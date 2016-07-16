@@ -1,7 +1,6 @@
 import psycopg2;
 import crypt;
 
-
 ################################################################################################################################
 #Begining of common functions
 ################################################################################################################################
@@ -103,18 +102,6 @@ def DB_ACCESS_GetUserId(name):
 #-2 Exception
 def DB_ACCESS_DeleteUserById(id):
     return DB_ACCESS_GenDeleteRecById("UsersTable",id);
-    #try:
-    #    cur.execute('SELECT id from "CurationSchema"."UsersTable" where "id" = %s' % id)
-    #    rowCount = cur.rowcount
-    #    if rowCount == 0 : 
-    #        return -1;  #username was not found
-    #    else:
-    #        cur.execute('delete from "CurationSchema"."UsersTable" where "id" = %s' % id)
-    #        con.commit();
-    #        return 1;
-    #except psycopg2.DatabaseError as e:
-    #    print ('Error %s' % e)
-    #    return -2   #DB exception
 
 #Activate the user (in case we would like to reuse)
 # 1 - deleted succesfully
@@ -258,16 +245,16 @@ def DB_ACCESS_GenAddRec(tableName, description):
 #Start of AgentTypesTable table functions
 ################################################################################################################################
 
-def DB_ACCESS_AgentTypesTable_GetDescription(id)
+def DB_ACCESS_AgentTypesTable_GetDescription(id):
     return DB_ACCESS_GenGetDescription("AgentTypesTable",id);
 
-def DB_ACCESS_AgentTypesTable_DeleteById(id)
+def DB_ACCESS_AgentTypesTable_DeleteById(id):
     return DB_ACCESS_GenDeleteRecById("AgentTypesTable",id);
 
-def DB_ACCESS_AgentTypesTable_AddRec(desc)
+def DB_ACCESS_AgentTypesTable_AddRec(desc):
     return DB_ACCESS_GenAddRec("AgentTypesTable",desc);
 
-def DB_ACCESS_AgentTypesTable_GedId(desc)
+def DB_ACCESS_AgentTypesTable_GedId(desc):
     return DB_ACCESS_GenGetId("AgentTypesTable",desc);
 
 ################################################################################################################################
@@ -278,16 +265,16 @@ def DB_ACCESS_AgentTypesTable_GedId(desc)
 #Start of CurationDetailsTypesTable table functions
 ################################################################################################################################
 
-def DB_ACCESS_CurationDetailsTypesTable_GetDescription(id)
+def DB_ACCESS_CurationDetailsTypesTable_GetDescription(id):
     return DB_ACCESS_GenGetDescription("CurationDetailsTypesTable",id);
 
-def DB_ACCESS_CurationDetailsTypesTable_DeleteById(id)
+def DB_ACCESS_CurationDetailsTypesTable_DeleteById(id):
     return DB_ACCESS_GenDeleteRecById("CurationDetailsTypesTable",id);
 
-def DB_ACCESS_CurationDetailsTypesTable_AddRec(desc)
+def DB_ACCESS_CurationDetailsTypesTable_AddRec(desc):
     return DB_ACCESS_GenAddRec("CurationDetailsTypesTable",desc);
 
-def DB_ACCESS_CurationDetailsTypesTable_GedId(desc)
+def DB_ACCESS_CurationDetailsTypesTable_GedId(desc):
     return DB_ACCESS_GenGetId("CurationDetailsTypesTable",desc);
 
 ################################################################################################################################
@@ -298,16 +285,16 @@ def DB_ACCESS_CurationDetailsTypesTable_GedId(desc)
 #Start of CurationTypesTable table functions
 ################################################################################################################################
 
-def DB_ACCESS_CurationTypesTable_GetDescription(id)
+def DB_ACCESS_CurationTypesTable_GetDescription(id):
     return DB_ACCESS_GenGetDescription("CurationTypesTable",id);
 
-def DB_ACCESS_CurationTypesTable_DeleteById(id)
+def DB_ACCESS_CurationTypesTable_DeleteById(id):
     return DB_ACCESS_GenDeleteRecById("CurationTypesTable",id);
 
-def DB_ACCESS_CurationTypesTable_AddRec(desc)
+def DB_ACCESS_CurationTypesTable_AddRec(desc):
     return DB_ACCESS_GenAddRec("CurationTypesTable",desc);
 
-def DB_ACCESS_CurationTypesTable_GedId(desc)
+def DB_ACCESS_CurationTypesTable_GedId(desc):
     return DB_ACCESS_GenGetId("CurationTypesTable",desc);
 
 ################################################################################################################################
@@ -318,16 +305,16 @@ def DB_ACCESS_CurationTypesTable_GedId(desc)
 #Start of MethodTypesTable table functions
 ################################################################################################################################
 
-def DB_ACCESS_MethodTypesTable_GetDescription(id)
+def DB_ACCESS_MethodTypesTable_GetDescription(id):
     return DB_ACCESS_GenGetDescription("MethodTypesTable",id);
 
-def DB_ACCESS_MethodTypesTable_DeleteById(id)
+def DB_ACCESS_MethodTypesTable_DeleteById(id):
     return DB_ACCESS_GenDeleteRecById("MethodTypesTable",id);
 
-def DB_ACCESS_MethodTypesTable_AddRec(desc)
+def DB_ACCESS_MethodTypesTable_AddRec(desc):
     return DB_ACCESS_GenAddRec("MethodTypesTable",desc);
 
-def DB_ACCESS_MethodTypesTable_GedId(desc)
+def DB_ACCESS_MethodTypesTable_GedId(desc):
     return DB_ACCESS_GenGetId("MethodTypesTable",desc);
 
 ################################################################################################################################
@@ -338,16 +325,16 @@ def DB_ACCESS_MethodTypesTable_GedId(desc)
 #Start of OntologyNamesTable table functions
 ################################################################################################################################
 
-def DB_ACCESS_OntologyNamesTable_GetDescription(id)
+def DB_ACCESS_OntologyNamesTable_GetDescription(id):
     return DB_ACCESS_GenGetDescription("OntologyNamesTable",id);
 
-def DB_ACCESS_OntologyNamesTable_DeleteById(id)
+def DB_ACCESS_OntologyNamesTable_DeleteById(id):
     return DB_ACCESS_GenDeleteRecById("OntologyNamesTable",id);
 
-def DB_ACCESS_OntologyNamesTable_AddRec(desc)
+def DB_ACCESS_OntologyNamesTable_AddRec(desc):
     return DB_ACCESS_GenAddRec("OntologyNamesTable",desc);
 
-def DB_ACCESS_OntologyNamesTable_GedId(desc)
+def DB_ACCESS_OntologyNamesTable_GedId(desc):
     return DB_ACCESS_GenGetId("OntologyNamesTable",desc);
 
 ################################################################################################################################
@@ -358,16 +345,16 @@ def DB_ACCESS_OntologyNamesTable_GedId(desc)
 #Start of OntologyTable table functions
 ################################################################################################################################
 
-def DB_ACCESS_OntologyTable_GetDescription(id)
+def DB_ACCESS_OntologyTable_GetDescription(id):
     return DB_ACCESS_GenGetDescription("OntologyTable",id);
 
-def DB_ACCESS_OntologyTable_DeleteById(id)
+def DB_ACCESS_OntologyTable_DeleteById(id):
     return DB_ACCESS_GenDeleteRecById("OntologyTable",id);
 
-def DB_ACCESS_OntologyTable_AddRec(desc)
+def DB_ACCESS_OntologyTable_AddRec(desc):
     return DB_ACCESS_GenAddRec("OntologyTable",desc);
 
-def DB_ACCESS_OntologyTable_GedId(desc)
+def DB_ACCESS_OntologyTable_GedId(desc):
     return DB_ACCESS_GenGetId("OntologyTable",desc);
 
 ################################################################################################################################
@@ -378,16 +365,16 @@ def DB_ACCESS_OntologyTable_GedId(desc)
 #Start of PrimerRegionTypesTable table functions
 ################################################################################################################################
 
-def DB_ACCESS_PrimerRegionTypesTable_GetDescription(id)
+def DB_ACCESS_PrimerRegionTypesTable_GetDescription(id):
     return DB_ACCESS_GenGetDescription("PrimerRegionTypesTable",id);
 
-def DB_ACCESS_PrimerRegionTypesTable_DeleteById(id)
+def DB_ACCESS_PrimerRegionTypesTable_DeleteById(id):
     return DB_ACCESS_GenDeleteRecById("PrimerRegionTypesTable",id);
 
-def DB_ACCESS_PrimerRegionTypesTable_AddRec(desc)
+def DB_ACCESS_PrimerRegionTypesTable_AddRec(desc):
     return DB_ACCESS_GenAddRec("PrimerRegionTypesTable",desc);
 
-def DB_ACCESS_PrimerRegionTypesTable_GedId(desc)
+def DB_ACCESS_PrimerRegionTypesTable_GedId(desc):
     return DB_ACCESS_GenGetId("PrimerRegionTypesTable",desc);
 
 ################################################################################################################################
@@ -399,28 +386,97 @@ def DB_ACCESS_PrimerRegionTypesTable_GedId(desc)
 #Start of SynonymTable table functions
 ################################################################################################################################
 
-def DB_ACCESS_SynonymTable_GetDescription(id)
+def DB_ACCESS_SynonymTable_GetDescription(id):
     return DB_ACCESS_GenGetDescription("SynonymTable",id);
 
-def DB_ACCESS_SynonymTable_DeleteById(id)
+def DB_ACCESS_SynonymTable_DeleteById(id):
     return DB_ACCESS_GenDeleteRecById("SynonymTable",id);
 
-def DB_ACCESS_SynonymTable_AddRec(desc)
+def DB_ACCESS_SynonymTable_AddRec(desc):
     return DB_ACCESS_GenAddRec("SynonymTable",desc);
 
-def DB_ACCESS_SynonymTable_GedId(desc)
+def DB_ACCESS_SynonymTable_GedId(desc):
     return DB_ACCESS_GenGetId("SynonymTable",desc);
 
 ################################################################################################################################
 #End of SynonymTable table functions
 ################################################################################################################################
 
+################################################################################################################################
+#Start of CurationListTable table functions
+################################################################################################################################
+
+#Delete record 
+# 1 - deleted succesfully
+#-1 if doesn't exist
+#-2 Exception
+def DB_ACCESS_CurationListTable_DeleteRec(idCurationVal,idCurrationDetailVal,idOntologyVal):
+    try:
+        cur.execute('SELECT "idCuration" from "CurationSchema"."CurationListTable" where ("idCuration" = %s AND "idCurrationDetail" = %s AND "idOntology" = %s )' % (idCurationVal,idCurrationDetailVal,idOntologyVal))
+        rowCount = cur.rowcount
+        if rowCount == 0 : 
+            return -1;  #username was not found
+        else:
+            cur.execute('delete from "CurationSchema"."CurationListTable" where ("idCuration" = %s AND "idCurrationDetail" = %s AND "idOntology" = %s )' % (idCurationVal,idCurrationDetailVal,idOntologyVal))
+            con.commit();
+            return 1;
+    except psycopg2.DatabaseError as e:
+        print ('Error %s' % e)
+        return -2   #DB exception
+
+#Add record
+# return 1 if succeed
+# -1 doesn't exist
+# -2 Exception
+# -3 already exist
+def DB_ACCESS_CurationListTable_AddRec(idCurationVal,idCurrationDetailVal,idOntologyVal):
+    try:
+        cur.execute('SELECT "idCuration" from "CurationSchema"."CurationListTable" where ("idCuration" = %s AND "idCurrationDetail" = %s AND "idOntology" = %s )' % (idCurationVal,idCurrationDetailVal,idOntologyVal))
+        rowCount = cur.rowcount
+        if rowCount > 0 : 
+            return -3;
+        else:
+            cur.execute('INSERT INTO "CurationSchema"."CurationListTable" ("idCuration","idCurrationDetail","idOntology") values (%s,%s,%s)' % (idCurationVal,idCurrationDetailVal,idOntologyVal) );
+            con.commit()
+            return 1;
+        
+    except psycopg2.DatabaseError as e:
+        return -2;
+    return;
+
+#Is exist 
+# 1 - yes
+# 0 - no
+#-2 Exception
+def DB_ACCESS_CurationListTable_IsExist(idCurationVal,idCurrationDetailVal,idOntologyVal):
+    try:
+        cur.execute('SELECT "idCuration" from "CurationSchema"."CurationListTable" where ("idCuration" = %s AND "idCurrationDetail" = %s AND "idOntology" = %s )' % (idCurationVal,idCurrationDetailVal,idOntologyVal))
+         
+        rowCount = cur.rowcount
+        if rowCount > 0 : 
+            return 1;  #record exist
+        else:
+            return 0; #record doesnt exist
+    except psycopg2.DatabaseError as e:
+        return -2;
+    return;
+    
+################################################################################################################################
+#End of CurationListTable table functions
+################################################################################################################################
+
 
 #Unit test
 PostGresConnect()
 
+#print "test";
+#print ( DB_ACCESS_CurationListTable_IsExist(2,3,1));
+#print ( DB_ACCESS_CurationListTable_IsExist(2,7,1));
+#print ( DB_ACCESS_CurationListTable_AddRec(1,1,1));
+print ( DB_ACCESS_CurationListTable_DeleteRec(1,1,1));
+
 #print (DB_ACCESS_GenAddRec("MethodTypesTable","testValue1"));
-print (DB_ACCESS_GenDeleteRecById("MethodTypesTable",5));
+#print (DB_ACCESS_GenDeleteRecById("MethodTypesTable",5));
                            
 #print (DB_ACCESS_GetDescription("MethodTypesTable",3));
 #print (DB_ACCESS_GetDescription("MethodTypesTable",2));
