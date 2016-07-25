@@ -465,6 +465,135 @@ def DB_ACCESS_CurationListTable_IsExist(idCurationVal,idCurrationDetailVal,idOnt
 #End of CurationListTable table functions
 ################################################################################################################################
 
+################################################################################################################################
+#Start of Curations table functions
+################################################################################################################################
+
+#Delete record 
+# 1 - deleted succesfully
+#-1 if doesn't exist
+#-2 Exception
+def DB_ACCESS_CurationsTable_DeleteRec(idExpVal,idUserVal,idCurrTypeVal,idMethodVal,dateVal,descriptionVal,agentTypeIdVal):
+    try:
+        cur.execute('SELECT "id" from "CurationSchema"."CurationsTable" where ("idExp" = %s AND "idUser" = %s AND "idCurrType" = %s AND "idMethod" = %s AND "addedDate" = %s AND "description" = \'%s\' AND "agentTypeId" = %s )' % (idExpVal,idUserVal,idCurrTypeVal,idMethodVal,dateVal,descriptionVal,agentTypeIdVal))
+        rowCount = cur.rowcount
+        if rowCount == 0 : 
+            return -1;  #username was not found
+        else:
+            cur.execute('delete from "CurationSchema"."CurationsTable" where where ("idExp" = %s AND "idUser" = %s AND "idCurrType" = %s AND "idMethod" = %s AND "addedDate" = %s AND "description" = \'%s\' AND "agentTypeId" = %s )' % (idExpVal,idUserVal,idCurrTypeVal,idMethodVal,dateVal,descriptionVal,agentTypeIdVal))
+            con.commit();
+            return 1;
+    except psycopg2.DatabaseError as e:
+        print ('Error %s' % e)
+        return -2   #DB exception
+
+#Delete record 
+# 1 - deleted succesfully
+#-1 if doesn't exist
+#-2 Exception
+def DB_ACCESS_CurationsTable_DeleteRecById(idVal):
+    try:
+        cur.execute('SELECT "id" from "CurationSchema"."CurationsTable" where ("id" = %s)' % (idVal))
+        rowCount = cur.rowcount
+        if rowCount == 0 : 
+            return -1;  #username was not found
+        else:
+            cur.execute('delete from "CurationSchema"."CurationsTable" where  ("id" = %s)' % (idVal))
+            con.commit();
+            return 1;
+    except psycopg2.DatabaseError as e:
+        print ('Error %s' % e)
+        return -2   #DB exception    
+    
+#Add record
+# return 1 if succeed
+# -1 doesn't exist
+# -2 Exception
+# -3 already exist
+def DB_ACCESS_CurationsTable_AddRec(idExpVal,idUserVal,idCurrTypeVal,idMethodVal,dateVal,descriptionVal,agentTypeIdVal):
+    try:
+        cur.execute('SELECT "id" from "CurationSchema"."CurationsTable" where ("idExp" = %s AND "idUser" = %s AND "idCurrType" = %s AND "idMethod" = %s AND "addedDate" = %s AND "description" = \'%s\' AND "agentTypeId" = %s )' % (idExpVal,idUserVal,idCurrTypeVal,idMethodVal,dateVal,descriptionVal,agentTypeIdVal))
+        rowCount = cur.rowcount
+        if rowCount > 0 : 
+            return -3;
+        else:
+            cur.execute('INSERT INTO "CurationSchema"."CurationsTable" ("idExp","idUser","idCurrType","idMethod","addedDate","description","agentTypeId") values (%s,%s,%s,%s,%s,\'%s\',%s)' % (idExpVal,idUserVal,idCurrTypeVal,idMethodVal,dateVal,descriptionVal,agentTypeIdVal) );
+            con.commit()
+            return 1;
+        
+    except psycopg2.DatabaseError as e:
+        return -2;
+    return;
+
+################################################################################################################################
+#End of Curations table functions
+################################################################################################################################
+
+################################################################################################################################
+#Start of ExperimentsTable table functions
+################################################################################################################################
+
+#Delete record 
+# 1 - deleted succesfully
+#-1 if doesn't exist
+#-2 Exception
+def DB_ACCESS_ExperimentsTable_DeleteRec(idExpVal,idUserVal,idCurrTypeVal,idMethodVal,dateVal,descriptionVal,agentTypeIdVal):
+    try:
+         cur.execute('SELECT "id" from "CurationSchema"."ExperimentsTable" where ("uniqueId" = %s AND "expId" = %s AND "type" = \'%s\' AND "value" = \'%s\' AND "date" = %s AND "userId" = \'%s\')' % (uniqueIdVal,expIdVal,typeVal,valueVal,dateVal,userIdVal))
+        rowCount = cur.rowcount
+        if rowCount == 0 : 
+            return -1;  #username was not found
+        else:
+            cur.execute('delete from "CurationSchema"."ExperimentsTable" where ("uniqueId" = %s AND "expId" = %s AND "type" = \'%s\' AND "value" = \'%s\' AND "date" = %s AND "userId" = \'%s\')' % (uniqueIdVal,expIdVal,typeVal,valueVal,dateVal,userIdVal))
+            con.commit();
+            return 1;
+    except psycopg2.DatabaseError as e:
+        print ('Error %s' % e)
+        return -2   #DB exception
+
+#Delete record by id
+# 1 - deleted succesfully
+#-1 if doesn't exist
+#-2 Exception
+def DB_ACCESS_ExperimentsTable_DeleteRecById(idVal):
+    try:
+        cur.execute('SELECT "uniqueId" from "CurationSchema"."ExperimentsTable" where ("id" = %s)' % (idVal))
+        rowCount = cur.rowcount
+        if rowCount == 0 : 
+            return -1;  #username was not found
+        else:
+            cur.execute('delete from "CurationSchema"."ExperimentsTable" where  ("uniqueId" = %s)' % (idVal))
+            con.commit();
+            return 1;
+    except psycopg2.DatabaseError as e:
+        print ('Error %s' % e)
+        return -2   #DB exception    
+    
+#Add record
+# return 1 if succeed
+# -1 doesn't exist
+# -2 Exception
+# -3 already exist
+def DB_ACCESS_ExperimentsTable_AddRec(uniqueIdVal,expIdVal,typeVal,valueVal,dateVal,userIdVal):
+    try:
+        cur.execute('SELECT "id" from "CurationSchema"."ExperimentsTable" where ("uniqueId" = %s AND "expId" = %s AND "type" = \'%s\' AND "value" = \'%s\' AND "date" = %s AND "userId" = \'%s\')' % (uniqueIdVal,expIdVal,typeVal,valueVal,dateVal,userIdVal))
+        rowCount = cur.rowcount
+        if rowCount > 0 : 
+            return -3;
+        else:
+            cur.execute('INSERT INTO "CurationSchema"."ExperimentsTable" ("uniqueId","expId","type","value","date","userId") values (%s,%s,\'%s\',\'%s\',%s,%s)' % (uniqueIdVal,expIdVal,typeVal,valueVal,dateVal,userIdVal) );
+            con.commit()
+            return 1;
+        
+    except psycopg2.DatabaseError as e:
+        return -2;
+    return;
+
+################################################################################################################################
+#End of ExperimentsTable table functions
+################################################################################################################################
+
+
 
 #Unit test
 PostGresConnect()
