@@ -593,6 +593,99 @@ def DB_ACCESS_ExperimentsTable_AddRec(uniqueIdVal,expIdVal,typeVal,valueVal,date
 #End of ExperimentsTable table functions
 ################################################################################################################################
 
+################################################################################################################################
+#Start of OntologySynonymTable table functions
+################################################################################################################################
+
+#Delete record 
+# 1 - deleted succesfully
+#-1 if doesn't exist
+#-2 Exception
+def DB_ACCESS_OntologySynonymTable_DeleteRec(idOntologyVal,idSynonymVal):
+    try:
+         cur.execute('SELECT "id" from "CurationSchema"."OntologySynonymTable" where ("idOntology" = %s AND "idSynonym" = %s)' % (idOntologyVal,idSynonymVal))
+        rowCount = cur.rowcount
+        if rowCount == 0 : 
+            return -1;  #username was not found
+        else:
+            cur.execute('delete from "CurationSchema"."OntologySynonymTable" where ("idOntology" = %s AND "idSynonym" = %s)' % (idOntologyVal,idSynonymVal)
+            con.commit();
+            return 1;
+    except psycopg2.DatabaseError as e:
+        print ('Error %s' % e)
+        return -2   #DB exception
+
+    
+#Add record
+# return 1 if succeed
+# -1 doesn't exist
+# -2 Exception
+# -3 already exist
+def DB_ACCESS_OntologySynonymTable_AddRec(uniqueIdVal,expIdVal,typeVal,valueVal,dateVal,userIdVal):
+    try:
+        cur.execute('SELECT "id" from "CurationSchema"."OntologySynonymTable" where ("idOntology" = %s AND "idSynonym" = %s)' % (idOntologyVal,idSynonymVal))
+        rowCount = cur.rowcount
+        if rowCount > 0 : 
+            return -3;
+        else:
+            cur.execute('INSERT INTO "CurationSchema"."OntologySynonymTable" ("idOntology","idSynonym") values (%s,%s)' % (idOntologyVal,idSynonymVal) );
+            con.commit()
+            return 1;
+        
+    except psycopg2.DatabaseError as e:
+        return -2;
+    return;
+
+################################################################################################################################
+#End of OntologySynonymTable table functions
+################################################################################################################################
+
+################################################################################################################################
+#Start of OntologyTreeStructureTable table functions
+################################################################################################################################
+
+#Delete record 
+# 1 - deleted succesfully
+#-1 if doesn't exist
+#-2 Exception
+def DB_ACCESS_OntologyTreeStructureTable_DeleteRec(ontologyIdVal,ontologyParentIdVal,ontologyNameIdVal):
+    try:
+          cur.execute('SELECT "id" from "CurationSchema"."OntologyTreeStructureTable" where ("ontologyId" = %s AND "ontologyParentId" = %s AND "ontologyNameId" = %s)' % (ontologyIdVal,ontologyParentIdVal,ontologyNameIdVal))
+        rowCount = cur.rowcount
+        if rowCount == 0 : 
+            return -1;  #username was not found
+        else:
+            cur.execute('delete from "CurationSchema"."OntologyTreeStructureTable"  where ("ontologyId" = %s AND "ontologyParentId" = %s AND "ontologyNameId" = %s)' % (ontologyIdVal,ontologyParentIdVal,ontologyNameIdVal))
+            con.commit();
+            return 1;
+    except psycopg2.DatabaseError as e:
+        print ('Error %s' % e)
+        return -2   #DB exception
+
+    
+#Add record
+# return 1 if succeed
+# -1 doesn't exist
+# -2 Exception
+# -3 already exist
+def DB_ACCESS_OntologyTreeStructureTable_AddRec(ontologyIdVal,ontologyParentIdVal,ontologyNameIdVal):
+    try:
+        cur.execute('SELECT "id" from "CurationSchema"."OntologyTreeStructureTable" where ("ontologyId" = %s AND "ontologyParentId" = %s AND "ontologyNameId" = %s)' % (ontologyIdVal,ontologyParentIdVal,ontologyNameIdVal))
+        rowCount = cur.rowcount
+        if rowCount > 0 : 
+            return -3;
+        else:
+            cur.execute('INSERT INTO "CurationSchema"."OntologyTreeStructureTable" ("idOntology","ontologyParentId","ontologyNameId") values (%s,%s,%s)' % (ontologyIdVal,ontologyParentIdVal,ontologyNameIdVal) );
+            con.commit()
+            return 1;
+        
+    except psycopg2.DatabaseError as e:
+        return -2;
+    return;
+
+################################################################################################################################
+#End of OntologyTreeStructureTable table functions
+################################################################################################################################
 
 
 #Unit test
