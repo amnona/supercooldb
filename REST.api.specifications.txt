@@ -1,0 +1,194 @@
+# amnonlog.txt
+# supercooldb REST API for Eitan
+
+Title: Query sequence:
+URL: /QuerySeq/?seq=<seq>&region=<region>
+Method: GET
+URL Params:
+	seq : str ('ACGT')
+		the sequence string to query the database (can be any length)
+	region : int (optional)
+		the region id (default=1 which is V4 515F 806R)
+Success Response:
+	Code : 200
+	Content :
+	{
+		"taxonomy" : str
+		(taxonomy from SequencesTable)
+		"curations" : list of
+			{
+				"user" : str
+					name of the user who added this annotation 
+					(from UsersTable userName)
+				"addedDate" : str (DD-MM-YYYY HH:MM:SS)
+					date when the annotation was added
+					(addedDate from CurationsTable)
+				"idExp" : int
+					the ID of the experiment from which this annotation originated
+					(uniqueId from ExperimentsTable)
+					(see Query Experiment)
+				"currType" : str
+					curration type (differential expression/contaminant/etc.)
+					(description from CurationTypesTable)
+				"method" : str
+					The method used to detect this behavior (i.e. observation/ranksum/clustering/etc")
+					(description from MethodTypesTable)
+				"agentType" : str
+					Name of the program which submitted this annotation (i.e. heatsequer)
+					(description from AgentTypesTable)
+				"description" : str
+					Free text describing this annotation (i.e. "lower in green tomatoes comapred to red ones")
+				"CurationList" : list of
+					{
+						"detail" : str
+							the type of detail (i.e. ALL/HIGH/LOW)
+							(description from CurationDetailsTypeTable)
+						"term" : str
+							the ontology term for this detail (i.e. feces/ibd/homo sapiens)
+							(description from OntologyTable)
+					}
+			}
+	}
+
+
+Title: Query experiment based on ID:
+URL: /QueryExpID/?expid=<exp>
+Method: GET
+URL Params:
+	expid : int
+		the experiment id
+		(expId from ExperimentsTable)
+Success Response:
+	Code : 200
+	Content :
+	{
+		"expdetails" : list of
+		{
+			"type" : str
+				type of detail about experiment (i.e. title/author/pubmedid/sra/qiitaid etc.)
+			"value" : str
+				the corresponding value to type (i.e. "Response of bacteria to pita eating"/10262 etc.)
+			date : str (DD-MM-YYYY HH:MM:SS)
+				date when this detail about the experiment was added
+			user : str
+				the user who added this detail about the experiment
+				(userName from UsersTable)
+		}
+	}
+
+
+Title: Query experiment based on type/value:
+URL: /QueryExpDetail/?type=<type>&value=<value>
+Method: GET
+URL Params:
+	type : str
+		the detail type (i.e. "pubmedid"/"author"/etc.)
+		(type from ExperimentsTable)
+	value : str
+		the detail value (i.e. "john smith"/"pmid003344"/etc.)
+Success Response:
+	Code : 200
+	Content :
+	{
+		"experiments" : list of
+		{
+			expid : int
+				the expId for an experiment matching the query
+		}
+	}
+
+
+Title: Add new experiment detail
+URL: /AddExpDetails/
+Method: POST
+URL Params:
+Data Params:
+	{
+		"expId" : int
+			(expId from ExperimentsTable) or 0 to add a new experiment
+		"details" : list of
+		{
+			"type" : str
+				the detail type (i.e. "pubmedid"/"author"/etc.)
+				(type from ExperimentsTable)
+			"value" : str
+				the detail value (i.e. "john smith"/"pmid003344"/etc.)
+		}
+	}
+Success Response:
+	Code : 201
+	Content :
+	{
+		"expId" : int
+			the expId for the experiment with the details added
+			same as the data expId if it was >0
+			or the expId for the new experiment created
+	}
+Details:
+	Validation:
+		if expId>0, make sure the experiment exists
+		If the detail already exists for the experiment, update it?
+	Action:
+		If ExpID=0, get a new unique experimentId (can use the current uniqueid in ExperimentsTable)
+		Add entries into ExperimentsTable for all the pairs in the list. For each one, automatically add the userId and date
+		Return the new expId for these details
+
+
+Title: Add new annotation
+URL: /AddAnnotation/
+Method: POST
+URL Params:
+Data Params:
+	{
+		"expId" : int
+			(expId from ExperimentsTable)
+		"sequences" : list of str (ACGT)
+			the sequences to add the annotation to
+		"region" : int (optional)
+			the region where the sequence is from (1 by default)
+			(id from PrimersTable)
+		"currType" : str
+			curration type (differential expression/contaminant/etc.)
+			(description from CurationTypesTable)
+		"method" : str
+			The method used to detect this behavior (i.e. observation/ranksum/clustering/etc")
+			(description from MethodTypesTable)
+		"agentType" : str
+			Name of the program which submitted this annotation (i.e. heatsequer)
+			(description from AgentTypesTable)
+		"description" : str
+			Free text describing this annotation (i.e. "lower in green tomatoes comapred to red ones")
+		"CurationList" : list of
+			{
+				"detail" : str
+					the type of detail (i.e. ALL/HIGH/LOW)
+					(description from CurationDetailsTypeTable)
+				"term" : str
+					the ontology term for this detail (i.e. feces/ibd/homo sapiens)
+					(description from OntologyTable)
+			}
+	}
+Success Response:
+	Code : 201
+	Content :
+	{
+		"currId" : int
+		the id from CurationsTable for the new annotation.
+	}
+Details:
+	Validation:
+		expId exists in ExperimentsTable
+		sequences are all valid ACGT sequences
+		region is a valid id from PrimersTable
+	Action:
+		iterate over sequences, if sequence does not exist, add it to SequencesTable (what to do about taxonomy? - keep it empty?)
+		if currType does not exist, add it to CurationTypesTable
+		if method does not exist, add it to MethodTypesTable
+		if agentType does not exist, add it to AgentTypesTable
+		iterate over all CurationList:
+			if detail does not exist, add it to CurationsDetailsTypeTable
+			if term does not exist, add it to OntologyNamesTable
+		Create a new curation in CurationsTable
+		Add all sequence/curation pairs to SequenceCurationTable
+		Add all annotation details to CurationsTable (automatically adding userId and addedDate)
+		Add all pairs to CurationListTable
