@@ -539,7 +539,7 @@ def DB_ACCESS_CurationsTable_AddRec(idExpVal,idUserVal,idCurrTypeVal,idMethodVal
 #-2 Exception
 def DB_ACCESS_ExperimentsTable_DeleteRec(idExpVal,idUserVal,idCurrTypeVal,idMethodVal,dateVal,descriptionVal,agentTypeIdVal):
     try:
-         cur.execute('SELECT "id" from "CurationSchema"."ExperimentsTable" where ("uniqueId" = %s AND "expId" = %s AND "type" = \'%s\' AND "value" = \'%s\' AND "date" = %s AND "userId" = \'%s\')' % (uniqueIdVal,expIdVal,typeVal,valueVal,dateVal,userIdVal))
+        cur.execute('SELECT "id" from "CurationSchema"."ExperimentsTable" where ("uniqueId" = %s AND "expId" = %s AND "type" = \'%s\' AND "value" = \'%s\' AND "date" = %s AND "userId" = \'%s\')' % (uniqueIdVal,expIdVal,typeVal,valueVal,dateVal,userIdVal))
         rowCount = cur.rowcount
         if rowCount == 0 : 
             return -1;  #username was not found
@@ -603,16 +603,16 @@ def DB_ACCESS_ExperimentsTable_AddRec(uniqueIdVal,expIdVal,typeVal,valueVal,date
 #-2 Exception
 def DB_ACCESS_OntologySynonymTable_DeleteRec(idOntologyVal,idSynonymVal):
     try:
-         cur.execute('SELECT "id" from "CurationSchema"."OntologySynonymTable" where ("idOntology" = %s AND "idSynonym" = %s)' % (idOntologyVal,idSynonymVal))
+        cur.execute('SELECT "id" from "CurationSchema"."OntologySynonymTable" where ("idOntology" = %s AND "idSynonym" = %s)' % (idOntologyVal,idSynonymVal))
         rowCount = cur.rowcount
         if rowCount == 0 : 
             return -1;  #username was not found
         else:
-            cur.execute('delete from "CurationSchema"."OntologySynonymTable" where ("idOntology" = %s AND "idSynonym" = %s)' % (idOntologyVal,idSynonymVal)
-            con.commit();
+            cur.execute('delete from "CurationSchema"."OntologySynonymTable" where ("idOntology" = %s AND "idSynonym" = %s)' % (idOntologyVal,idSynonymVal))
+            con.commit()
             return 1;
     except psycopg2.DatabaseError as e:
-        print ('Error %s' % e)
+        print ('Error %s' % e)  
         return -2   #DB exception
 
     
@@ -650,7 +650,7 @@ def DB_ACCESS_OntologySynonymTable_AddRec(uniqueIdVal,expIdVal,typeVal,valueVal,
 #-2 Exception
 def DB_ACCESS_OntologyTreeStructureTable_DeleteRec(ontologyIdVal,ontologyParentIdVal,ontologyNameIdVal):
     try:
-          cur.execute('SELECT "id" from "CurationSchema"."OntologyTreeStructureTable" where ("ontologyId" = %s AND "ontologyParentId" = %s AND "ontologyNameId" = %s)' % (ontologyIdVal,ontologyParentIdVal,ontologyNameIdVal))
+        cur.execute('SELECT "id" from "CurationSchema"."OntologyTreeStructureTable" where ("ontologyId" = %s AND "ontologyParentId" = %s AND "ontologyNameId" = %s)' % (ontologyIdVal,ontologyParentIdVal,ontologyNameIdVal))
         rowCount = cur.rowcount
         if rowCount == 0 : 
             return -1;  #username was not found
