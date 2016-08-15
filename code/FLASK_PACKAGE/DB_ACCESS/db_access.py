@@ -1,6 +1,9 @@
 import psycopg2;
 import crypt;
+import json;
 
+def tempFunction(expId):
+    return "test234";
 ################################################################################################################################
 #Begining of common functions
 ################################################################################################################################
@@ -588,6 +591,34 @@ def DB_ACCESS_ExperimentsTable_AddRec(uniqueIdVal,expIdVal,typeVal,valueVal,date
     except psycopg2.DatabaseError as e:
         return -2;
     return;
+
+#Get record
+def DB_ACCESS_ExperimentsTable_GetRec(expId):
+    #return (uniqueIdVal + 1)
+    jsonRetData = dict()
+    jsonRetData["ReturnCode"] = 0
+    jsonRetData["ReturnDescription"] = "Succeed"
+    try:
+        cur.execute('SELECT type,value,"userId" from "CurationSchema"."ExperimentsTable","CurationSchema"."ExperimentsIdentifiers" where ("expId" = %s and "expId" = "uniqueId")' % (expId))
+        rowCount = cur.rowcount
+        if rowCount == 0 : 
+            jsonRetData["ReturnCode"] = -1
+            jsonRetData["ReturnDescription"] = "Record doesnt exist"
+        else:
+            row = cur.fetchone()
+            jsonRetData["UserId"] = row[2]
+            jsonRetData.setdefault("Types", [])
+            jsonRetData.setdefault("Values", [])
+            while row is not None:
+                jsonRetData["Types"].append(row[0]);
+                jsonRetData["Values"].append(row[1]);
+                row = cur.fetchone()
+            
+    except psycopg2.DatabaseError as e:
+        jsonRetData["ReturnCode"] = -2
+        jsonRetData["ReturnDescription"] = "Exception"
+    #return;
+    return json.dumps(jsonRetData, ensure_ascii=False)
 
 ################################################################################################################################
 #End of ExperimentsTable table functions
