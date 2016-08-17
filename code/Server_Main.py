@@ -1,9 +1,11 @@
 from flask import Flask,jsonify
 import json
 from FLASK_PACKAGE.Exp_Flask import Exp_Flask_Obj
+from FLASK_PACKAGE.Seq_Flask import Seq_Flask_Obj
 
 app = Flask(__name__)
 app.register_blueprint(Exp_Flask_Obj)
+app.register_blueprint(Seq_Flask_Obj)
 
 #@app.route('/')
 #def index():

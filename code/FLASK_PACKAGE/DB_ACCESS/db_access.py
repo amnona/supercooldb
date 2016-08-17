@@ -594,12 +594,11 @@ def DB_ACCESS_ExperimentsTable_AddRec(uniqueIdVal,expIdVal,typeVal,valueVal,date
 
 #Get record
 def DB_ACCESS_ExperimentsTable_GetRec(expId):
-    #return (uniqueIdVal + 1)
     jsonRetData = dict()
     jsonRetData["ReturnCode"] = 0
     jsonRetData["ReturnDescription"] = "Succeed"
     try:
-        cur.execute('SELECT type,value,"userId" from "CurationSchema"."ExperimentsTable","CurationSchema"."ExperimentsIdentifiers" where ("expId" = %s and "expId" = "uniqueId")' % (expId))
+        cur.execute('SELECT type,value,"userId","ExperimentTypesTable".description from "CurationSchema"."ExperimentsTable","CurationSchema"."ExperimentsIdentifiers","CurationSchema"."ExperimentTypesTable" where ("expId" = %s and "expId" = "uniqueId" and "CurationSchema"."ExperimentTypesTable".id = "CurationSchema"."ExperimentsTable"."expTypeId" )' % (expId))
         rowCount = cur.rowcount
         if rowCount == 0 : 
             jsonRetData["ReturnCode"] = -1
@@ -607,6 +606,7 @@ def DB_ACCESS_ExperimentsTable_GetRec(expId):
         else:
             row = cur.fetchone()
             jsonRetData["UserId"] = row[2]
+            jsonRetData["ExpType"] = row[3]
             jsonRetData.setdefault("Types", [])
             jsonRetData.setdefault("Values", [])
             while row is not None:
@@ -718,6 +718,41 @@ def DB_ACCESS_OntologyTreeStructureTable_AddRec(ontologyIdVal,ontologyParentIdVa
 #End of OntologyTreeStructureTable table functions
 ################################################################################################################################
 
+################################################################################################################################
+#Start of SequencesTable functions
+################################################################################################################################
+
+
+def DB_ACCESS_SequencesTable_GetSequence(seq,type):
+    jsonRetData = dict()
+    jsonRetData["ReturnCode"] = 0
+    jsonRetData["ReturnDescription"] = "Succeed"
+    try:
+        cur.execute('SELECT "CurationSchema"."SequencesTable".sequence from "CurationSchema"."SequencesTable" where ( "CurationSchema"."SequencesTable".sequence = \'%s\'  )' % (seq));
+        #return('SELECT "CurationSchema"."SequencesTable".sequence from "CurationSchema"."SequencesTable" where ( "CurationSchema"."SequencesTable".sequence = \'%s\'  )' % (seq));
+ #       rowCount = cur.rowcount
+  #      if rowCount == 0 : 
+   #         jsonRetData["ReturnCode"] = -1
+    #        jsonRetData["ReturnDescription"] = "Record doesnt exist"
+     #   else:
+      #      row = cur.fetchone()
+       #     jsonRetData["UserId"] = row[2]
+        #    jsonRetData["ExpType"] = row[3]
+#            jsonRetData.setdefault("Types", [])
+ #           jsonRetData.setdefault("Values", [])
+  #          while row is not None:
+   #             jsonRetData["Types"].append(row[0]);
+    #            jsonRetData["Values"].append(row[1]);
+     #           row = cur.fetchone()
+            
+    except psycopg2.DatabaseError as e:
+        jsonRetData["ReturnCode"] = -2
+        jsonRetData["ReturnDescription"] = "Exception"
+    #return;
+    return json.dumps(jsonRetData, ensure_ascii=False)
+################################################################################################################################
+#End of SequencesTable table functions
+################################################################################################################################
 
 #Unit test
 PostGresConnect()
