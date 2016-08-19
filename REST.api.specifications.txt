@@ -2,6 +2,7 @@
 # supercooldb REST API for Eitan
 
 Title: Query sequence:
+Description : Get all the annotations about a given sequence
 URL: /QuerySeq/?seq=<seq>&region=<region>
 Method: GET
 URL Params:
@@ -19,7 +20,7 @@ Success Response:
 			{
 				"user" : str
 					name of the user who added this annotation 
-					(from UsersTable userName)
+					(userName from UsersTable)
 				"addedDate" : str (DD-MM-YYYY HH:MM:SS)
 					date when the annotation was added
 					(addedDate from CurationsTable)
@@ -38,6 +39,8 @@ Success Response:
 					(description from AgentTypesTable)
 				"description" : str
 					Free text describing this annotation (i.e. "lower in green tomatoes comapred to red ones")
+				"private" : bool
+					True if the curation is private, False if not
 				"CurationList" : list of
 					{
 						"detail" : str
@@ -49,9 +52,14 @@ Success Response:
 					}
 			}
 	}
+Details :
+	Validation:
+		If a curation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
+		If curation is not private, return it (no need for authentication)
 
 
 Title: Query experiment based on ID:
+Description : Get all experiment details baed on the experiment id
 URL: /QueryExpID/?expid=<exp>
 Method: GET
 URL Params:
@@ -74,10 +82,21 @@ Success Response:
 				the user who added this detail about the experiment
 				(userName from UsersTable)
 		}
+		isprivate : bool
+			true if experiment is private, false if public
+		createdby : str
+			the user who owns this study (created it in the database)
+		date : str (DD-MM-YYYY HH:MM:SS)
+			the date when the study was created in the database
 	}
+Details :
+	Validation:
+		If study is private, return only if user is authenticated and created the study. If user not authenticated, return Some Error (which?)
+		If study is not private, return it (no need for authentication)
 
 
 Title: Query experiment based on type/value:
+Description: Get IDs of all experiments matching a field/value pair (i.e. "Pubmedid","111222")
 URL: /QueryExpDetail/?type=<type>&value=<value>
 Method: GET
 URL Params:
@@ -96,6 +115,10 @@ Success Response:
 				the expId for an experiment matching the query
 		}
 	}
+Details :
+	Validation:
+		If study is private, return only if user is authenticated and created the study. If user not authenticated, do not return it in the list
+		If study is not private, return it (no need for authentication)
 
 
 Title: Add new experiment detail
