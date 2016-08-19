@@ -1,6 +1,7 @@
 # amnonlog.txt
 # supercooldb REST API for Eitan
 
+------------------------------------------------
 Title: Query sequence:
 Description : Get all the annotations about a given sequence
 URL: /QuerySeq/?seq=<seq>&region=<region>
@@ -57,7 +58,7 @@ Details :
 		If a curation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
 		If curation is not private, return it (no need for authentication)
 
-
+------------------------------------------------
 Title: Query experiment based on ID:
 Description : Get all experiment details baed on the experiment id
 URL: /QueryExpID/?expid=<exp>
@@ -95,6 +96,7 @@ Details :
 		If study is not private, return it (no need for authentication)
 
 
+------------------------------------------------
 Title: Query experiment based on type/value:
 Description: Get IDs of all experiments matching a field/value pair (i.e. "Pubmedid","111222")
 URL: /QueryExpDetail/?type=<type>&value=<value>
@@ -121,6 +123,57 @@ Details :
 		If study is not private, return it (no need for authentication)
 
 
+------------------------------------------------
+Title: Query Ontology terms
+Description : Get all ontology terms starting from a given id
+				used to update the autocomplete list in the client
+URL: /QueryOntology/?startid=<startid>
+Method: GET
+URL Params:
+	startid : int
+		retrieve all ontology terms with id bigger than startid (incremental update client)
+		(id from OntologyTable)
+Success Response:
+	Code : 200
+	Content :
+	{
+		"terms" : list of
+		{
+			"id" : int
+				the ontology term id (id from OntologyTable)
+			"description" : str
+				the ontology term (description from OntologyTable)
+		}
+	}
+
+
+------------------------------------------------
+Title: Query Ontology synonyms
+Description : Get all ontology synonyms starting from a given id
+				used to update the autocomplete list in the client
+URL: /QueryOntologySynonyms/?startid=<startid>
+Method: GET
+URL Params:
+	startid : int
+		retrieve all ontology synonyms with id bigger than startid (incremental update client)
+		(id from OntologySynonymTable)
+Success Response:
+	Code : 200
+	Content :
+	{
+		"terms" : list of
+		{
+			"id" : int
+				the synonym relation id (id from SynonymTable)
+			"synonymterm" : str
+				the synonym term (description from OntologyTable linked by idSynonym from OntologySynonymTable)
+			"originalterm" : str
+				the ontology term to which it is a synonym (description from OntologyTable linked by idOntology)
+		}
+	}
+
+
+------------------------------------------------
 Title: Add new experiment detail
 URL: /AddExpDetails/
 Method: POST
@@ -129,13 +182,18 @@ Data Params:
 	{
 		"expId" : int
 			(expId from ExperimentsTable) or 0 to add a new experiment
+		"private" : bool (optional)
+				default=False
+				whether the experiment should be private or public (default)
+				(private from Experiments)
 		"details" : list of
 		{
 			"type" : str
 				the detail type (i.e. "pubmedid"/"author"/etc.)
-				(type from ExperimentsTable)
+				(description from ExperimentTypesTable linked from ExperimentsIdentifiers)
 			"value" : str
 				the detail value (i.e. "john smith"/"pmid003344"/etc.)
+				(value from ExperimentsIdentifiers)
 		}
 	}
 Success Response:
@@ -152,11 +210,13 @@ Details:
 		if expId>0, make sure the experiment exists
 		If the detail already exists for the experiment, update it?
 	Action:
-		If ExpID=0, get a new unique experimentId (can use the current uniqueid in ExperimentsTable)
+		If ExpID=0, get a new unique experimentId (can use the current uniqueid in ExperimentsTable) and add the private field and the userID/Date
 		Add entries into ExperimentsTable for all the pairs in the list. For each one, automatically add the userId and date
 		Return the new expId for these details
+		for each "type"/"value" in the "details" list, if "type" exists in ExperimentTypesTable, get the id and add it to "type" field in ExperimentsIdentifiers table. Otherwise, create it there and get the id and add it to "type" field in ExperimentsIdentifiers.
 
 
+------------------------------------------------
 Title: Add new annotation
 URL: /AddAnnotation/
 Method: POST
@@ -181,6 +241,10 @@ Data Params:
 			(description from AgentTypesTable)
 		"description" : str
 			Free text describing this annotation (i.e. "lower in green tomatoes comapred to red ones")
+		"private" : bool (optional)
+			default=False
+			is this annotation private
+			private from CurationsTable
 		"CurationList" : list of
 			{
 				"detail" : str
@@ -215,3 +279,44 @@ Details:
 		Add all sequence/curation pairs to SequenceCurationTable
 		Add all annotation details to CurationsTable (automatically adding userId and addedDate)
 		Add all pairs to CurationListTable
+
+
+------------------------------------------------
+Title: Add new ontology term
+URL: /AddOntologyTerm/
+Description : Add a new term to the ontology term list and link to parent, synonyms
+Method: POST
+URL Params:
+Data Params:
+	{
+		"term" : str
+			the new term to add (description from OntologyTable)
+		"parent" : str (optional)
+			default="root"
+			if supplied, the id of the parent of this term (description from OntologyTable)
+		"ontologyname" : str (optional)
+			default = "scdb"
+			name of the ontology to which this term belongs (i.e. "doid")
+			(description from OntologyNamesTable
+		"synonyms" : (optional) list of
+		{
+			"term" : str
+				alternative names for the new ontology term
+		}
+	}
+Success Response:
+	Code : 201
+	Content :
+	{
+		"id" : int
+			the id of the new ontology term
+	}
+Details:
+	Validation:
+		if ontology does not exist (in OntologyNamesTable), fail
+	Action:
+		if term does not exist in OnologyTable, add it (description in OntologyTable).
+		Get the term id (id in OntologyTable)
+		If parent is supplied, if it does not exist in OntologyTable, add it. Get the parentid (id from OntologyTable for the parent). 
+		Get the ontologynameid from the OntologyNamesTable. Add (ontologyId = termid, ontologyParentId = parentif, ontologyNameId = ontologynameid)
+		for each sysnonym, if not in OntologyTable add it, get the synonymid, add to OntologySynymTable (idOntology = termid, idSynonym = synonymid)
