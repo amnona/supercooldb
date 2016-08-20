@@ -598,13 +598,14 @@ def DB_ACCESS_ExperimentsTable_GetRec(expId):
     jsonRetData["ReturnCode"] = 0
     jsonRetData["ReturnDescription"] = "Succeed"
     try:
-        cur.execute('SELECT type,value,"userId","ExperimentTypesTable".description from "CurationSchema"."ExperimentsTable","CurationSchema"."ExperimentsIdentifiers","CurationSchema"."ExperimentTypesTable" where ("expId" = %s and "expId" = "uniqueId" and "CurationSchema"."ExperimentTypesTable".id = "CurationSchema"."ExperimentsTable"."expTypeId" )' % (expId))
+        cur.execute('SELECT type,value,"CurationSchema"."ExperimentsTable"."userId","ExperimentTypesTable".description from "CurationSchema"."ExperimentsTable","CurationSchema"."ExperimentsIdentifiers","CurationSchema"."ExperimentTypesTable" where ("uniqueId" = %s and "expId" = "uniqueId" and "CurationSchema"."ExperimentTypesTable".id = "CurationSchema"."ExperimentsIdentifiers"."expTypeId" )' % (expId))
         rowCount = cur.rowcount
         if rowCount == 0 : 
             jsonRetData["ReturnCode"] = -1
             jsonRetData["ReturnDescription"] = "Record doesnt exist"
         else:
             row = cur.fetchone()
+            #change to user name
             jsonRetData["UserId"] = row[2]
             jsonRetData["ExpType"] = row[3]
             jsonRetData.setdefault("Types", [])
@@ -618,7 +619,8 @@ def DB_ACCESS_ExperimentsTable_GetRec(expId):
         jsonRetData["ReturnCode"] = -2
         jsonRetData["ReturnDescription"] = "Exception"
     #return;
-    return json.dumps(jsonRetData, ensure_ascii=False)
+    #return json.dumps(jsonRetData, ensure_ascii=False)
+    return jsonRetData;
 
 ################################################################################################################################
 #End of ExperimentsTable table functions
@@ -749,9 +751,64 @@ def DB_ACCESS_SequencesTable_GetSequence(seq,type):
         jsonRetData["ReturnCode"] = -2
         jsonRetData["ReturnDescription"] = "Exception"
     #return;
-    return json.dumps(jsonRetData, ensure_ascii=False)
+    #return json.dumps(jsonRetData, ensure_ascii=False)
+    return jsonRetData;
 ################################################################################################################################
 #End of SequencesTable table functions
+################################################################################################################################
+
+################################################################################################################################
+#Start of OntologyTable functions
+################################################################################################################################
+
+def DB_ACCESS_OntologyTable_GetRecById(id):
+    jsonRetData = dict()
+    jsonRetData["ReturnCode"] = 0
+    jsonRetData["ReturnDescription"] = "Succeed"
+    try:
+        cur.execute('SELECT "CurationSchema"."OntologyTable".id,"CurationSchema"."OntologyTable".description from "CurationSchema"."OntologyTable" where ( "CurationSchema"."OntologyTable".id = %s  )' % (id));
+        rowCount = cur.rowcount
+        if rowCount == 0 : 
+            jsonRetData["ReturnCode"] = -1
+            jsonRetData["ReturnDescription"] = "Record doesnt exist"
+        elif rowCount > 1 : 
+            jsonRetData["ReturnCode"] = -2
+            jsonRetData["ReturnDescription"] = "More than one record was found"
+        else:
+            row = cur.fetchone()
+            jsonRetData["id"] = row[0]
+            jsonRetData["description"] = row[1]
+    except psycopg2.DatabaseError as e:
+        jsonRetData["ReturnCode"] = -2
+        jsonRetData["ReturnDescription"] = "Exception"
+    return jsonRetData;
+
+def DB_ACCESS_OntologyTable_GetRecByName(name):
+    jsonRetData = dict()
+    jsonRetData["ReturnCode"] = 0
+    jsonRetData["ReturnDescription"] = "Succeed"
+    try:
+        name = name.replace("\"","\'");
+        cur.execute('SELECT "CurationSchema"."OntologyTable".id,"CurationSchema"."OntologyTable".description from "CurationSchema"."OntologyTable" where ( "CurationSchema"."OntologyTable".description = %s )' % name);
+        
+        rowCount = cur.rowcount
+        if rowCount == 0 : 
+            jsonRetData["ReturnCode"] = -1
+            jsonRetData["ReturnDescription"] = "Record doesnt exist"
+        elif rowCount > 1 : 
+            jsonRetData["ReturnCode"] = -3
+            jsonRetData["ReturnDescription"] = "More than one record was found"
+        else:
+            row = cur.fetchone()
+            jsonRetData["id"] = row[0]
+            jsonRetData["description"] = row[1]
+    except psycopg2.DatabaseError as e:
+        jsonRetData["ReturnCode"] = -2
+        jsonRetData["ReturnDescription"] = "Exception"
+    return jsonRetData;
+
+################################################################################################################################
+#Start of OntologyTable functions
 ################################################################################################################################
 
 #Unit test

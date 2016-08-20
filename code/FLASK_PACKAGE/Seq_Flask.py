@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, abort
 from .DB_ACCESS import db_access
+import json;
 
 Seq_Flask_Obj = Blueprint('Seq_Flask_Obj', __name__,
                         template_folder='templates')
