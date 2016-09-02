@@ -758,15 +758,63 @@ def DB_ACCESS_SequencesTable_GetSequence(seq,type):
 ################################################################################################################################
 
 ################################################################################################################################
-#Start of OntologyTable functions
+#Start of Gen functions
 ################################################################################################################################
 
-def DB_ACCESS_OntologyTable_GetRecById(id):
+def DB_ACCESS_Gen_AddOrReturnId(tableName,name):
+    jsonRetData = dict()
+    jsonRetData["ReturnCode"] = 0
+    
+    #try to get the id if exist
+    name = name.replace("\"","\'");
+    name = name.replace("\'","");
+    ontId = DB_ACCESS_GenGetId(tableName, name)
+    print (name);
+    if ontId > 0:
+        jsonRetData["ReturnDescription"] = "Already exist"
+        jsonRetData["id"] = ontId
+        return jsonRetData;
+    else:
+        ontId = DB_ACCESS_GenAddRec(tableName, name)
+        if ontId > 0:
+            jsonRetData["ReturnDescription"] = "Added successfully"
+            jsonRetData["id"] = ontId
+        else:
+            jsonRetData["ReturnCode"] = -1
+            jsonRetData["ReturnDescription"] = "Failed to add record"
+            jsonRetData["AdditionalInfo"] = ontId
+        return jsonRetData;
+
+def DB_ACCESS_Gen_GetRecsByStartId(tableName,fromId):
     jsonRetData = dict()
     jsonRetData["ReturnCode"] = 0
     jsonRetData["ReturnDescription"] = "Succeed"
     try:
-        cur.execute('SELECT "CurationSchema"."OntologyTable".id,"CurationSchema"."OntologyTable".description from "CurationSchema"."OntologyTable" where ( "CurationSchema"."OntologyTable".id = %s  )' % (id));
+        cur.execute('SELECT "CurationSchema"."%s".id,"CurationSchema"."%s".description from "CurationSchema"."%s" where ( "CurationSchema"."%s".id >= %s  )' % (tableName,tableName,tableName,tableName,fromId));
+        rowCount = cur.rowcount
+        if rowCount == 0 : 
+            jsonRetData["ReturnCode"] = -1
+            jsonRetData["ReturnDescription"] = "Record doesnt exist"
+        else: 
+            row = cur.fetchone()
+            jsonRetData["count"] = rowCount
+            jsonRetData.setdefault("IDs", [])
+            jsonRetData.setdefault("Descriptions", [])
+            while row is not None:
+                jsonRetData["IDs"].append(row[0]);
+                jsonRetData["Descriptions"].append(row[1]);
+                row = cur.fetchone()
+    except psycopg2.DatabaseError as e:
+        jsonRetData["ReturnCode"] = -2
+        jsonRetData["ReturnDescription"] = "Exception"
+    return jsonRetData;
+
+def DB_ACCESS_Gen_GetRecById(tableName,id):
+    jsonRetData = dict()
+    jsonRetData["ReturnCode"] = 0
+    jsonRetData["ReturnDescription"] = "Succeed"
+    try:
+        cur.execute('SELECT "CurationSchema"."%s".id,"CurationSchema"."%s".description from "CurationSchema"."%s" where ( "CurationSchema"."%s".id = %s  )' % (tableName,tableName,tableName,tableName,id));
         rowCount = cur.rowcount
         if rowCount == 0 : 
             jsonRetData["ReturnCode"] = -1
@@ -783,13 +831,13 @@ def DB_ACCESS_OntologyTable_GetRecById(id):
         jsonRetData["ReturnDescription"] = "Exception"
     return jsonRetData;
 
-def DB_ACCESS_OntologyTable_GetRecByName(name):
+def DB_ACCESS_Gen_GetRecByName(tableName,name):
     jsonRetData = dict()
     jsonRetData["ReturnCode"] = 0
     jsonRetData["ReturnDescription"] = "Succeed"
     try:
         name = name.replace("\"","\'");
-        cur.execute('SELECT "CurationSchema"."OntologyTable".id,"CurationSchema"."OntologyTable".description from "CurationSchema"."OntologyTable" where ( "CurationSchema"."OntologyTable".description = %s )' % name);
+        cur.execute('SELECT "CurationSchema"."%s".id,"CurationSchema"."%s".description from "CurationSchema"."%s" where ( "CurationSchema"."%s".description = %s )' % (tableName,tableName,tableName,tableName,name));
         
         rowCount = cur.rowcount
         if rowCount == 0 : 
@@ -808,8 +856,221 @@ def DB_ACCESS_OntologyTable_GetRecByName(name):
     return jsonRetData;
 
 ################################################################################################################################
+#End of Gen functions
+################################################################################################################################
+
+################################################################################################################################
 #Start of OntologyTable functions
 ################################################################################################################################
+
+def DB_ACCESS_OntologyTable_AddOntology(name):
+    return DB_ACCESS_Gen_AddOrReturnId("OntologyTable", name);
+
+def DB_ACCESS_OntologyTable_GetRecsByStartId(fromId):
+   return DB_ACCESS_Gen_GetRecsByStartId("OntologyTable", fromId)
+
+def DB_ACCESS_OntologyTable_GetRecById(id):
+    return DB_ACCESS_Gen_GetRecById("OntologyTable", id);
+
+def DB_ACCESS_OntologyTable_GetRecByName(name):
+    return DB_ACCESS_Gen_GetRecByName("OntologyTable", name);
+
+################################################################################################################################
+#Start of OntologyTable functions
+################################################################################################################################
+
+
+################################################################################################################################
+#Start of SynonymTable functions
+################################################################################################################################
+
+def DB_ACCESS_SynonymTable_AddSynonym(name):
+    return DB_ACCESS_Gen_AddOrReturnId("SynonymTable", name);
+
+def DB_ACCESS_SynonymTable_GetRecsByStartId(fromId):
+    return DB_ACCESS_Gen_GetRecsByStartId("SynonymTable", fromId)
+
+def DB_ACCESS_SynonymTable_GetRecById(id):
+    return DB_ACCESS_Gen_GetRecById("SynonymTable", id);
+
+def DB_ACCESS_SynonymTable_GetRecByName(name):
+    return DB_ACCESS_Gen_GetRecByName("SynonymTable", name);
+
+################################################################################################################################
+#Start of SynonymTable functions
+################################################################################################################################
+
+################################################################################################################################
+#Start of OntologyNamesTable functions
+################################################################################################################################
+
+def DB_ACCESS_OntologyNamesTable_AddOntologyName(name):
+    return DB_ACCESS_Gen_AddOrReturnId("OntologyNamesTable", name);
+
+def DB_ACCESS_OntologyNamesTable_GetRecsByStartId(fromId):
+    return DB_ACCESS_Gen_GetRecsByStartId("OntologyNamesTable", fromId)
+
+def DB_ACCESS_OntologyNamesTable_GetRecById(id):
+    return DB_ACCESS_Gen_GetRecById("OntologyNamesTable", id);
+
+def DB_ACCESS_OntologyNamesTable_GetRecByName(name):
+    return DB_ACCESS_Gen_GetRecByName("OntologyNamesTable", name);
+
+################################################################################################################################
+#Start of OntologyNamesTable functions
+################################################################################################################################
+
+################################################################################################################################
+#Start of OntologySynonymTable functions
+################################################################################################################################
+
+def DB_ACCESS_OntologySynonymTable_GetRecsByStartId(uniqueId):
+    jsonRetData = dict()
+    jsonRetData["ReturnCode"] = 0
+    jsonRetData["ReturnDescription"] = "Succeed"
+    try:
+        cur.execute('SELECT "CurationSchema"."OntologySynonymTable"."uniqueId","CurationSchema"."OntologySynonymTable"."idOntology","CurationSchema"."OntologySynonymTable"."idSynonym" from "CurationSchema"."OntologySynonymTable" where ( "CurationSchema"."OntologySynonymTable"."uniqueId" >= %s  )' % (uniqueId));
+        rowCount = cur.rowcount
+        if rowCount == 0 : 
+            jsonRetData["ReturnCode"] = -1
+            jsonRetData["ReturnDescription"] = "Record doesnt exist"
+        else: 
+            row = cur.fetchone()
+            jsonRetData["count"] = rowCount
+            jsonRetData.setdefault("unuqueId", [])
+            jsonRetData.setdefault("ontologyId", [])
+            jsonRetData.setdefault("synonymId", [])
+            while row is not None:
+                jsonRetData["unuqueId"].append(row[0]);
+                jsonRetData["ontologyId"].append(row[1]);
+                jsonRetData["synonymId"].append(row[2]);
+                row = cur.fetchone()
+    except psycopg2.DatabaseError as e:
+        jsonRetData["ReturnCode"] = -2
+        jsonRetData["ReturnDescription"] = "Exception"
+    return jsonRetData;
+
+def DB_ACCESS_OntologySynonymTable_GetRecBySynId(synId):
+    jsonRetData = dict()
+    jsonRetData["ReturnCode"] = 0
+    jsonRetData["ReturnDescription"] = "Succeed"
+    try:
+        cur.execute('SELECT "CurationSchema"."OntologySynonymTable"."uniqueId","CurationSchema"."OntologySynonymTable"."idOntology","CurationSchema"."OntologySynonymTable"."idSynonym" from "CurationSchema"."OntologySynonymTable" where ( "CurationSchema"."OntologySynonymTable"."idSynonym" = %s  )' % (synId));
+        rowCount = cur.rowcount
+        if rowCount == 0 : 
+            jsonRetData["ReturnCode"] = -1
+            jsonRetData["ReturnDescription"] = "Record doesnt exist"
+        else: 
+            row = cur.fetchone()
+            jsonRetData["count"] = rowCount
+            jsonRetData.setdefault("unuqueId", [])
+            jsonRetData.setdefault("ontologyId", [])
+            jsonRetData.setdefault("synonymId", [])
+            while row is not None:
+                jsonRetData["unuqueId"].append(row[0]);
+                jsonRetData["ontologyId"].append(row[1]);
+                jsonRetData["synonymId"].append(row[2]);
+                row = cur.fetchone()
+    except psycopg2.DatabaseError as e:
+        jsonRetData["ReturnCode"] = -2
+        jsonRetData["ReturnDescription"] = "Exception"
+    return jsonRetData;
+
+def DB_ACCESS_OntologySynonymTable_GetRecByOntId(ontId):
+    jsonRetData = dict()
+    jsonRetData["ReturnCode"] = 0
+    jsonRetData["ReturnDescription"] = "Succeed"
+    try:
+        cur.execute('SELECT "CurationSchema"."OntologySynonymTable"."uniqueId","CurationSchema"."OntologySynonymTable"."idOntology","CurationSchema"."OntologySynonymTable"."idSynonym" from "CurationSchema"."OntologySynonymTable" where ( "CurationSchema"."OntologySynonymTable"."idOntology" = %s  )' % (ontId));
+        rowCount = cur.rowcount
+        if rowCount == 0 : 
+            jsonRetData["ReturnCode"] = -1
+            jsonRetData["ReturnDescription"] = "Record doesnt exist"
+        else: 
+            row = cur.fetchone()
+            jsonRetData["count"] = rowCount
+            jsonRetData.setdefault("unuqueId", [])
+            jsonRetData.setdefault("ontologyId", [])
+            jsonRetData.setdefault("synonymId", [])
+            while row is not None:
+                jsonRetData["unuqueId"].append(row[0]);
+                jsonRetData["ontologyId"].append(row[1]);
+                jsonRetData["synonymId"].append(row[2]);
+                row = cur.fetchone()
+    except psycopg2.DatabaseError as e:
+        jsonRetData["ReturnCode"] = -2
+        jsonRetData["ReturnDescription"] = "Exception"
+    return jsonRetData;
+        
+################################################################################################################################
+#End of OntologySynonymTable functions
+################################################################################################################################
+
+################################################################################################################################
+#Start of OntologyTreeStructureTable functions
+################################################################################################################################
+
+def DB_ACCESS_OntologyTreeStructureTable_GetRecsByStartId(uniqueId):
+    jsonRetData = dict()
+    jsonRetData["ReturnCode"] = 0
+    jsonRetData["ReturnDescription"] = "Succeed"
+    try:
+        cur.execute('SELECT "CurationSchema"."OntologyTreeStructureTable"."uniqueId","CurationSchema"."OntologyTreeStructureTable"."ontologyId","CurationSchema"."OntologyTreeStructureTable"."ontologyParentId","CurationSchema"."OntologyTreeStructureTable"."ontologyNameId" from "CurationSchema"."OntologyTreeStructureTable" where ( "CurationSchema"."OntologyTreeStructureTable"."uniqueId" >= %s  )' % (uniqueId));
+        rowCount = cur.rowcount
+        if rowCount == 0 : 
+            jsonRetData["ReturnCode"] = -1
+            jsonRetData["ReturnDescription"] = "Record doesnt exist"
+        else: 
+            row = cur.fetchone()
+            jsonRetData["count"] = rowCount
+            jsonRetData.setdefault("unuqueId", [])
+            jsonRetData.setdefault("ontologyId", [])
+            jsonRetData.setdefault("ontologyParentId", [])
+            jsonRetData.setdefault("ontologyNameId", [])
+            while row is not None:
+                jsonRetData["unuqueId"].append(row[0]);
+                jsonRetData["ontologyId"].append(row[1]);
+                jsonRetData["ontologyParentId"].append(row[2]);
+                jsonRetData["ontologyNameId"].append(row[3]);
+                row = cur.fetchone()
+    except psycopg2.DatabaseError as e:
+        jsonRetData["ReturnCode"] = -2
+        jsonRetData["ReturnDescription"] = "Exception"
+    return jsonRetData;
+
+def DB_ACCESS_OntologyTreeStructureTable_GetOntologyTreeParentsByOntId(ontId):
+    jsonRetData = dict()
+    jsonRetData["ReturnCode"] = 0
+    jsonRetData["ReturnDescription"] = "Succeed"
+    try:
+        cur.execute('SELECT "CurationSchema"."OntologyTreeStructureTable"."uniqueId","CurationSchema"."OntologyTreeStructureTable"."ontologyId","CurationSchema"."OntologyTreeStructureTable"."ontologyParentId","CurationSchema"."OntologyTreeStructureTable"."ontologyNameId" from "CurationSchema"."OntologyTreeStructureTable" where ( "CurationSchema"."OntologyTreeStructureTable"."ontologyId" = %s  )' % (ontId));
+        rowCount = cur.rowcount
+        if rowCount == 0 : 
+            jsonRetData["ReturnCode"] = -1
+            jsonRetData["ReturnDescription"] = "Record doesnt exist"
+        else: 
+            row = cur.fetchone()
+            jsonRetData["count"] = rowCount
+            jsonRetData.setdefault("unuqueId", [])
+            jsonRetData.setdefault("ontologyId", [])
+            jsonRetData.setdefault("ontologyParentId", [])
+            jsonRetData.setdefault("ontologyNameId", [])
+            while row is not None:
+                jsonRetData["unuqueId"].append(row[0]);
+                jsonRetData["ontologyId"].append(row[1]);
+                jsonRetData["ontologyParentId"].append(row[2]);
+                jsonRetData["ontologyNameId"].append(row[3]);
+                row = cur.fetchone()
+    except psycopg2.DatabaseError as e:
+        jsonRetData["ReturnCode"] = -2
+        jsonRetData["ReturnDescription"] = "Exception"
+    return jsonRetData;
+
+
+################################################################################################################################
+#End of OntologyTreeStructureTable functions
+################################################################################################################################
+
 
 #Unit test
 PostGresConnect()
