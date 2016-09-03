@@ -169,28 +169,42 @@ def DB_ACCESS_GetUserRecById(id):
 #Start of (id,description) tables functions - we named it IandD tables
 ################################################################################################################################
 
-#Return the description
-#-1 id not exist
-#-2 Exception
-def DB_ACCESS_GenGetDescription(tableName,id):
+#num of records if exist
+#-1 doesnt exist
+#-2 exception
+def DB_ACCESS_GenIsExistById(tableName,id):
     try:
         cur.execute('SELECT description from "CurationSchema"."%s" where "id" = \'%s\'' % (tableName,id))
         rowCount = cur.rowcount
         if rowCount == 0 : 
             return -1;  #username was not found
         else:
+            return rowCount;
+    except psycopg2.DatabaseError as e:
+        print ('Error %s' % e)
+        return -2;   #DB exception
+    
+#Return the description
+#return empty string in any other case
+def DB_ACCESS_GenGetDescription(tableName,id):
+    try:
+        cur.execute('SELECT description from "CurationSchema"."%s" where "id" = \'%s\'' % (tableName,id))
+        rowCount = cur.rowcount
+        if rowCount == 0 : 
+            return "";  #username was not found
+        else:
             ver = cur.fetchone()
             return ver[0]; #Return the description
     except psycopg2.DatabaseError as e:
         print ('Error %s' % e)
-        return -2   #DB exception
+        return "";   #DB exception
 
-#Return the description
-#-1 id not exist
+#Return the id
+#-1 id doesnt exist
 #-2 Exception
 def DB_ACCESS_GenGetId(tableName,description):
     try:
-        cur.execute('SELECT id from "CurationSchema"."%s" where "description" = \'%s\'' % (tableName,description))
+        cur.execute('SELECT id from "CurationSchema"."%s" where LOWER("description") = LOWER(\'%s\')' % (tableName,description))
         rowCount = cur.rowcount
         if rowCount == 0 : 
             return -1;  #username was not found
@@ -630,6 +644,23 @@ def DB_ACCESS_ExperimentsTable_GetRec(expId):
 #Start of OntologySynonymTable table functions
 ################################################################################################################################
 
+#Is exist
+#Return unique id if exist 
+#-1 doesnt exist
+#-2 exception
+def DB_ACCESS_OntologySynonymTable_IsExist(idOntologyVal,idSynonymVal):
+    try:
+        cur.execute('SELECT "uniqueId" from "CurationSchema"."OntologySynonymTable" where ("idOntology" = %s AND "idSynonym" = %s)' % (idOntologyVal,idSynonymVal))
+        rowCount = cur.rowcount
+        if rowCount > 0 : 
+            row = cur.fetchone()
+            return row[0];
+        else:
+            return -1;
+    except psycopg2.DatabaseError as e:
+        return -2;
+
+
 #Delete record 
 # 1 - deleted succesfully
 #-1 if doesn't exist
@@ -650,20 +681,19 @@ def DB_ACCESS_OntologySynonymTable_DeleteRec(idOntologyVal,idSynonymVal):
 
     
 #Add record
-# return 1 if succeed
-# -1 doesn't exist
+# return uniqueId if exist
 # -2 Exception
-# -3 already exist
-def DB_ACCESS_OntologySynonymTable_AddRec(uniqueIdVal,expIdVal,typeVal,valueVal,dateVal,userIdVal):
+def DB_ACCESS_OntologySynonymTable_AddRec(idOntologyVal,idSynonymVal):
     try:
-        cur.execute('SELECT "id" from "CurationSchema"."OntologySynonymTable" where ("idOntology" = %s AND "idSynonym" = %s)' % (idOntologyVal,idSynonymVal))
-        rowCount = cur.rowcount
-        if rowCount > 0 : 
-            return -3;
+        #Since we want to prevent two records with the same information we will double check before adding the information
+        ret = DB_ACCESS_OntologySynonymTable_IsExist(idOntologyVal,idSynonymVal);
+        if ret >= 0 : 
+            return ret;
         else:
             cur.execute('INSERT INTO "CurationSchema"."OntologySynonymTable" ("idOntology","idSynonym") values (%s,%s)' % (idOntologyVal,idSynonymVal) );
             con.commit()
-            return 1;
+            #Return the unique id if the record was added successfully
+            return DB_ACCESS_OntologySynonymTable_IsExist(idOntologyVal,idSynonymVal);
         
     except psycopg2.DatabaseError as e:
         return -2;
@@ -677,6 +707,22 @@ def DB_ACCESS_OntologySynonymTable_AddRec(uniqueIdVal,expIdVal,typeVal,valueVal,
 #Start of OntologyTreeStructureTable table functions
 ################################################################################################################################
 
+# Check if exist
+# return the unique id
+# -1 if doesnt exist
+# -2 exception
+def DB_ACCESS_OntologyTreeStructureTable_IsExist(ontologyIdVal,ontologyParentIdVal,ontologyNameIdVal):
+    try:
+        cur.execute('SELECT "uniqueId" from "CurationSchema"."OntologyTreeStructureTable" where ("ontologyId" = %s AND "ontologyParentId" = %s AND "ontologyNameId" = %s)' % (ontologyIdVal,ontologyParentIdVal,ontologyNameIdVal))
+        rowCount = cur.rowcount
+        if rowCount > 0 : 
+            row = cur.fetchone()
+            return row[0];
+        else:
+            return -1;
+    except psycopg2.DatabaseError as e:
+        return -2;
+    
 #Delete record 
 # 1 - deleted succesfully
 #-1 if doesn't exist
@@ -695,22 +741,21 @@ def DB_ACCESS_OntologyTreeStructureTable_DeleteRec(ontologyIdVal,ontologyParentI
         print ('Error %s' % e)
         return -2   #DB exception
 
-    
+     
 #Add record
-# return 1 if succeed
-# -1 doesn't exist
+# return the id
 # -2 Exception
 # -3 already exist
 def DB_ACCESS_OntologyTreeStructureTable_AddRec(ontologyIdVal,ontologyParentIdVal,ontologyNameIdVal):
     try:
-        cur.execute('SELECT "id" from "CurationSchema"."OntologyTreeStructureTable" where ("ontologyId" = %s AND "ontologyParentId" = %s AND "ontologyNameId" = %s)' % (ontologyIdVal,ontologyParentIdVal,ontologyNameIdVal))
-        rowCount = cur.rowcount
-        if rowCount > 0 : 
-            return -3;
+        #if the record already exist dont add it but return the id
+        ret = DB_ACCESS_OntologyTreeStructureTable_IsExist(ontologyIdVal,ontologyParentIdVal,ontologyNameIdVal);
+        if ret >= 0:
+            return ret;
         else:
-            cur.execute('INSERT INTO "CurationSchema"."OntologyTreeStructureTable" ("idOntology","ontologyParentId","ontologyNameId") values (%s,%s,%s)' % (ontologyIdVal,ontologyParentIdVal,ontologyNameIdVal) );
+            cur.execute('INSERT INTO "CurationSchema"."OntologyTreeStructureTable" ("ontologyId","ontologyParentId","ontologyNameId") values (%s,%s,%s)' % (ontologyIdVal,ontologyParentIdVal,ontologyNameIdVal) );
             con.commit()
-            return 1;
+            return DB_ACCESS_OntologyTreeStructureTable_IsExist(ontologyIdVal,ontologyParentIdVal,ontologyNameIdVal);
         
     except psycopg2.DatabaseError as e:
         return -2;
@@ -837,7 +882,7 @@ def DB_ACCESS_Gen_GetRecByName(tableName,name):
     jsonRetData["ReturnDescription"] = "Succeed"
     try:
         name = name.replace("\"","\'");
-        cur.execute('SELECT "CurationSchema"."%s".id,"CurationSchema"."%s".description from "CurationSchema"."%s" where ( "CurationSchema"."%s".description = %s )' % (tableName,tableName,tableName,tableName,name));
+        cur.execute('SELECT "CurationSchema"."%s".id,"CurationSchema"."%s".description from "CurationSchema"."%s" where ( LOWER("CurationSchema"."%s".description) = LOWER(%s) )' % (tableName,tableName,tableName,tableName,name));
         
         rowCount = cur.rowcount
         if rowCount == 0 : 
@@ -863,16 +908,16 @@ def DB_ACCESS_Gen_GetRecByName(tableName,name):
 #Start of OntologyTable functions
 ################################################################################################################################
 
-def DB_ACCESS_OntologyTable_AddOntology(name):
+def DB_ACCESS_FLASK_OntologyTable_AddOntology(name):
     return DB_ACCESS_Gen_AddOrReturnId("OntologyTable", name);
 
-def DB_ACCESS_OntologyTable_GetRecsByStartId(fromId):
+def DB_ACCESS_FLASK_OntologyTable_GetRecsByStartId(fromId):
    return DB_ACCESS_Gen_GetRecsByStartId("OntologyTable", fromId)
 
-def DB_ACCESS_OntologyTable_GetRecById(id):
+def DB_ACCESS_FLASK_OntologyTable_GetRecById(id):
     return DB_ACCESS_Gen_GetRecById("OntologyTable", id);
 
-def DB_ACCESS_OntologyTable_GetRecByName(name):
+def DB_ACCESS_FLASK_OntologyTable_GetRecByName(name):
     return DB_ACCESS_Gen_GetRecByName("OntologyTable", name);
 
 ################################################################################################################################
@@ -884,16 +929,16 @@ def DB_ACCESS_OntologyTable_GetRecByName(name):
 #Start of SynonymTable functions
 ################################################################################################################################
 
-def DB_ACCESS_SynonymTable_AddSynonym(name):
+def DB_ACCESS_FLASK_SynonymTable_AddSynonym(name):
     return DB_ACCESS_Gen_AddOrReturnId("SynonymTable", name);
 
-def DB_ACCESS_SynonymTable_GetRecsByStartId(fromId):
+def DB_ACCESS_FLASK_SynonymTable_GetRecsByStartId(fromId):
     return DB_ACCESS_Gen_GetRecsByStartId("SynonymTable", fromId)
 
-def DB_ACCESS_SynonymTable_GetRecById(id):
+def DB_ACCESS_FLASK_SynonymTable_GetRecById(id):
     return DB_ACCESS_Gen_GetRecById("SynonymTable", id);
 
-def DB_ACCESS_SynonymTable_GetRecByName(name):
+def DB_ACCESS_FLASK_SynonymTable_GetRecByName(name):
     return DB_ACCESS_Gen_GetRecByName("SynonymTable", name);
 
 ################################################################################################################################
@@ -904,16 +949,16 @@ def DB_ACCESS_SynonymTable_GetRecByName(name):
 #Start of OntologyNamesTable functions
 ################################################################################################################################
 
-def DB_ACCESS_OntologyNamesTable_AddOntologyName(name):
+def DB_ACCESS_FLASK_OntologyNamesTable_AddOntologyName(name):
     return DB_ACCESS_Gen_AddOrReturnId("OntologyNamesTable", name);
 
-def DB_ACCESS_OntologyNamesTable_GetRecsByStartId(fromId):
+def DB_ACCESS_FLASK_OntologyNamesTable_GetRecsByStartId(fromId):
     return DB_ACCESS_Gen_GetRecsByStartId("OntologyNamesTable", fromId)
 
-def DB_ACCESS_OntologyNamesTable_GetRecById(id):
+def DB_ACCESS_FLASK_OntologyNamesTable_GetRecById(id):
     return DB_ACCESS_Gen_GetRecById("OntologyNamesTable", id);
 
-def DB_ACCESS_OntologyNamesTable_GetRecByName(name):
+def DB_ACCESS_FLASK_OntologyNamesTable_GetRecByName(name):
     return DB_ACCESS_Gen_GetRecByName("OntologyNamesTable", name);
 
 ################################################################################################################################
@@ -924,7 +969,79 @@ def DB_ACCESS_OntologyNamesTable_GetRecByName(name):
 #Start of OntologySynonymTable functions
 ################################################################################################################################
 
-def DB_ACCESS_OntologySynonymTable_GetRecsByStartId(uniqueId):
+def DB_ACCESS_FLASK_OntologySynonymTable_AddById(oId,sId):
+    jsonRetData = dict()
+    jsonRetData["ReturnCode"] = 0
+    jsonRetData["ReturnDescription"] = "Succeed"
+    
+    #Check if the record exist
+    ret = DB_ACCESS_OntologySynonymTable_IsExist(oId,sId);
+    if ret >= 0:
+        #Same record is already exist
+        jsonRetData["Additional information"] = "Already exist"
+        jsonRetData["uniqueId"] = ret;
+    else:
+        #the record doesnt exist, confirm that ontology and synonym with the given IDs do exist before trying to add the record
+        if DB_ACCESS_GenIsExistById("OntologyTable",oId) > 0:        
+            if DB_ACCESS_GenIsExistById("SynonymTable",sId) > 0 :        
+                ret = DB_ACCESS_OntologySynonymTable_AddRec(oId,sId);
+                if ret >= 0:
+                    jsonRetData["uniqueId"] = ret;
+                else:
+                    jsonRetData["ReturnCode"] = -3
+                    jsonRetData["ReturnDescription"] = "Failed to add record"
+            else:
+                #the synonym doesnt exist
+                jsonRetData["ReturnCode"] = -2
+                jsonRetData["ReturnDescription"] = "Invalid synonym id"
+        else:
+            #the ontology doesnt exist
+            jsonRetData["ReturnCode"] = -1
+            jsonRetData["ReturnDescription"] = "Invalid ontology id"
+            
+    return jsonRetData;
+
+def DB_ACCESS_FLASK_OntologySynonymTable_AddByName(oName,sName):
+    jsonRetData = dict()
+    jsonRetData["ReturnCode"] = 0
+    jsonRetData["ReturnDescription"] = "Succeed"
+    
+    oName = oName.replace("\"","\'");
+    oName = oName.replace("\'","");
+    sName = sName.replace("\"","\'");
+    sName = sName.replace("\'","");
+    
+    oId = DB_ACCESS_GenGetId("OntologyTable",oName);
+    sId = DB_ACCESS_GenGetId("SynonymTable",sName);
+    if oId >= 0:        
+        if sId >= 0 :        
+            #Check if the record exist
+            ret = DB_ACCESS_OntologySynonymTable_IsExist(oId,sId);
+            if ret >= 0:
+                #Same record is already exist
+                jsonRetData["Additional information"] = "Already exist"
+                jsonRetData["uniqueId"] = ret;
+            else:
+                #the record doesnt exist, confirm that ontology and synonym with the given IDs do exist before trying to add the record
+                ret = DB_ACCESS_OntologySynonymTable_AddRec(oId,sId);
+                if ret >= 0:
+                    jsonRetData["uniqueId"] = ret;
+                else:
+                    jsonRetData["ReturnCode"] = -3
+                    jsonRetData["ReturnDescription"] = "Failed to add record"
+        else:
+            #the synonym doesnt exist
+            jsonRetData["ReturnCode"] = -2
+            jsonRetData["ReturnDescription"] = "Invalid synonym name"
+    else:
+        #the ontology doesnt exist
+        jsonRetData["ReturnCode"] = -1
+        jsonRetData["ReturnDescription"] = "Invalid ontology name"
+            
+    return jsonRetData;
+
+
+def DB_ACCESS_FLASK_OntologySynonymTable_GetRecsByStartId(uniqueId):
     jsonRetData = dict()
     jsonRetData["ReturnCode"] = 0
     jsonRetData["ReturnDescription"] = "Succeed"
@@ -950,7 +1067,7 @@ def DB_ACCESS_OntologySynonymTable_GetRecsByStartId(uniqueId):
         jsonRetData["ReturnDescription"] = "Exception"
     return jsonRetData;
 
-def DB_ACCESS_OntologySynonymTable_GetRecBySynId(synId):
+def DB_ACCESS_FLASK_OntologySynonymTable_GetRecBySynId(synId):
     jsonRetData = dict()
     jsonRetData["ReturnCode"] = 0
     jsonRetData["ReturnDescription"] = "Succeed"
@@ -976,7 +1093,7 @@ def DB_ACCESS_OntologySynonymTable_GetRecBySynId(synId):
         jsonRetData["ReturnDescription"] = "Exception"
     return jsonRetData;
 
-def DB_ACCESS_OntologySynonymTable_GetRecByOntId(ontId):
+def DB_ACCESS_FLASK_OntologySynonymTable_GetRecByOntId(ontId):
     jsonRetData = dict()
     jsonRetData["ReturnCode"] = 0
     jsonRetData["ReturnDescription"] = "Succeed"
@@ -1010,7 +1127,91 @@ def DB_ACCESS_OntologySynonymTable_GetRecByOntId(ontId):
 #Start of OntologyTreeStructureTable functions
 ################################################################################################################################
 
-def DB_ACCESS_OntologyTreeStructureTable_GetRecsByStartId(uniqueId):
+def DB_ACCESS_FLASK_OntologyTreeStructureTable_AddByName(oName,pName,oNameName):
+    jsonRetData = dict()
+    jsonRetData["ReturnCode"] = 0
+    jsonRetData["ReturnDescription"] = "Succeed"
+    
+    oName = oName.replace("\"","\'");
+    oName = oName.replace("\'","");
+    pName = pName.replace("\"","\'");
+    pName = pName.replace("\'","");
+    oNameName = oNameName.replace("\"","\'");
+    oNameName = oNameName.replace("\'","");
+    
+    oId = DB_ACCESS_GenGetId("OntologyTable",oName);
+    pId = DB_ACCESS_GenGetId("OntologyTable",pName);
+    ontNameId = DB_ACCESS_GenGetId("OntologyNamesTable",oNameName);
+    if oId >= 0:        
+        if pId >= 0 :        
+            if ontNameId >= 0 :            
+                #Check if the record exist
+                ret = DB_ACCESS_OntologyTreeStructureTable_IsExist(oId,pId,ontNameId);
+                if ret >= 0:
+                    #Same record is already exist
+                    jsonRetData["Additional information"] = "Already exist"
+                    jsonRetData["uniqueId"] = ret;
+                else:
+                    #the record doesnt exist, confirm that ontology and synonym with the given IDs do exist before trying to add the record
+                    ret = DB_ACCESS_OntologyTreeStructureTable_AddRec(oId,pId,ontNameId);
+                    if ret >= 0:
+                        jsonRetData["uniqueId"] = ret;
+                    else:
+                        jsonRetData["ReturnCode"] = -4
+                        jsonRetData["ReturnDescription"] = "Failed to add record"
+            else:
+                #the synonym doesnt exist
+                jsonRetData["ReturnCode"] = -3
+                jsonRetData["ReturnDescription"] = "Invalid ontology name name"
+        else:
+            #the synonym doesnt exist
+            jsonRetData["ReturnCode"] = -2
+            jsonRetData["ReturnDescription"] = "Invalid ontology parent name"
+    else:
+        #the ontology doesnt exist
+        jsonRetData["ReturnCode"] = -1
+        jsonRetData["ReturnDescription"] = "Invalid ontology name"
+            
+    return jsonRetData;
+
+def DB_ACCESS_FLASK_OntologyTreeStructureTable_AddById(oId,pId,ontNameId):
+    jsonRetData = dict()
+    jsonRetData["ReturnCode"] = 0
+    jsonRetData["ReturnDescription"] = "Succeed"
+    
+    #Check if the record exist
+    ret = DB_ACCESS_OntologyTreeStructureTable_IsExist(oId,pId,ontNameId);
+    if ret >= 0:
+        #Same record is already exist
+        jsonRetData["Additional information"] = "Already exist"
+        jsonRetData["uniqueId"] = ret;
+    else:
+        #the record doesnt exist, confirm that ontology and synonym with the given IDs do exist before trying to add the record
+        if DB_ACCESS_GenIsExistById("OntologyTable",oId) > 0:        
+            if DB_ACCESS_GenIsExistById("OntologyTable",pId) > 0 :        
+                if DB_ACCESS_GenIsExistById("OntologyNamesTable",ontNameId) > 0 :        
+                    ret = DB_ACCESS_OntologyTreeStructureTable_AddRec(oId,pId,ontNameId);
+                    if ret >= 0:
+                        jsonRetData["uniqueId"] = ret;
+                    else:
+                        jsonRetData["ReturnCode"] = -4
+                        jsonRetData["ReturnDescription"] = "Failed to add record"
+                else:
+                    #the synonym doesnt exist
+                    jsonRetData["ReturnCode"] = -3
+                    jsonRetData["ReturnDescription"] = "Invalid ontology name id"
+            else:
+                #the synonym doesnt exist
+                jsonRetData["ReturnCode"] = -2
+                jsonRetData["ReturnDescription"] = "Invalid ontology parent id"
+        else:
+            #the ontology doesnt exist
+            jsonRetData["ReturnCode"] = -1
+            jsonRetData["ReturnDescription"] = "Invalid ontology id"
+            
+    return jsonRetData;
+
+def DB_ACCESS_FLASK_OntologyTreeStructureTable_GetRecsByStartId(uniqueId):
     jsonRetData = dict()
     jsonRetData["ReturnCode"] = 0
     jsonRetData["ReturnDescription"] = "Succeed"
@@ -1038,7 +1239,7 @@ def DB_ACCESS_OntologyTreeStructureTable_GetRecsByStartId(uniqueId):
         jsonRetData["ReturnDescription"] = "Exception"
     return jsonRetData;
 
-def DB_ACCESS_OntologyTreeStructureTable_GetOntologyTreeParentsByOntId(ontId):
+def DB_ACCESS_FLASK_OntologyTreeStructureTable_GetOntologyTreeParentsByOntId(ontId):
     jsonRetData = dict()
     jsonRetData["ReturnCode"] = 0
     jsonRetData["ReturnDescription"] = "Succeed"
