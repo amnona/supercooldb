@@ -112,11 +112,10 @@ def AddOntologyStructureByName(oName,pName,oNameName):
     jsonRetData = db_access.DB_ACCESS_FLASK_OntologyTreeStructureTable_AddByName(oName,pName,oNameName);
     return json.dumps(jsonRetData, ensure_ascii=False);
 
-
-@Ontology_Flask_Obj.route('/AddOntologyTreeByIDs/ontId=<oId>&parentId=<pId>&ontNameId=<ontNameId>')
-def AddOntologyTreeById(oId,pId,ontNameId):
-    jsonRetData = db_access.DB_ACCESS_FLASK_OntologyTreeStructureTable_AddById(oId,pId,ontNameId);
-    return json.dumps(jsonRetData, ensure_ascii=False);
+#@Ontology_Flask_Obj.route('/AddOntologyTreeByIDs/ontId=<oId>&parentId=<pId>&ontNameId=#<ontNameId>')
+#def AddOntologyTreeById(oId,pId,ontNameId):
+#    jsonRetData = #db_access.DB_ACCESS_FLASK_OntologyTreeStructureTable_AddById(oId,pId,ontNameId);
+#    return json.dumps(jsonRetData, ensure_ascii=False);
 
 @Ontology_Flask_Obj.route('/QueryOntologyTreeIDs/fromId=<id>')
 def GetOntologyTreeRangeById(id):
