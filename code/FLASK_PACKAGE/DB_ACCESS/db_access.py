@@ -33,7 +33,7 @@ def connect_db():
 # connect to the db
 # return 1 if connected successfully
 # return 0 if failed to connect
-<<<<<<< HEAD
+
 # def PostGresConnect():
 #     try:
 #         global con
@@ -44,18 +44,6 @@ def connect_db():
 #     except psycopg2.DatabaseError as e:
 #         print ('Error %s' % e)
 #         return 0;
-=======
-def PostGresConnect():
-    try:
-        global con 
-        con = psycopg2.connect(database='postgres', user='postgres', password='admin123') 
-        global cur 
-        cur = con.cursor()
-        return 0;
-    except psycopg2.DatabaseError as e:
-        print ('Error %s' % e)
-        return -1;
->>>>>>> 9941fce85402b881dabefa570f58d7ccec4fa274
 
 ################################################################################################################################
 #End of common functions
