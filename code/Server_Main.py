@@ -43,7 +43,9 @@ def teardown_request(exception):
 
 
 if __name__ == '__main__':
-	if db_access.PostGresConnect() == 0:
-		app.run(debug=True)
-	else:
-		print("Failed to load DB")
+	# need to check for database in a nicer way
+	app.run(debug=True)
+	# if db_access.PostGresConnect() == 0:
+	# 	app.run(debug=True)
+	# else:
+	# 	print("Failed to load DB")
