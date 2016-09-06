@@ -3,6 +3,7 @@ import json
 from FLASK_PACKAGE.Exp_Flask import Exp_Flask_Obj
 from FLASK_PACKAGE.Seq_Flask import Seq_Flask_Obj
 from FLASK_PACKAGE.Ontology_Flask import Ontology_Flask_Obj
+from FLASK_PACKAGE.DB_ACCESS import db_access
 
 app = Flask(__name__)
 app.register_blueprint(Exp_Flask_Obj)
@@ -27,4 +28,7 @@ app.register_blueprint(Ontology_Flask_Obj)
 
 
 if __name__ == '__main__':
-	app.run(debug=True)
+    if db_access.PostGresConnect() == 0 :
+        app.run(debug=True)
+    else:
+        print("Failed to load DB");

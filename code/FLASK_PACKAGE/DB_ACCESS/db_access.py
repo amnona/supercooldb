@@ -17,10 +17,10 @@ def PostGresConnect():
         con = psycopg2.connect(database='postgres', user='postgres', password='admin123') 
         global cur 
         cur = con.cursor()
-        return 1;
+        return 0;
     except psycopg2.DatabaseError as e:
         print ('Error %s' % e)
-        return 0;
+        return -1;
 
 ################################################################################################################################
 #End of common functions
@@ -1274,13 +1274,13 @@ def DB_ACCESS_FLASK_OntologyTreeStructureTable_GetOntologyTreeParentsByOntId(ont
 
 
 #Unit test
-PostGresConnect()
+#PostGresConnect()
 
 #print "test";
 #print ( DB_ACCESS_CurationListTable_IsExist(2,3,1));
 #print ( DB_ACCESS_CurationListTable_IsExist(2,7,1));
 #print ( DB_ACCESS_CurationListTable_AddRec(1,1,1));
-print ( DB_ACCESS_CurationListTable_DeleteRec(1,1,1));
+#print ( DB_ACCESS_CurationListTable_DeleteRec(1,1,1));
 
 #print (DB_ACCESS_GenAddRec("MethodTypesTable","testValue1"));
 #print (DB_ACCESS_GenDeleteRecById("MethodTypesTable",5));
