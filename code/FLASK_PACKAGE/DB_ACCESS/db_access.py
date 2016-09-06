@@ -352,7 +352,7 @@ def DB_ACCESS_GenAddRec(tableName, description,con,cur):
 		else:
 			cur.execute('INSERT INTO "CurationSchema"."%s" (description) values (\'%s\')' % (tableName,description) )
 			con.commit()
-			return DB_ACCESS_GenGetId(tableName,description)
+			return DB_ACCESS_GenGetId(tableName,description,con,cur)
 	except psycopg2.DatabaseError as e:
 		print("Error GenAddRec: %s" % e)
 		return -2
@@ -1013,14 +1013,14 @@ def DB_ACCESS_Gen_AddOrReturnId(tableName,name,con,cur):
 	#try to get the id if exist
 	name = name.replace("\"","\'")
 	name = name.replace("\'","")
-	ontId = DB_ACCESS_GenGetId(tableName, name)
+	ontId = DB_ACCESS_GenGetId(tableName, name,con,cur)
 	print (name)
 	if ontId > 0:
 		jsonRetData["ReturnDescription"] = "Already exist"
 		jsonRetData["id"] = ontId
 		return jsonRetData
 	else:
-		ontId = DB_ACCESS_GenAddRec(tableName, name)
+		ontId = DB_ACCESS_GenAddRec(tableName, name,con,cur)
 		if ontId > 0:
 			jsonRetData["ReturnDescription"] = "Added successfully"
 			jsonRetData["id"] = ontId
