@@ -1,13 +1,28 @@
-from flask import Flask,jsonify
+from flask import Flask,jsonify,g
 import json
 from FLASK_PACKAGE.Exp_Flask import Exp_Flask_Obj
 from FLASK_PACKAGE.Seq_Flask import Seq_Flask_Obj
 from FLASK_PACKAGE.Ontology_Flask import Ontology_Flask_Obj
+from FLASK_PACKAGE.DB_ACCESS.db_access import connect_db
 
 app = Flask(__name__)
 app.register_blueprint(Exp_Flask_Obj)
 app.register_blueprint(Seq_Flask_Obj)
 app.register_blueprint(Ontology_Flask_Obj)
+
+
+# whenever a new request arrives, connect to the database and store in g.db
+@app.before_request
+def before_request():
+	con,cur=connect_db()
+	g.con = con
+	g.cur = cur
+
+
+# and when the request is over, disconnect
+@app.teardown_request
+def teardown_request(exception):
+	g.con.close()
 
 #@app.route('/')
 #def index():
