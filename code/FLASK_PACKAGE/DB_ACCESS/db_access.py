@@ -875,14 +875,14 @@ def DB_ACCESS_OntologySynonymTable_AddRec(idOntologyVal,idSynonymVal,con,cur):
 	"""
 	try:
 		#Since we want to prevent two records with the same information we will double check before adding the information
-		ret = DB_ACCESS_OntologySynonymTable_IsExist(idOntologyVal,idSynonymVal)
+		ret = DB_ACCESS_OntologySynonymTable_IsExist(idOntologyVal,idSynonymVal,con,cur)
 		if ret >= 0:
 			return ret
 		else:
 			cur.execute('INSERT INTO "CurationSchema"."OntologySynonymTable" ("idOntology","idSynonym") values (%s,%s)' % (idOntologyVal,idSynonymVal) )
 			con.commit()
 			#Return the unique id if the record was added successfully
-			return DB_ACCESS_OntologySynonymTable_IsExist(idOntologyVal,idSynonymVal)
+			return DB_ACCESS_OntologySynonymTable_IsExist(idOntologyVal,idSynonymVal,con,cur)
 	except psycopg2.DatabaseError as e:
 		print ('Error %s' % e)
 		return -2
@@ -949,13 +949,13 @@ def DB_ACCESS_OntologyTreeStructureTable_AddRec(ontologyIdVal,ontologyParentIdVa
 	"""
 	try:
 		#if the record already exist dont add it but return the id
-		ret = DB_ACCESS_OntologyTreeStructureTable_IsExist(ontologyIdVal,ontologyParentIdVal,ontologyNameIdVal)
+		ret = DB_ACCESS_OntologyTreeStructureTable_IsExist(ontologyIdVal,ontologyParentIdVal,ontologyNameIdVal,con,cur)
 		if ret >= 0:
 			return ret
 		else:
 			cur.execute('INSERT INTO "CurationSchema"."OntologyTreeStructureTable" ("ontologyId","ontologyParentId","ontologyNameId") values (%s,%s,%s)' % (ontologyIdVal,ontologyParentIdVal,ontologyNameIdVal) )
 			con.commit()
-			return DB_ACCESS_OntologyTreeStructureTable_IsExist(ontologyIdVal,ontologyParentIdVal,ontologyNameIdVal)
+			return DB_ACCESS_OntologyTreeStructureTable_IsExist(ontologyIdVal,ontologyParentIdVal,ontologyNameIdVal,con,cur)
 	except psycopg2.DatabaseError as e:
 		print ('Error %s' % e)
 		return -2
@@ -1038,10 +1038,10 @@ def DB_ACCESS_Gen_AddOrReturnId(tableName,name,con,cur):
 #     try:
 #         cur.execute('SELECT "CurationSchema"."%s".id,"CurationSchema"."%s".description from "CurationSchema"."%s" where ( "CurationSchema"."%s".id >= %s  )' % (tableName,tableName,tableName,tableName,fromId));
 #         rowCount = cur.rowcount
-#         if rowCount == 0 : 
+#         if rowCount == 0 :
 #             jsonRetData["ReturnCode"] = -1
 #             jsonRetData["ReturnDescription"] = "Record doesnt exist"
-#         else: 
+#         else:
 #             row = cur.fetchone()
 #             jsonRetData["count"] = rowCount
 #             jsonRetData.setdefault("IDs", [])
@@ -1061,7 +1061,7 @@ def DB_ACCESS_Gen_GetRecById(tableName,id,con,cur):
 	jsonRetData["ReturnCode"] = 0
 	jsonRetData["ReturnDescription"] = "Succeed"
 	try:
-		cur.execute('SELECT "CurationSchema"."%s".id,"CurationSchema"."%s".description from "CurationSchema"."%s" where ( "CurationSchema"."%s".id = %s  )' % (tableName,tableName,tableName,tableName,id))
+		cur.execute('SELECT "CurationSchema"."%s".id,"CurationSchema"."%s".description from "CurationSchema"."%s" where ( "CurationSchema"."%s".id = %s  )', (tableName,tableName,tableName,tableName,id))
 		rowCount = cur.rowcount
 		if rowCount == 0:
 			jsonRetData["ReturnCode"] = -1
@@ -1184,6 +1184,45 @@ def DB_ACCESS_FLASK_OntologyNamesTable_GetRecByName(name,con,cur):
 ################################################################################################################################
 #Start of OntologySynonymTable functions
 ################################################################################################################################
+
+
+def DB_ACCESS_FLASK_OntologySynonymTable_AddByNameId(oId,sName,con,cur):
+	"""
+	Add to synonym table using name of new synonym and id of parent
+	"""
+	jsonRetData = dict()
+	jsonRetData["ReturnCode"] = 0
+	jsonRetData["ReturnDescription"] = "Succeed"
+
+	# add/get the synonym id
+	ret = DB_ACCESS_Gen_AddOrReturnId("SynonymTable",sName,con,cur)
+	sId = ret["id"]
+
+	#Check if the record exist
+	ret = DB_ACCESS_OntologySynonymTable_IsExist(oId,sId,con,cur)
+	if ret >= 0:
+		#Same record is already exist
+		jsonRetData["Additional information"] = "Already exist"
+		jsonRetData["uniqueId"] = ret
+	else:
+		#the record doesnt exist, confirm that ontology and synonym with the given IDs do exist before trying to add the record
+		if DB_ACCESS_GenIsExistById("OntologyTable",oId,con,cur) > 0:
+			if DB_ACCESS_GenIsExistById("SynonymTable",sId,con,cur) > 0:
+				ret = DB_ACCESS_OntologySynonymTable_AddRec(oId,sId,con,cur)
+				if ret >= 0:
+					jsonRetData["uniqueId"] = ret
+				else:
+					jsonRetData["ReturnCode"] = -3
+					jsonRetData["ReturnDescription"] = "Failed to add record"
+			else:
+				#the synonym doesnt exist
+				jsonRetData["ReturnCode"] = -2
+				jsonRetData["ReturnDescription"] = "Invalid synonym id"
+		else:
+			#the ontology doesnt exist
+			jsonRetData["ReturnCode"] = -1
+			jsonRetData["ReturnDescription"] = "Invalid ontology id"
+	return jsonRetData
 
 
 def DB_ACCESS_FLASK_OntologySynonymTable_AddById(oId,sId,con,cur):
@@ -1362,9 +1401,9 @@ def DB_ACCESS_FLASK_OntologyTreeStructureTable_AddByName(oName,pName,oNameName,c
 	oNameName = oNameName.replace("\"","\'")
 	oNameName = oNameName.replace("\'","")
 
-	oId = DB_ACCESS_GenGetId("OntologyTable",oName)
-	pId = DB_ACCESS_GenGetId("OntologyTable",pName)
-	ontNameId = DB_ACCESS_GenGetId("OntologyNamesTable",oNameName)
+	oId = DB_ACCESS_GenGetId("OntologyTable",oName,con,cur)
+	pId = DB_ACCESS_GenGetId("OntologyTable",pName,con,cur)
+	ontNameId = DB_ACCESS_GenGetId("OntologyNamesTable",oNameName,con,cur)
 	if oId >= 0:
 		if pId >= 0:
 			if ontNameId >= 0:
