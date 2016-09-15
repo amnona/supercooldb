@@ -77,41 +77,86 @@ def ontology_add_term():
 	parent=request.form.get('parent')
 	if parent is None:
 		parent="root"
-	ontologyname=request.args.get('ontologyname')
+	ontologyname=request.form.get('ontologyname')
 	if ontologyname is None:
+		print("no ontology name supplied")
 		ontologyname="scdb"
 	synonyms=request.form.getlist('synonyms')
 
 	# add/get the ontology term
 	res = db_access.DB_ACCESS_FLASK_OntologyTable_AddOntology(term,g.con,g.cur)
-	print(res)
 	cid=res['id']
-	print('cid is %s' % cid)
 
 	# add/get the ontology parent term
 	res = db_access.DB_ACCESS_FLASK_OntologyTable_AddOntology(parent,g.con,g.cur)
-	print(res)
 	parentid=res['id']
-	print('parentid is %s' % parentid)
 
 	# add/get the ontology name
 	res=db_access.DB_ACCESS_FLASK_OntologyNamesTable_AddOntologyName(ontologyname,g.con,g.cur)
-	print(res)
 	ontologynameid=res['id']
-	print('ontologyname id is %s' % ontologynameid)
 
 	# add the term/parent to the tree structure
 	res = db_access.DB_ACCESS_FLASK_OntologyTreeStructureTable_AddByName(term,parent,ontologyname,g.con,g.cur)
-	print(res)
 	jsonRetData=res
 
 	# add the synonyms
-	print("synonyms : %s" % synonyms)
 	for csyn in synonyms:
-		print("adding %s" % csyn)
 		res=db_access.DB_ACCESS_FLASK_OntologySynonymTable_AddByNameId(cid,csyn,g.con,g.cur)
 
 	return json.dumps(jsonRetData, ensure_ascii=False)
+
+
+@Ontology_Flask_Obj.route('/ontology/get_parents',methods=['GET'])
+def ontology_get_parents():
+	"""
+	Title: Get all parents for a given ontology term
+	URL: /ontology/get_parents
+	Description : Get a list of all the parents for a given ontology term
+	Method: GET
+	URL Params:
+		{
+			"term" : str
+				the ontology term to get the parents for
+		}
+	Data Params:
+	Success Response:
+		Code : 201
+		Content :
+		{
+			"parents" : list of str
+				list of the parent terms
+		}
+	Details:
+		Validation:
+		NA
+		Action:
+		Get all the parents of the ontology term
+		If it is a synonym for a term, get the original term first.
+		Note that if the term is in more than one ontology, will return all parents
+	"""
+	term=request.args.get('term')
+	if term is None:
+		# # TODO: retrun error
+		return(return_doc(ontology_get_parents))
+
+	res=db_access.DB_ACCESS_FLASK_OntologyTable_GetRecByName(term,g.con,g.cur)
+	if 'id' not in res:
+		return json.dumps(res, ensure_ascii=False)
+	cid=res['id']
+	print(cid)
+	plist=[cid]
+	parents=[]
+	while len(plist)>0:
+		cid=plist.pop(0)
+		res=db_access.DB_ACCESS_FLASK_OntologyTreeStructureTable_GetOntologyTreeParentsByOntId(cid,g.con,g.cur)
+		if 'ontologyParentId' not in res:
+			continue
+		plist.extend(res['ontologyParentId'])
+		for cparent in res['ontologyParentId']:
+			res=db_access.DB_ACCESS_FLASK_OntologyTable_GetRecById(cparent,g.con,g.cur)
+			parents.append(res['description'])
+	print(parents)
+	return json.dumps(parents, ensure_ascii=False)
 
 
 @Ontology_Flask_Obj.route('/ontology/get_term',methods=['GET'])

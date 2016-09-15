@@ -16,6 +16,7 @@ def connect_db():
 	try:
 		con = psycopg2.connect(database='postgres', user='postgres', password='admin123')
 		cur = con.cursor()
+		cur.execute('SET search_path to "CurationSchema"')
 		return (con,cur)
 	except psycopg2.DatabaseError as e:
 		print ('Cannot connect to database. Error %s' % e)
@@ -1061,7 +1062,8 @@ def DB_ACCESS_Gen_GetRecById(tableName,id,con,cur):
 	jsonRetData["ReturnCode"] = 0
 	jsonRetData["ReturnDescription"] = "Succeed"
 	try:
-		cur.execute('SELECT "CurationSchema"."%s".id,"CurationSchema"."%s".description from "CurationSchema"."%s" where ( "CurationSchema"."%s".id = %s  )', (tableName,tableName,tableName,tableName,id))
+#		cur.execute('SELECT "CurationSchema"."%s".id,"CurationSchema"."%s".description from "CurationSchema"."%s" where ( "CurationSchema"."%s".id = %s  )', (tableName,tableName,tableName,tableName,id))
+		cur.execute('SELECT id,description from "CurationSchema"."%s" where ( id = %s  )' % (tableName,'%s'),[id])
 		rowCount = cur.rowcount
 		if rowCount == 0:
 			jsonRetData["ReturnCode"] = -1
@@ -1086,7 +1088,8 @@ def DB_ACCESS_Gen_GetRecByName(tableName,name,con,cur):
 	jsonRetData["ReturnDescription"] = "Succeed"
 	try:
 		name = name.replace("\"","\'")
-		cur.execute('SELECT "CurationSchema"."%s".id,"CurationSchema"."%s".description from "CurationSchema"."%s" where ( LOWER("CurationSchema"."%s".description) = LOWER(%s) )' % (tableName,tableName,tableName,tableName,name))
+#		cur.execute('SELECT "CurationSchema"."%s".id,"CurationSchema"."%s".description from "CurationSchema"."%s" where ( LOWER("CurationSchema"."%s".description) = LOWER(%s) )' % (tableName,tableName,tableName,tableName,name))
+		cur.execute('SELECT id, description from "CurationSchema"."%s" where description = %s' % (tableName,"%s"),[name])
 		rowCount = cur.rowcount
 		if rowCount == 0:
 			jsonRetData["ReturnCode"] = -1
