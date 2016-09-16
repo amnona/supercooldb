@@ -3,13 +3,16 @@ import json
 from FLASK_PACKAGE.Exp_Flask import Exp_Flask_Obj
 from FLASK_PACKAGE.Seq_Flask import Seq_Flask_Obj
 from FLASK_PACKAGE.Ontology_Flask import Ontology_Flask_Obj
+#from FLASK_PACKAGE.Doc_Flask import Doc_Flask_Obj
 from FLASK_PACKAGE.DB_ACCESS.db_access import connect_db
 from FLASK_PACKAGE.DB_ACCESS import db_access
+
 
 app = Flask(__name__)
 app.register_blueprint(Exp_Flask_Obj)
 app.register_blueprint(Seq_Flask_Obj)
 app.register_blueprint(Ontology_Flask_Obj)
+#app.register_blueprint(Doc_Flask_Obj)
 
 
 # whenever a new request arrives, connect to the database and store in g.db

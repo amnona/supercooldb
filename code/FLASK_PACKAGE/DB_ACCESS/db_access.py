@@ -16,12 +16,11 @@ def connect_db():
 	try:
 		con = psycopg2.connect(database='postgres', user='postgres', password='admin123')
 		cur = con.cursor()
-		cur.execute('SET search_path to "CurationSchema"')
+		cur.execute('SET search_path to CurationSchemaTest')
 		return (con,cur)
 	except psycopg2.DatabaseError as e:
 		print ('Cannot connect to database. Error %s' % e)
 		return None
-
 
 
 
@@ -999,6 +998,7 @@ def DB_ACCESS_SequencesTable_GetSequence(seq,type,con,cur):
 	#return;
 	#return json.dumps(jsonRetData, ensure_ascii=False)
 	return jsonRetData
+
 ################################################################################################################################
 #End of SequencesTable table functions
 ################################################################################################################################
