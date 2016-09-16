@@ -1,0 +1,1504 @@
+--
+-- PostgreSQL database dump
+--
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+
+DROP SCHEMA CurationSchemaTest CASCADE;
+
+CREATE SCHEMA CurationSchemaTest;
+
+ALTER SCHEMA CurationSchemaTest OWNER TO postgres;
+
+COMMENT ON SCHEMA CurationSchemaTest IS 'standard public schema';
+
+
+SET search_path = CurationSchemaTest, pg_catalog;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+CREATE TABLE AgentTypesTable (
+    id integer NOT NULL,
+    description text
+);
+
+
+ALTER TABLE CurationSchemaTest.AgentTypesTable OWNER TO postgres;
+
+CREATE SEQUENCE AgentTypes_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.AgentTypes_id_seq OWNER TO postgres;
+
+
+ALTER SEQUENCE AgentTypes_id_seq OWNED BY AgentTypesTable.id;
+
+
+
+CREATE TABLE CurationDetailsTypesTable (
+    id integer NOT NULL,
+    description text
+);
+
+
+ALTER TABLE CurationSchemaTest.CurationDetailsTypesTable OWNER TO postgres;
+
+--
+-- Name: CurationDetailsTypesTable_id_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE CurationDetailsTypesTable_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.CurationDetailsTypesTable_id_seq OWNER TO postgres;
+
+--
+-- Name: CurationDetailsTypesTable_id_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE CurationDetailsTypesTable_id_seq OWNED BY CurationDetailsTypesTable.id;
+
+
+--
+-- Name: CurationListTable; Type: TABLE; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE CurationListTable (
+    idCuration integer NOT NULL,
+    idCurrationDetail integer NOT NULL,
+    idOntology integer NOT NULL
+);
+
+
+ALTER TABLE CurationSchemaTest.CurationListTable OWNER TO postgres;
+
+--
+-- Name: CurationListTable_idCuration_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE CurationListTable_idCuration_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.CurationListTable_idCuration_seq OWNER TO postgres;
+
+--
+-- Name: CurationListTable_idCuration_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE CurationListTable_idCuration_seq OWNED BY CurationListTable.idCuration;
+
+
+--
+-- Name: CurationListTable_idCurrationDetail_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE CurationListTable_idCurrationDetail_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.CurationListTable_idCurrationDetail_seq OWNER TO postgres;
+
+--
+-- Name: CurationListTable_idCurrationDetail_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE CurationListTable_idCurrationDetail_seq OWNED BY CurationListTable.idCurrationDetail;
+
+
+--
+-- Name: CurationListTable_idOntology_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE CurationListTable_idOntology_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.CurationListTable_idOntology_seq OWNER TO postgres;
+
+--
+-- Name: CurationListTable_idOntology_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE CurationListTable_idOntology_seq OWNED BY CurationListTable.idOntology;
+
+
+--
+-- Name: CurationTypesTable; Type: TABLE; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE CurationTypesTable (
+    id integer NOT NULL,
+    description text
+);
+
+
+ALTER TABLE CurationSchemaTest.CurationTypesTable OWNER TO postgres;
+
+--
+-- Name: CurationTypesTable_id_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE CurationTypesTable_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.CurationTypesTable_id_seq OWNER TO postgres;
+
+--
+-- Name: CurationTypesTable_id_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE CurationTypesTable_id_seq OWNED BY CurationTypesTable.id;
+
+
+--
+-- Name: CurationsTable; Type: TABLE; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE CurationsTable (
+    id integer NOT NULL,
+    idExp integer NOT NULL,
+    idUser integer NOT NULL,
+    idCurrType integer NOT NULL,
+    idMethod integer NOT NULL,
+    addedDate date,
+    description text,
+    agentTypeId integer NOT NULL
+);
+
+
+ALTER TABLE CurationSchemaTest.CurationsTable OWNER TO postgres;
+
+--
+-- Name: CurationsTable_agentTypeId_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE CurationsTable_agentTypeId_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.CurationsTable_agentTypeId_seq OWNER TO postgres;
+
+--
+-- Name: CurationsTable_agentTypeId_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE CurationsTable_agentTypeId_seq OWNED BY CurationsTable.agentTypeId;
+
+
+--
+-- Name: CurationsTable_idCurrType_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE CurationsTable_idCurrType_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.CurationsTable_idCurrType_seq OWNER TO postgres;
+
+--
+-- Name: CurationsTable_idCurrType_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE CurationsTable_idCurrType_seq OWNED BY CurationsTable.idCurrType;
+
+
+--
+-- Name: CurationsTable_idExp_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE CurationsTable_idExp_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.CurationsTable_idExp_seq OWNER TO postgres;
+
+--
+-- Name: CurationsTable_idExp_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE CurationsTable_idExp_seq OWNED BY CurationsTable.idExp;
+
+
+--
+-- Name: CurationsTable_idMethod_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE CurationsTable_idMethod_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.CurationsTable_idMethod_seq OWNER TO postgres;
+
+--
+-- Name: CurationsTable_idMethod_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE CurationsTable_idMethod_seq OWNED BY CurationsTable.idMethod;
+
+
+--
+-- Name: CurationsTable_idUser_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE CurationsTable_idUser_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.CurationsTable_idUser_seq OWNER TO postgres;
+
+--
+-- Name: CurationsTable_idUser_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE CurationsTable_idUser_seq OWNED BY CurationsTable.idUser;
+
+
+--
+-- Name: CurationsTable_id_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE CurationsTable_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.CurationsTable_id_seq OWNER TO postgres;
+
+--
+-- Name: CurationsTable_id_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE CurationsTable_id_seq OWNED BY CurationsTable.id;
+
+
+--
+-- Name: ExperimentsTable; Type: TABLE; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE ExperimentsTable (
+    uniqueId integer NOT NULL,
+    expId integer NOT NULL,
+    type text,
+    value text,
+    date date,
+    userId integer NOT NULL,
+    private text
+);
+
+
+ALTER TABLE CurationSchemaTest.ExperimentsTable OWNER TO postgres;
+
+--
+-- Name: ExperimentsTable_expId_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE ExperimentsTable_expId_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.ExperimentsTable_expId_seq OWNER TO postgres;
+
+--
+-- Name: ExperimentsTable_expId_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE ExperimentsTable_expId_seq OWNED BY ExperimentsTable.expId;
+
+
+--
+-- Name: ExperimentsTable_uniqueId_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE ExperimentsTable_uniqueId_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.ExperimentsTable_uniqueId_seq OWNER TO postgres;
+
+--
+-- Name: ExperimentsTable_uniqueId_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE ExperimentsTable_uniqueId_seq OWNED BY ExperimentsTable.uniqueId;
+
+
+--
+-- Name: ExperimentsTable_userId_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE ExperimentsTable_userId_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.ExperimentsTable_userId_seq OWNER TO postgres;
+
+--
+-- Name: ExperimentsTable_userId_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE ExperimentsTable_userId_seq OWNED BY ExperimentsTable.userId;
+
+
+--
+-- Name: MethodTypesTable; Type: TABLE; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE MethodTypesTable (
+    id integer NOT NULL,
+    description text
+);
+
+
+ALTER TABLE CurationSchemaTest.MethodTypesTable OWNER TO postgres;
+
+--
+-- Name: MethodType_id_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE MethodType_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.MethodType_id_seq OWNER TO postgres;
+
+--
+-- Name: MethodType_id_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE MethodType_id_seq OWNED BY MethodTypesTable.id;
+
+
+--
+-- Name: OntologyNamesTable; Type: TABLE; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE OntologyNamesTable (
+    id integer NOT NULL,
+    description text
+);
+
+
+ALTER TABLE CurationSchemaTest.OntologyNamesTable OWNER TO postgres;
+
+--
+-- Name: OntologyNamesTable_id_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE OntologyNamesTable_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.OntologyNamesTable_id_seq OWNER TO postgres;
+
+--
+-- Name: OntologyNamesTable_id_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE OntologyNamesTable_id_seq OWNED BY OntologyNamesTable.id;
+
+
+--
+-- Name: OntologySynonymTable; Type: TABLE; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE OntologySynonymTable (
+    idOntology integer NOT NULL,
+    idSynonym integer NOT NULL,
+    uniqueId integer DEFAULT 5
+);
+
+
+ALTER TABLE CurationSchemaTest.OntologySynonymTable OWNER TO postgres;
+
+--
+-- Name: OntologySynonymTable_idOntology_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE OntologySynonymTable_idOntology_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.OntologySynonymTable_idOntology_seq OWNER TO postgres;
+
+--
+-- Name: OntologySynonymTable_idOntology_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE OntologySynonymTable_idOntology_seq OWNED BY OntologySynonymTable.idOntology;
+
+
+--
+-- Name: OntologySynonymTable_idSynonym_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE OntologySynonymTable_idSynonym_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.OntologySynonymTable_idSynonym_seq OWNER TO postgres;
+
+--
+-- Name: OntologySynonymTable_idSynonym_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE OntologySynonymTable_idSynonym_seq OWNED BY OntologySynonymTable.idSynonym;
+
+
+--
+-- Name: OntologyTable; Type: TABLE; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE OntologyTable (
+    id integer NOT NULL,
+    description text
+);
+
+
+ALTER TABLE CurationSchemaTest.OntologyTable OWNER TO postgres;
+
+--
+-- Name: OntologyTable_id_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE OntologyTable_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.OntologyTable_id_seq OWNER TO postgres;
+
+--
+-- Name: OntologyTable_id_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE OntologyTable_id_seq OWNED BY OntologyTable.id;
+
+
+--
+-- Name: OntologyTreeStructureTable; Type: TABLE; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE OntologyTreeStructureTable (
+    ontologyId integer NOT NULL,
+    ontologyParentId integer NOT NULL,
+    ontologyNameId integer NOT NULL,
+    uniqueId integer DEFAULT 5
+);
+
+
+ALTER TABLE CurationSchemaTest.OntologyTreeStructureTable OWNER TO postgres;
+
+--
+-- Name: OntologyTreeStructureTable_ontologyId_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE OntologyTreeStructureTable_ontologyId_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.OntologyTreeStructureTable_ontologyId_seq OWNER TO postgres;
+
+--
+-- Name: OntologyTreeStructureTable_ontologyId_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE OntologyTreeStructureTable_ontologyId_seq OWNED BY OntologyTreeStructureTable.ontologyId;
+
+
+--
+-- Name: OntologyTreeStructureTable_ontologyNameId_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE OntologyTreeStructureTable_ontologyNameId_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.OntologyTreeStructureTable_ontologyNameId_seq OWNER TO postgres;
+
+--
+-- Name: OntologyTreeStructureTable_ontologyNameId_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE OntologyTreeStructureTable_ontologyNameId_seq OWNED BY OntologyTreeStructureTable.ontologyNameId;
+
+
+--
+-- Name: OntologyTreeStructureTable_ontologyParentId_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE OntologyTreeStructureTable_ontologyParentId_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.OntologyTreeStructureTable_ontologyParentId_seq OWNER TO postgres;
+
+--
+-- Name: OntologyTreeStructureTable_ontologyParentId_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE OntologyTreeStructureTable_ontologyParentId_seq OWNED BY OntologyTreeStructureTable.ontologyParentId;
+
+
+--
+-- Name: PrimerRegionTypesTable; Type: TABLE; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE PrimerRegionTypesTable (
+    id integer NOT NULL,
+    description text
+);
+
+
+ALTER TABLE CurationSchemaTest.PrimerRegionTypesTable OWNER TO postgres;
+
+--
+-- Name: PrimerRegionTypesTable_id_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE PrimerRegionTypesTable_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.PrimerRegionTypesTable_id_seq OWNER TO postgres;
+
+--
+-- Name: PrimerRegionTypesTable_id_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE PrimerRegionTypesTable_id_seq OWNED BY PrimerRegionTypesTable.id;
+
+
+--
+-- Name: PrimersTable; Type: TABLE; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE PrimersTable (
+    id integer NOT NULL,
+    idUser integer NOT NULL,
+    forwardPrimer text,
+    reversePrimer text,
+    regionType integer NOT NULL,
+    regionName text
+);
+
+
+ALTER TABLE CurationSchemaTest.PrimersTable OWNER TO postgres;
+
+--
+-- Name: PrimersTable_idUser_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE PrimersTable_idUser_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.PrimersTable_idUser_seq OWNER TO postgres;
+
+--
+-- Name: PrimersTable_idUser_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE PrimersTable_idUser_seq OWNED BY PrimersTable.idUser;
+
+
+--
+-- Name: PrimersTable_id_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE PrimersTable_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.PrimersTable_id_seq OWNER TO postgres;
+
+--
+-- Name: PrimersTable_id_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE PrimersTable_id_seq OWNED BY PrimersTable.id;
+
+
+--
+-- Name: PrimersTable_regionType_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE PrimersTable_regionType_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.PrimersTable_regionType_seq OWNER TO postgres;
+
+--
+-- Name: PrimersTable_regionType_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE PrimersTable_regionType_seq OWNED BY PrimersTable.regionType;
+
+
+--
+-- Name: SequencesCurationTable; Type: TABLE; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE SequencesCurationTable (
+    seqId integer NOT NULL,
+    curId integer NOT NULL
+);
+
+
+ALTER TABLE CurationSchemaTest.SequencesCurationTable OWNER TO postgres;
+
+--
+-- Name: SequencesCurationTable_curationId_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE SequencesCurationTable_curationId_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.SequencesCurationTable_curationId_seq OWNER TO postgres;
+
+--
+-- Name: SequencesCurationTable_curationId_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE SequencesCurationTable_curationId_seq OWNED BY SequencesCurationTable.curId;
+
+
+--
+-- Name: SequencesCurationTable_sequenceId_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE SequencesCurationTable_sequenceId_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.SequencesCurationTable_sequenceId_seq OWNER TO postgres;
+
+--
+-- Name: SequencesCurationTable_sequenceId_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE SequencesCurationTable_sequenceId_seq OWNED BY SequencesCurationTable.seqId;
+
+
+--
+-- Name: SequencesTable; Type: TABLE; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE SequencesTable (
+    id integer NOT NULL,
+    idPrimer integer NOT NULL,
+    sequence text,
+    length text,
+    taxonomy text,
+    ggid integer
+);
+
+
+ALTER TABLE CurationSchemaTest.SequencesTable OWNER TO postgres;
+
+--
+-- Name: SequencesTable_idPrimer_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE SequencesTable_idPrimer_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.SequencesTable_idPrimer_seq OWNER TO postgres;
+
+--
+-- Name: SequencesTable_idPrimer_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE SequencesTable_idPrimer_seq OWNED BY SequencesTable.idPrimer;
+
+
+--
+-- Name: SequencesTable_id_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE SequencesTable_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.SequencesTable_id_seq OWNER TO postgres;
+
+--
+-- Name: SequencesTable_id_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE SequencesTable_id_seq OWNED BY SequencesTable.id;
+
+
+--
+-- Name: SynonymTable; Type: TABLE; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE SynonymTable (
+    id integer NOT NULL,
+    description text
+);
+
+
+ALTER TABLE CurationSchemaTest.SynonymTable OWNER TO postgres;
+
+--
+-- Name: SynonymTable_id_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE SynonymTable_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.SynonymTable_id_seq OWNER TO postgres;
+
+--
+-- Name: SynonymTable_id_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE SynonymTable_id_seq OWNED BY SynonymTable.id;
+
+
+--
+-- Name: UsersTable; Type: TABLE; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE UsersTable (
+    id integer NOT NULL,
+    userName text,
+    passwordHash text,
+    name text,
+    description text,
+    isActive boolean
+);
+
+
+ALTER TABLE CurationSchemaTest.UsersTable OWNER TO postgres;
+
+--
+-- Name: TABLE UsersTable; Type: COMMENT; Schema: CurationSchema; Owner: postgres
+--
+
+COMMENT ON TABLE UsersTable IS 'In this table we will store list of DB users';
+
+
+--
+-- Name: COLUMN UsersTable.id; Type: COMMENT; Schema: CurationSchema; Owner: postgres
+--
+
+COMMENT ON COLUMN UsersTable.id IS 'User id (auto increment)';
+
+
+--
+-- Name: UsersTable_id_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE UsersTable_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.UsersTable_id_seq OWNER TO postgres;
+
+--
+-- Name: UsersTable_id_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE UsersTable_id_seq OWNED BY UsersTable.id;
+
+
+--
+-- Name: testTable; Type: TABLE; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE testTable (
+    id integer NOT NULL,
+    description text
+);
+
+
+ALTER TABLE CurationSchemaTest.testTable OWNER TO postgres;
+
+--
+-- Name: testTable_id_seq; Type: SEQUENCE; Schema: CurationSchema; Owner: postgres
+--
+
+CREATE SEQUENCE testTable_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE CurationSchemaTest.testTable_id_seq OWNER TO postgres;
+
+--
+-- Name: testTable_id_seq; Type: SEQUENCE OWNED BY; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER SEQUENCE testTable_id_seq OWNED BY testTable.id;
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY AgentTypesTable ALTER COLUMN id SET DEFAULT nextval('AgentTypes_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY CurationDetailsTypesTable ALTER COLUMN id SET DEFAULT nextval('CurationDetailsTypesTable_id_seq'::regclass);
+
+
+--
+-- Name: idCuration; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY CurationListTable ALTER COLUMN idCuration SET DEFAULT nextval('CurationListTable_idCuration_seq'::regclass);
+
+
+--
+-- Name: idCurrationDetail; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY CurationListTable ALTER COLUMN idCurrationDetail SET DEFAULT nextval('CurationListTable_idCurrationDetail_seq'::regclass);
+
+
+--
+-- Name: idOntology; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY CurationListTable ALTER COLUMN idOntology SET DEFAULT nextval('CurationListTable_idOntology_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY CurationTypesTable ALTER COLUMN id SET DEFAULT nextval('CurationTypesTable_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY CurationsTable ALTER COLUMN id SET DEFAULT nextval('CurationsTable_id_seq'::regclass);
+
+
+--
+-- Name: idExp; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY CurationsTable ALTER COLUMN idExp SET DEFAULT nextval('CurationsTable_idExp_seq'::regclass);
+
+
+--
+-- Name: idUser; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY CurationsTable ALTER COLUMN idUser SET DEFAULT nextval('CurationsTable_idUser_seq'::regclass);
+
+
+--
+-- Name: idCurrType; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY CurationsTable ALTER COLUMN idCurrType SET DEFAULT nextval('CurationsTable_idCurrType_seq'::regclass);
+
+
+--
+-- Name: idMethod; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY CurationsTable ALTER COLUMN idMethod SET DEFAULT nextval('CurationsTable_idMethod_seq'::regclass);
+
+
+--
+-- Name: agentTypeId; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY CurationsTable ALTER COLUMN agentTypeId SET DEFAULT nextval('CurationsTable_agentTypeId_seq'::regclass);
+
+
+--
+-- Name: uniqueId; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY ExperimentsTable ALTER COLUMN uniqueId SET DEFAULT nextval('ExperimentsTable_uniqueId_seq'::regclass);
+
+
+--
+-- Name: expId; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY ExperimentsTable ALTER COLUMN expId SET DEFAULT nextval('ExperimentsTable_expId_seq'::regclass);
+
+
+--
+-- Name: userId; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY ExperimentsTable ALTER COLUMN userId SET DEFAULT nextval('ExperimentsTable_userId_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY MethodTypesTable ALTER COLUMN id SET DEFAULT nextval('MethodType_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY OntologyNamesTable ALTER COLUMN id SET DEFAULT nextval('OntologyNamesTable_id_seq'::regclass);
+
+
+--
+-- Name: idOntology; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY OntologySynonymTable ALTER COLUMN idOntology SET DEFAULT nextval('OntologySynonymTable_idOntology_seq'::regclass);
+
+
+--
+-- Name: idSynonym; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY OntologySynonymTable ALTER COLUMN idSynonym SET DEFAULT nextval('OntologySynonymTable_idSynonym_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY OntologyTable ALTER COLUMN id SET DEFAULT nextval('OntologyTable_id_seq'::regclass);
+
+
+--
+-- Name: ontologyId; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY OntologyTreeStructureTable ALTER COLUMN ontologyId SET DEFAULT nextval('OntologyTreeStructureTable_ontologyId_seq'::regclass);
+
+
+--
+-- Name: ontologyParentId; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY OntologyTreeStructureTable ALTER COLUMN ontologyParentId SET DEFAULT nextval('OntologyTreeStructureTable_ontologyParentId_seq'::regclass);
+
+
+--
+-- Name: ontologyNameId; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY OntologyTreeStructureTable ALTER COLUMN ontologyNameId SET DEFAULT nextval('OntologyTreeStructureTable_ontologyNameId_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY PrimerRegionTypesTable ALTER COLUMN id SET DEFAULT nextval('PrimerRegionTypesTable_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY PrimersTable ALTER COLUMN id SET DEFAULT nextval('PrimersTable_id_seq'::regclass);
+
+
+--
+-- Name: idUser; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY PrimersTable ALTER COLUMN idUser SET DEFAULT nextval('PrimersTable_idUser_seq'::regclass);
+
+
+--
+-- Name: regionType; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY PrimersTable ALTER COLUMN regionType SET DEFAULT nextval('PrimersTable_regionType_seq'::regclass);
+
+
+--
+-- Name: seqId; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY SequencesCurationTable ALTER COLUMN seqId SET DEFAULT nextval('SequencesCurationTable_sequenceId_seq'::regclass);
+
+
+--
+-- Name: curId; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY SequencesCurationTable ALTER COLUMN curId SET DEFAULT nextval('SequencesCurationTable_curationId_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY SequencesTable ALTER COLUMN id SET DEFAULT nextval('SequencesTable_id_seq'::regclass);
+
+
+--
+-- Name: idPrimer; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY SequencesTable ALTER COLUMN idPrimer SET DEFAULT nextval('SequencesTable_idPrimer_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY SynonymTable ALTER COLUMN id SET DEFAULT nextval('SynonymTable_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY UsersTable ALTER COLUMN id SET DEFAULT nextval('UsersTable_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY testTable ALTER COLUMN id SET DEFAULT nextval('testTable_id_seq'::regclass);
+
+
+--
+-- Name: AgentTypes_pkey; Type: CONSTRAINT; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY AgentTypesTable
+    ADD CONSTRAINT AgentTypes_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: CurationDetailsTypesTable_pkey; Type: CONSTRAINT; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY CurationDetailsTypesTable
+    ADD CONSTRAINT CurationDetailsTypesTable_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: CurationListTable_pkey; Type: CONSTRAINT; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY CurationListTable
+    ADD CONSTRAINT CurationListTable_pkey PRIMARY KEY (idCuration, idCurrationDetail, idOntology);
+
+
+--
+-- Name: CurationTypesTable_pkey; Type: CONSTRAINT; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY CurationTypesTable
+    ADD CONSTRAINT CurationTypesTable_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: CurationsTable_pkey; Type: CONSTRAINT; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY CurationsTable
+    ADD CONSTRAINT CurationsTable_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ExperimentsTable_pkey; Type: CONSTRAINT; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY ExperimentsTable
+    ADD CONSTRAINT ExperimentsTable_pkey PRIMARY KEY (uniqueId);
+
+
+--
+-- Name: MethodType_pkey; Type: CONSTRAINT; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY MethodTypesTable
+    ADD CONSTRAINT MethodType_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: OntologyNamesTable_pkey; Type: CONSTRAINT; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY OntologyNamesTable
+    ADD CONSTRAINT OntologyNamesTable_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: OntologySynonymTable_pkey; Type: CONSTRAINT; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY OntologySynonymTable
+    ADD CONSTRAINT OntologySynonymTable_pkey PRIMARY KEY (idOntology, idSynonym);
+
+
+--
+-- Name: OntologyTable_pkey; Type: CONSTRAINT; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY OntologyTable
+    ADD CONSTRAINT OntologyTable_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: OntologyTreeStructureTable_pkey; Type: CONSTRAINT; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY OntologyTreeStructureTable
+    ADD CONSTRAINT OntologyTreeStructureTable_pkey PRIMARY KEY (ontologyId, ontologyParentId, ontologyNameId);
+
+
+--
+-- Name: PrimerRegionTypesTable_pkey; Type: CONSTRAINT; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY PrimerRegionTypesTable
+    ADD CONSTRAINT PrimerRegionTypesTable_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: PrimersTable_pkey; Type: CONSTRAINT; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY PrimersTable
+    ADD CONSTRAINT PrimersTable_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: SequencesCurationTable_pkey; Type: CONSTRAINT; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY SequencesCurationTable
+    ADD CONSTRAINT SequencesCurationTable_pkey PRIMARY KEY (seqId, curId);
+
+
+--
+-- Name: SequencesTable_pkey; Type: CONSTRAINT; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY SequencesTable
+    ADD CONSTRAINT SequencesTable_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: SynonymTable_pkey; Type: CONSTRAINT; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY SynonymTable
+    ADD CONSTRAINT SynonymTable_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: UsersTable_pkey; Type: CONSTRAINT; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY UsersTable
+    ADD CONSTRAINT UsersTable_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: testTable_pkey; Type: CONSTRAINT; Schema: CurationSchema; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY testTable
+    ADD CONSTRAINT testTable_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: CurationsTable_agentTypeId_fkey; Type: FK CONSTRAINT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY CurationsTable
+    ADD CONSTRAINT CurationsTable_agentTypeId_fkey FOREIGN KEY (agentTypeId) REFERENCES AgentTypesTable(id);
+
+
+--
+-- Name: CurationsTable_idCurrType_fkey; Type: FK CONSTRAINT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY CurationsTable
+    ADD CONSTRAINT CurationsTable_idCurrType_fkey FOREIGN KEY (idCurrType) REFERENCES CurationTypesTable(id);
+
+
+--
+-- Name: CurationsTable_idExp_fkey; Type: FK CONSTRAINT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY CurationsTable
+    ADD CONSTRAINT CurationsTable_idExp_fkey FOREIGN KEY (idExp) REFERENCES ExperimentsTable(uniqueId);
+
+
+--
+-- Name: CurationsTable_idMethod_fkey; Type: FK CONSTRAINT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY CurationsTable
+    ADD CONSTRAINT CurationsTable_idMethod_fkey FOREIGN KEY (idMethod) REFERENCES MethodTypesTable(id);
+
+
+--
+-- Name: CurationsTable_idUser_fkey; Type: FK CONSTRAINT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY CurationsTable
+    ADD CONSTRAINT CurationsTable_idUser_fkey FOREIGN KEY (idUser) REFERENCES UsersTable(id);
+
+
+--
+-- Name: ExperimentsTable_userId_fkey; Type: FK CONSTRAINT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY ExperimentsTable
+    ADD CONSTRAINT ExperimentsTable_userId_fkey FOREIGN KEY (userId) REFERENCES UsersTable(id);
+
+
+--
+-- Name: OntologySynonymTable_idOntology_fkey; Type: FK CONSTRAINT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY OntologySynonymTable
+    ADD CONSTRAINT OntologySynonymTable_idOntology_fkey FOREIGN KEY (idOntology) REFERENCES OntologyTable(id);
+
+
+--
+-- Name: OntologySynonymTable_idSynonym_fkey; Type: FK CONSTRAINT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY OntologySynonymTable
+    ADD CONSTRAINT OntologySynonymTable_idSynonym_fkey FOREIGN KEY (idSynonym) REFERENCES SynonymTable(id);
+
+
+--
+-- Name: OntologyTreeStructureTable_ontologyId_fkey; Type: FK CONSTRAINT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY OntologyTreeStructureTable
+    ADD CONSTRAINT OntologyTreeStructureTable_ontologyId_fkey FOREIGN KEY (ontologyId) REFERENCES OntologyTable(id);
+
+
+--
+-- Name: OntologyTreeStructureTable_ontologyNameId_fkey; Type: FK CONSTRAINT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY OntologyTreeStructureTable
+    ADD CONSTRAINT OntologyTreeStructureTable_ontologyNameId_fkey FOREIGN KEY (ontologyNameId) REFERENCES OntologyNamesTable(id);
+
+
+--
+-- Name: OntologyTreeStructureTable_ontologyParentId_fkey; Type: FK CONSTRAINT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY OntologyTreeStructureTable
+    ADD CONSTRAINT OntologyTreeStructureTable_ontologyParentId_fkey FOREIGN KEY (ontologyParentId) REFERENCES OntologyTable(id);
+
+
+--
+-- Name: PrimersTable_idUser_fkey; Type: FK CONSTRAINT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY PrimersTable
+    ADD CONSTRAINT PrimersTable_idUser_fkey FOREIGN KEY (idUser) REFERENCES UsersTable(id);
+
+
+--
+-- Name: PrimersTable_regionType_fkey; Type: FK CONSTRAINT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY PrimersTable
+    ADD CONSTRAINT PrimersTable_regionType_fkey FOREIGN KEY (regionType) REFERENCES PrimerRegionTypesTable(id);
+
+
+--
+-- Name: SequencesCurationTable_curationId_fkey; Type: FK CONSTRAINT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY SequencesCurationTable
+    ADD CONSTRAINT SequencesCurationTable_curationId_fkey FOREIGN KEY (curId) REFERENCES CurationsTable(id);
+
+
+--
+-- Name: SequencesCurationTable_sequenceId_fkey; Type: FK CONSTRAINT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY SequencesCurationTable
+    ADD CONSTRAINT SequencesCurationTable_sequenceId_fkey FOREIGN KEY (seqId) REFERENCES SequencesTable(id);
+
+
+--
+-- Name: SequencesTable_idPrimer_fkey; Type: FK CONSTRAINT; Schema: CurationSchema; Owner: postgres
+--
+
+ALTER TABLE ONLY SequencesTable
+    ADD CONSTRAINT SequencesTable_idPrimer_fkey FOREIGN KEY (idPrimer) REFERENCES PrimersTable(id);
+
+
+--
+-- Add the unknown user inter UsersTable id=0
+--
+
+INSERT INTO UsersTable (id,userName,name,description) VALUES (0,'na','na','unknown user');
+
+
+--
+-- PostgreSQL database dump complete
+--
+

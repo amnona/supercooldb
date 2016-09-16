@@ -60,7 +60,7 @@ Details :
 
 ------------------------------------------------
 Title: Query experiment based on ID:
-Description : Get all experiment details baed on the experiment id
+Description : Get all experiment details based on the experiment id
 URL: /QueryExpID/?expid=<exp>
 Method: GET
 URL Params:
