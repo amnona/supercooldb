@@ -1,7 +1,7 @@
 import psycopg2
 
 
-def connect_db(schema='CurationSchemaTest'):
+def connect_db(schema='AnnotationSchemaTest'):
 	"""
 	connect to the postgres database and return the connection and cursor
 	input:
