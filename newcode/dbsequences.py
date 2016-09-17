@@ -36,7 +36,7 @@ def AddSequences(con,cur,sequences,taxonomies=None,ggids=None,primer='V4',commit
 	try:
 		for idx,cseq in enumerate(sequences):
 			# test if already exists, skip it
-			cseqid=GetSequenceId(con,cur,sequence=cseq,idprimer=idprimer)
+			err,cseqid=GetSequenceId(con,cur,sequence=cseq,idprimer=idprimer)
 			if cseqid<=0:
 				if taxonomies is None:
 					ctax='na'
