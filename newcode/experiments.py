@@ -103,7 +103,7 @@ def TestExpIdExists(con,cur,expid,userid=None):
 	True if exists and not private or (private and userid match), False if does not exist, or error encountered
 	"""
 # try:
-	debug(1,"TestExpIdExists %d" % expid)
+	debug(1,"TestExpIdExists %d userid %s" % (expid,userid))
 	cur.execute('SELECT private,userId from ExperimentsTable where expId=%s LIMIT 1',[expid])
 	if cur.rowcount==0:
 		debug(2,"expid %d does not exist" % expid)
@@ -118,7 +118,7 @@ def TestExpIdExists(con,cur,expid,userid=None):
 		debug(2,"expid %d private but same user - exists" % expid)
 		return True
 	# so private and different user - say it does not exist
-	debug(2,"expid %d private and different users (created by %d, queried by %d). Say it doesn't exist" % (res[1],userid))
+	debug(2,"expid %d private and different users (created by %d, queried by %s). Say it doesn't exist" % (expid,res[1],userid))
 	return False
 # except:
 	debug(7,"error in TestExpIdExists")

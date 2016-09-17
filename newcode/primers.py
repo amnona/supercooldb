@@ -23,8 +23,8 @@ def GetIdFromName(con,cur,name):
 			return -1
 		else:
 			#Return the id
-			ver = cur.fetchone()
-			return ver[0]
+			res = cur.fetchone()
+			return res[0]
 	except psycopg2.DatabaseError as e:
 		print ('Error %s' % e)
 
