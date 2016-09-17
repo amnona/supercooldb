@@ -90,6 +90,9 @@ def AddAnnotation(con,cur,expid,annotationtype,annotationdetails,method='',descr
 		return -1
 	# get the current date
 	cdate=datetime.date.today().isoformat()
+
+	if private is None:
+		private='n'
 	# lowercase the private
 	private=private.lower()
 
@@ -99,7 +102,7 @@ def AddAnnotation(con,cur,expid,annotationtype,annotationdetails,method='',descr
 	debug(2,"added annotation id is %d. adding %d annotationdetails" % (cid,len(annotationdetails)))
 	numadded=AddAnnotationDetails(con,cur,cid,annotationdetails,commit=False)
 	if numadded<0:
-		debug("failed to add annotation details. aborting")
+		debug(3,"failed to add annotation details. aborting")
 		return -1
 	debug(2,"%d annotationdetails added" % numadded)
 	if commit:

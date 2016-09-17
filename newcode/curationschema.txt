@@ -193,21 +193,22 @@ CREATE TABLE AnnotationsTable (
     id integer NOT NULL,
     idExp integer NOT NULL,
     idUser integer NOT NULL,
-    idCurrType integer NOT NULL,
+    idAnnotationType integer NOT NULL,
     idMethod integer NOT NULL,
     addedDate date,
     description text,
-    agentTypeId integer NOT NULL
+    idAgentType integer NOT NULL,
+    isPrivate text
 );
 
 
 ALTER TABLE AnnotationSchemaTest.AnnotationsTable OWNER TO postgres;
 
 --
--- Name: AnnotationsTable_agentTypeId_seq; Type: SEQUENCE; Schema: AnnotationSchema; Owner: postgres
+-- Name: AnnotationsTable_idAgentType_seq; Type: SEQUENCE; Schema: AnnotationSchema; Owner: postgres
 --
 
-CREATE SEQUENCE AnnotationsTable_agentTypeId_seq
+CREATE SEQUENCE AnnotationsTable_idAgentType_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -215,20 +216,20 @@ CREATE SEQUENCE AnnotationsTable_agentTypeId_seq
     CACHE 1;
 
 
-ALTER TABLE AnnotationSchemaTest.AnnotationsTable_agentTypeId_seq OWNER TO postgres;
+ALTER TABLE AnnotationSchemaTest.AnnotationsTable_idAgentType_seq OWNER TO postgres;
 
 --
--- Name: AnnotationsTable_agentTypeId_seq; Type: SEQUENCE OWNED BY; Schema: AnnotationSchema; Owner: postgres
+-- Name: AnnotationsTable_idAgentType_seq; Type: SEQUENCE OWNED BY; Schema: AnnotationSchema; Owner: postgres
 --
 
-ALTER SEQUENCE AnnotationsTable_agentTypeId_seq OWNED BY AnnotationsTable.agentTypeId;
+ALTER SEQUENCE AnnotationsTable_idAgentType_seq OWNED BY AnnotationsTable.idAgentType;
 
 
 --
--- Name: AnnotationsTable_idCurrType_seq; Type: SEQUENCE; Schema: AnnotationSchema; Owner: postgres
+-- Name: AnnotationsTable_idAnnotationType_seq; Type: SEQUENCE; Schema: AnnotationSchema; Owner: postgres
 --
 
-CREATE SEQUENCE AnnotationsTable_idCurrType_seq
+CREATE SEQUENCE AnnotationsTable_idAnnotationType_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -236,13 +237,13 @@ CREATE SEQUENCE AnnotationsTable_idCurrType_seq
     CACHE 1;
 
 
-ALTER TABLE AnnotationSchemaTest.AnnotationsTable_idCurrType_seq OWNER TO postgres;
+ALTER TABLE AnnotationSchemaTest.AnnotationsTable_idAnnotationType_seq OWNER TO postgres;
 
 --
--- Name: AnnotationsTable_idCurrType_seq; Type: SEQUENCE OWNED BY; Schema: AnnotationSchema; Owner: postgres
+-- Name: AnnotationsTable_idAnnotationType_seq; Type: SEQUENCE OWNED BY; Schema: AnnotationSchema; Owner: postgres
 --
 
-ALTER SEQUENCE AnnotationsTable_idCurrType_seq OWNED BY AnnotationsTable.idCurrType;
+ALTER SEQUENCE AnnotationsTable_idAnnotationType_seq OWNED BY AnnotationsTable.idAnnotationType;
 
 
 --
@@ -1045,10 +1046,10 @@ ALTER TABLE ONLY AnnotationsTable ALTER COLUMN idUser SET DEFAULT nextval('Annot
 
 
 --
--- Name: idCurrType; Type: DEFAULT; Schema: AnnotationSchema; Owner: postgres
+-- Name: idAnnotationType; Type: DEFAULT; Schema: AnnotationSchema; Owner: postgres
 --
 
-ALTER TABLE ONLY AnnotationsTable ALTER COLUMN idCurrType SET DEFAULT nextval('AnnotationsTable_idCurrType_seq'::regclass);
+ALTER TABLE ONLY AnnotationsTable ALTER COLUMN idAnnotationType SET DEFAULT nextval('AnnotationsTable_idAnnotationType_seq'::regclass);
 
 
 --
@@ -1059,10 +1060,10 @@ ALTER TABLE ONLY AnnotationsTable ALTER COLUMN idMethod SET DEFAULT nextval('Ann
 
 
 --
--- Name: agentTypeId; Type: DEFAULT; Schema: AnnotationSchema; Owner: postgres
+-- Name: idAgentType; Type: DEFAULT; Schema: AnnotationSchema; Owner: postgres
 --
 
-ALTER TABLE ONLY AnnotationsTable ALTER COLUMN agentTypeId SET DEFAULT nextval('AnnotationsTable_agentTypeId_seq'::regclass);
+ALTER TABLE ONLY AnnotationsTable ALTER COLUMN idAgentType SET DEFAULT nextval('AnnotationsTable_idAgentType_seq'::regclass);
 
 
 --
@@ -1364,19 +1365,19 @@ ALTER TABLE ONLY testTable
 
 
 --
--- Name: AnnotationsTable_agentTypeId_fkey; Type: FK CONSTRAINT; Schema: AnnotationSchema; Owner: postgres
+-- Name: AnnotationsTable_idAgentType_fkey; Type: FK CONSTRAINT; Schema: AnnotationSchema; Owner: postgres
 --
 
 ALTER TABLE ONLY AnnotationsTable
-    ADD CONSTRAINT AnnotationsTable_agentTypeId_fkey FOREIGN KEY (agentTypeId) REFERENCES AgentTypesTable(id);
+    ADD CONSTRAINT AnnotationsTable_idAgentType_fkey FOREIGN KEY (idAgentType) REFERENCES AgentTypesTable(id);
 
 
 --
--- Name: AnnotationsTable_idCurrType_fkey; Type: FK CONSTRAINT; Schema: AnnotationSchema; Owner: postgres
+-- Name: AnnotationsTable_idAnnotationType_fkey; Type: FK CONSTRAINT; Schema: AnnotationSchema; Owner: postgres
 --
 
 ALTER TABLE ONLY AnnotationsTable
-    ADD CONSTRAINT AnnotationsTable_idCurrType_fkey FOREIGN KEY (idCurrType) REFERENCES AnnotationTypesTable(id);
+    ADD CONSTRAINT AnnotationsTable_idAnnotationType_fkey FOREIGN KEY (idAnnotationType) REFERENCES AnnotationTypesTable(id);
 
 
 --
@@ -1514,6 +1515,14 @@ INSERT INTO AgentTypesTable (id,description) VALUES (0,'na');
 --
 
 INSERT INTO PrimersTable (id,idUser,forwardPrimer,reversePrimer,regionType,regionName) VALUES (0,0,'na','na',1,'na');
+
+--
+-- Init the annotationtype table
+--
+
+INSERT INTO AnnotationTypesTable (description) VALUES ('diffexp');
+INSERT INTO AnnotationTypesTable (description) VALUES ('isa');
+INSERT INTO AnnotationTypesTable (description) VALUES ('contamination');
 
 --
 -- PostgreSQL database dump complete
