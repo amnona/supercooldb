@@ -82,7 +82,7 @@ ALTER SEQUENCE AnnotationDetailsTypesTable_id_seq OWNED BY AnnotationDetailsType
 
 CREATE TABLE AnnotationListTable (
     idAnnotation integer NOT NULL,
-    idCurrationDetail integer NOT NULL,
+    idAnnotationDetail integer NOT NULL,
     idOntology integer NOT NULL
 );
 
@@ -111,10 +111,10 @@ ALTER SEQUENCE AnnotationListTable_idAnnotation_seq OWNED BY AnnotationListTable
 
 
 --
--- Name: AnnotationListTable_idCurrationDetail_seq; Type: SEQUENCE; Schema: AnnotationSchema; Owner: postgres
+-- Name: AnnotationListTable_idAnnotationDetail_seq; Type: SEQUENCE; Schema: AnnotationSchema; Owner: postgres
 --
 
-CREATE SEQUENCE AnnotationListTable_idCurrationDetail_seq
+CREATE SEQUENCE AnnotationListTable_idAnnotationDetail_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -122,13 +122,13 @@ CREATE SEQUENCE AnnotationListTable_idCurrationDetail_seq
     CACHE 1;
 
 
-ALTER TABLE AnnotationSchemaTest.AnnotationListTable_idCurrationDetail_seq OWNER TO postgres;
+ALTER TABLE AnnotationSchemaTest.AnnotationListTable_idAnnotationDetail_seq OWNER TO postgres;
 
 --
--- Name: AnnotationListTable_idCurrationDetail_seq; Type: SEQUENCE OWNED BY; Schema: AnnotationSchema; Owner: postgres
+-- Name: AnnotationListTable_idAnnotationDetail_seq; Type: SEQUENCE OWNED BY; Schema: AnnotationSchema; Owner: postgres
 --
 
-ALTER SEQUENCE AnnotationListTable_idCurrationDetail_seq OWNED BY AnnotationListTable.idCurrationDetail;
+ALTER SEQUENCE AnnotationListTable_idAnnotationDetail_seq OWNED BY AnnotationListTable.idAnnotationDetail;
 
 
 --
@@ -482,8 +482,8 @@ ALTER SEQUENCE OntologyNamesTable_id_seq OWNED BY OntologyNamesTable.id;
 
 CREATE TABLE OntologySynonymTable (
     idOntology integer NOT NULL,
-    idSynonym integer NOT NULL,
-    uniqueId integer DEFAULT 5
+    synonym text NOT NULL,
+    uniqueId integer NOT NULL
 );
 
 
@@ -511,10 +511,10 @@ ALTER SEQUENCE OntologySynonymTable_idOntology_seq OWNED BY OntologySynonymTable
 
 
 --
--- Name: OntologySynonymTable_idSynonym_seq; Type: SEQUENCE; Schema: AnnotationSchema; Owner: postgres
+-- Name: OntologySynonymTable_uniqueId_seq; Type: SEQUENCE; Schema: AnnotationSchema; Owner: postgres
 --
 
-CREATE SEQUENCE OntologySynonymTable_idSynonym_seq
+CREATE SEQUENCE OntologySynonymTable_uniqueId_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -522,13 +522,13 @@ CREATE SEQUENCE OntologySynonymTable_idSynonym_seq
     CACHE 1;
 
 
-ALTER TABLE AnnotationSchemaTest.OntologySynonymTable_idSynonym_seq OWNER TO postgres;
+ALTER TABLE AnnotationSchemaTest.OntologySynonymTable_unqiueId_seq OWNER TO postgres;
 
 --
--- Name: OntologySynonymTable_idSynonym_seq; Type: SEQUENCE OWNED BY; Schema: AnnotationSchema; Owner: postgres
+-- Name: OntologySynonymTable_uniqueId_seq; Type: SEQUENCE OWNED BY; Schema: AnnotationSchema; Owner: postgres
 --
 
-ALTER SEQUENCE OntologySynonymTable_idSynonym_seq OWNED BY OntologySynonymTable.idSynonym;
+ALTER SEQUENCE OntologySynonymTable_uniqueId_seq OWNED BY OntologySynonymTable.uniqueId;
 
 
 --
@@ -572,17 +572,17 @@ CREATE TABLE OntologyTreeStructureTable (
     ontologyId integer NOT NULL,
     ontologyParentId integer NOT NULL,
     ontologyNameId integer NOT NULL,
-    uniqueId integer DEFAULT 5
+    uniqueId integer NOT NULL
 );
 
 
 ALTER TABLE AnnotationSchemaTest.OntologyTreeStructureTable OWNER TO postgres;
 
 --
--- Name: OntologyTreeStructureTable_ontologyId_seq; Type: SEQUENCE; Schema: AnnotationSchema; Owner: postgres
+-- Name: OntologyTreeStructureTable_uniqueId_seq; Type: SEQUENCE; Schema: AnnotationSchema; Owner: postgres
 --
 
-CREATE SEQUENCE OntologyTreeStructureTable_ontologyId_seq
+CREATE SEQUENCE OntologyTreeStructureTable_uniqueId_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -590,13 +590,13 @@ CREATE SEQUENCE OntologyTreeStructureTable_ontologyId_seq
     CACHE 1;
 
 
-ALTER TABLE AnnotationSchemaTest.OntologyTreeStructureTable_ontologyId_seq OWNER TO postgres;
+ALTER TABLE AnnotationSchemaTest.OntologyTreeStructureTable_uniqueId_seq OWNER TO postgres;
 
 --
--- Name: OntologyTreeStructureTable_ontologyId_seq; Type: SEQUENCE OWNED BY; Schema: AnnotationSchema; Owner: postgres
+-- Name: OntologyTreeStructureTable_uniqueId_seq; Type: SEQUENCE OWNED BY; Schema: AnnotationSchema; Owner: postgres
 --
 
-ALTER SEQUENCE OntologyTreeStructureTable_ontologyId_seq OWNED BY OntologyTreeStructureTable.ontologyId;
+ALTER SEQUENCE OntologyTreeStructureTable_uniqueId_seq OWNED BY OntologyTreeStructureTable.uniqueId;
 
 
 --
@@ -1004,10 +1004,10 @@ ALTER TABLE ONLY AnnotationListTable ALTER COLUMN idAnnotation SET DEFAULT nextv
 
 
 --
--- Name: idCurrationDetail; Type: DEFAULT; Schema: AnnotationSchema; Owner: postgres
+-- Name: idAnnotationDetail; Type: DEFAULT; Schema: AnnotationSchema; Owner: postgres
 --
 
-ALTER TABLE ONLY AnnotationListTable ALTER COLUMN idCurrationDetail SET DEFAULT nextval('AnnotationListTable_idCurrationDetail_seq'::regclass);
+ALTER TABLE ONLY AnnotationListTable ALTER COLUMN idAnnotationDetail SET DEFAULT nextval('AnnotationListTable_idAnnotationDetail_seq'::regclass);
 
 
 --
@@ -1109,10 +1109,10 @@ ALTER TABLE ONLY OntologySynonymTable ALTER COLUMN idOntology SET DEFAULT nextva
 
 
 --
--- Name: idSynonym; Type: DEFAULT; Schema: AnnotationSchema; Owner: postgres
+-- Name: uniqueId; Type: DEFAULT; Schema: AnnotationSchema; Owner: postgres
 --
 
-ALTER TABLE ONLY OntologySynonymTable ALTER COLUMN idSynonym SET DEFAULT nextval('OntologySynonymTable_idSynonym_seq'::regclass);
+ALTER TABLE ONLY OntologySynonymTable ALTER COLUMN uniqueId SET DEFAULT nextval('OntologySynonymTable_uniqueId_seq'::regclass);
 
 
 --
@@ -1126,7 +1126,7 @@ ALTER TABLE ONLY OntologyTable ALTER COLUMN id SET DEFAULT nextval('OntologyTabl
 -- Name: ontologyId; Type: DEFAULT; Schema: AnnotationSchema; Owner: postgres
 --
 
-ALTER TABLE ONLY OntologyTreeStructureTable ALTER COLUMN ontologyId SET DEFAULT nextval('OntologyTreeStructureTable_ontologyId_seq'::regclass);
+ALTER TABLE ONLY OntologyTreeStructureTable ALTER COLUMN uniqueId SET DEFAULT nextval('OntologyTreeStructureTable_uniqueId_seq'::regclass);
 
 
 --
@@ -1241,7 +1241,7 @@ ALTER TABLE ONLY AnnotationDetailsTypesTable
 --
 
 ALTER TABLE ONLY AnnotationListTable
-    ADD CONSTRAINT AnnotationListTable_pkey PRIMARY KEY (idAnnotation, idCurrationDetail, idOntology);
+    ADD CONSTRAINT AnnotationListTable_pkey PRIMARY KEY (idAnnotation, idAnnotationDetail, idOntology);
 
 
 --
@@ -1289,7 +1289,7 @@ ALTER TABLE ONLY OntologyNamesTable
 --
 
 ALTER TABLE ONLY OntologySynonymTable
-    ADD CONSTRAINT OntologySynonymTable_pkey PRIMARY KEY (idOntology, idSynonym);
+    ADD CONSTRAINT OntologySynonymTable_pkey PRIMARY KEY (synonim,idOntology);
 
 
 --
@@ -1420,13 +1420,6 @@ ALTER TABLE ONLY OntologySynonymTable
     ADD CONSTRAINT OntologySynonymTable_idOntology_fkey FOREIGN KEY (idOntology) REFERENCES OntologyTable(id);
 
 
---
--- Name: OntologySynonymTable_idSynonym_fkey; Type: FK CONSTRAINT; Schema: AnnotationSchema; Owner: postgres
---
-
-ALTER TABLE ONLY OntologySynonymTable
-    ADD CONSTRAINT OntologySynonymTable_idSynonym_fkey FOREIGN KEY (idSynonym) REFERENCES SynonymTable(id);
-
 
 --
 -- Name: OntologyTreeStructureTable_ontologyId_fkey; Type: FK CONSTRAINT; Schema: AnnotationSchema; Owner: postgres
@@ -1523,6 +1516,17 @@ INSERT INTO PrimersTable (id,idUser,forwardPrimer,reversePrimer,regionType,regio
 INSERT INTO AnnotationTypesTable (description) VALUES ('diffexp');
 INSERT INTO AnnotationTypesTable (description) VALUES ('isa');
 INSERT INTO AnnotationTypesTable (description) VALUES ('contamination');
+
+--
+-- Init the AnnotationDetailsTypes Table
+--
+
+INSERT INTO AnnotationDetailsTypesTable (description) VALUES ('high');
+INSERT INTO AnnotationDetailsTypesTable (description) VALUES ('low');
+INSERT INTO AnnotationDetailsTypesTable (description) VALUES ('all');
+
+
+INSERT INTO OntologyTable (description) VALUES ('feces')
 
 --
 -- PostgreSQL database dump complete
