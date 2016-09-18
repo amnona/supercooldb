@@ -3,6 +3,7 @@ import experiments
 import dbidval
 from utils import debug
 import datetime
+import psycopg2
 
 
 def AddSequenceAnnotations(con,cur,sequences,primer,expid,annotationtype,annotationdetails,method='',description='',agenttype='',private='n',userid=None,commit=True):
@@ -42,6 +43,9 @@ def AddSequenceAnnotations(con,cur,sequences,primer,expid,annotationtype,annotat
 		return -1
 	for cseqid in seqids:
 		cur.execute('INSERT INTO SequencesAnnotationTable (seqId,annotationId) VALUES (%s,%s)',[cseqid,annotationid])
+	debug(2,"Added %d sequence annotations" % len(seqids))
+	if commit:
+		con.commit()
 	return 1
 
 
@@ -130,8 +134,9 @@ def AddAnnotationDetails(con,cur,annotationid,annotationdetails,commit=True):
 	"""
 	try:
 		numadded=0
+		print(annotationdetails)
 		for (cdetailtype,contologyterm) in annotationdetails:
-			cdetailtypeid=dbidval.GetIdFromDescription(con,cur,"AnnotationDetailTypesTable",cdetailtype)
+			cdetailtypeid=dbidval.GetIdFromDescription(con,cur,"AnnotationDetailsTypesTable",cdetailtype)
 			if cdetailtypeid<0:
 				debug(3,"detailtype %s not found" % cdetailtype)
 				return -1
@@ -141,10 +146,10 @@ def AddAnnotationDetails(con,cur,annotationid,annotationdetails,commit=True):
 				return -1
 			cur.execute('INSERT INTO AnnotationListTable (idAnnotation,idAnnotationDetail,idOntology) VALUES (%s,%s,%s)',[annotationid,cdetailtypeid,contologytermid])
 			numadded+=1
-		debug("Added %d annotationlist items" % numadded)
+		debug(1,"Added %d annotationlist items" % numadded)
 		if commit:
 			con.commit()
 		return numadded
-	except:
-		debug(7,"error enountered in AddAnnotationDetails")
+	except psycopg2.DatabaseError as e:
+		debug(7,"error %s enountered in AddAnnotationDetails" % e)
 		return -2
