@@ -1,5 +1,5 @@
 from flask import Blueprint, g,request
-import ontology
+import dbontology
 import json
 from utils import getdoc,debug
 
@@ -63,7 +63,7 @@ def ontology_add_term():
 	if ontologyname is None:
 		ontologyname='scdb'
 	synonyms=alldat.get('synonyms')
-	err,termid=ontology.AddTerm(g.con,g.cur,term,parent,ontologyname,synonyms)
+	err,termid=dbontology.AddTerm(g.con,g.cur,term,parent,ontologyname,synonyms)
 	if err:
 		debug(2,'add_ontology_term error %s encountered' % err)
 		return(err)
@@ -102,7 +102,7 @@ def ontology_get_parents():
 	if term is None:
 		# # TODO: retrun error
 		return('missing argument term',400)
-	err,parents=ontology.GetParents(g.con,g.cur,term)
+	err,parents=dbontology.GetParents(g.con,g.cur,term)
 	if err:
 		return(err,400)
 	return(json.dumps({'parents':parents}))

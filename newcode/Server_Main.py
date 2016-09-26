@@ -3,6 +3,7 @@ from Seq_Flask import Seq_Flask_Obj
 from Exp_Flask import Exp_Flask_Obj
 from Annotation_Flask import Annotation_Flask_Obj
 from Ontology_Flask import Ontology_Flask_Obj
+from utils import debug,SetDebugLevel
 import db_access
 
 
@@ -28,6 +29,8 @@ def teardown_request(exception):
 
 
 if __name__ == '__main__':
+	SetDebugLevel(0)
+	debug(2,'starting server')
 	# need to check for database in a nicer way
 	app.run(debug=True)
 	# if db_access.PostGresConnect() == 0:

@@ -97,18 +97,18 @@ def GetSequenceId(con,cur,sequence,idprimer=None):
 	errmsg : str
 		"" if ok, error msg if error encountered
 	sid : int
-		the ids of the sequence (-1 if not found)
+		the id of the sequence (-1 if not found)
 	"""
 	cseq=sequence.lower()
 	# if no regionid specified, fetch only 1 (faster)
 	if idprimer is None:
-		cur.execute('SELECT id FROM SequencesTable WHERE sequence=%s LIMIT 1',cseq)
+		cur.execute('SELECT id FROM SequencesTable WHERE sequence=%s LIMIT 1',[cseq])
 		if cur.rowcount==0:
 			sid=-1
 			debug(2,'sequence %s not found' % sequence)
 		else:
-			debug(1,'sequence %s found id %d' % (sequence,sid))
 			sid=cur.fetchone()[0]
+			debug(1,'sequence %s found id %d' % (sequence,sid))
 		return "",sid
 	# regionid was specified, so test all matching sequences
 	cur.execute('SELECT id,idPrimer FROM SequencesTable WHERE sequence=%s LIMIT 1',[cseq])
