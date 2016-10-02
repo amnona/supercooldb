@@ -2,9 +2,9 @@ from utils import debug
 import psycopg2
 
 
-def GetIdFromDescription(con,cur,table,description,noneok=False):
+def GetIdFromDescription(con,cur,table,description,noneok=False,addifnone=False,commit=True):
 	"""
-	Get the id based on a value for a given table
+	Get the id based on a value for a given table (and add if doesn't exists if addifnone=True)
 
 	input:
 	con,cur
@@ -14,6 +14,10 @@ def GetIdFromDescription(con,cur,table,description,noneok=False):
 		The value to search for
 	noneok : bool (optional)
 		False (default) fails if value is None, True returns 0 if None encountered
+	addifnone : bool (optional)
+		False (default) to return without adding if item does not exist. True to add if item does not exist
+	commit : bool (optional)
+		True (default) to commit if adding new item, False to skip commit
 
 	output:
 	cid : int
@@ -28,8 +32,15 @@ def GetIdFromDescription(con,cur,table,description,noneok=False):
 		description=description.lower()
 		cur.execute('SELECT id from %s WHERE description=%s LIMIT 1' % (table,'%s'),[description])
 		if cur.rowcount==0:
-			debug(2,"value %s not found in table %s" % (description,table))
-			return -1
+			if not addifnone:
+				debug(2,"value %s not found in table %s" % (description,table))
+				return -1
+			err,cid=AddItem(con,cur,table,description,allowreplicate=True,commit=commit)
+			if err:
+				debug(7,'error when adding term: %s' % err)
+				return -2
+			debug(2,'new term added to table. reported as found')
+			return cid
 		cid=cur.fetchone()[0]
 		debug(2,"value %s found in table %s id %d" % (description,table,cid))
 		return cid

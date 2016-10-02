@@ -1,3 +1,6 @@
+import sys
+
+
 def debug(level,msg):
 	"""
 	print a debug message
@@ -10,8 +13,9 @@ def debug(level,msg):
 	"""
 	global debuglevel
 
-	if level>=debuglevel:
-		print(msg)
+	# if level>=debuglevel:
+	if True:
+		print(msg,file=sys.stderr)
 
 
 def SetDebugLevel(level):
@@ -37,8 +41,6 @@ def getdoc(func):
 	s="<pre>\n%s\n</pre>" % s
 	return(s)
 
-
-debuglevel=1
 
 
 def tolist(data):

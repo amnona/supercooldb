@@ -1502,12 +1502,14 @@ INSERT INTO MethodTypesTable (id,description) VALUES (0,'na');
 --
 
 INSERT INTO AgentTypesTable (id,description) VALUES (0,'na');
+INSERT INTO AgentTypesTable (description) VALUES ('heatsequer');
 
 --
 -- Add the unknown primer into PrimersTable id=0
 --
 
 INSERT INTO PrimersTable (id,idUser,forwardPrimer,reversePrimer,regionType,regionName) VALUES (0,0,'na','na',1,'na');
+INSERT INTO PrimersTable (id,idUser,forwardPrimer,reversePrimer,regionType,regionName) VALUES (1,0,'515f','806f',1,'V4');
 
 --
 -- Init the annotationtype table
@@ -1516,6 +1518,9 @@ INSERT INTO PrimersTable (id,idUser,forwardPrimer,reversePrimer,regionType,regio
 INSERT INTO AnnotationTypesTable (description) VALUES ('diffexp');
 INSERT INTO AnnotationTypesTable (description) VALUES ('isa');
 INSERT INTO AnnotationTypesTable (description) VALUES ('contamination');
+INSERT INTO AnnotationTypesTable (description) VALUES ('common');
+INSERT INTO AnnotationTypesTable (description) VALUES ('highfreq');
+INSERT INTO AnnotationTypesTable (description) VALUES ('other');
 
 --
 -- Init the AnnotationDetailsTypes Table

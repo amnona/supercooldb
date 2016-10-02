@@ -1,4 +1,5 @@
 import psycopg2
+import psycopg2.extras
 
 
 def connect_db(schema='AnnotationSchemaTest'):
@@ -12,7 +13,7 @@ def connect_db(schema='AnnotationSchemaTest'):
 	"""
 	try:
 		con = psycopg2.connect(database='postgres', user='postgres', password='admin123')
-		cur = con.cursor()
+		cur = con.cursor(cursor_factory=psycopg2.extras.DictCursor)
 		cur.execute('SET search_path to %s' % schema)
 		return (con,cur)
 	except psycopg2.DatabaseError as e:

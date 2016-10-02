@@ -1,5 +1,6 @@
 from utils import debug
 import datetime
+import psycopg2
 
 
 def GetExperimentId(con,cur,details,userid=None):
@@ -12,11 +13,12 @@ def GetExperimentId(con,cur,details,userid=None):
 	userid : int (optional)
 		the userid asking the query (for private studies)
 	output:
-	expids : int
-		experimentid if exists
-		-1 if not found
-		-2 if error encountered
-		-3 if more than one match
+	errmsg : str
+		"" if ok, error msg if error encountered
+	expids : list of int
+		experimentids of matching experiments
+		[] if not found
+		None if error encountered
 	"""
 	try:
 		expids=None
@@ -37,16 +39,13 @@ def GetExperimentId(con,cur,details,userid=None):
 				expids=expids.intersection(cids)
 			if len(expids)==0:
 				debug(2,"No experiments found matching all details")
-				return -1
+				return 'No experiment match found for details',[]
 		if len(expids)>1:
-			debug(2,"Problem. Found %d experiments matching details" % len(expids))
-			return(-3)
-		expids=expids.pop()
-		debug(2,"found expid %d" % expids)
-		return expids
-	except:
+			debug(2,"Found %d experiments matching details" % len(expids))
+		return '',list(expids)
+	except psycopg2.DatabaseError as e:
 		debug(7,"GetExperimentID failed")
-		return -2
+		return '%s' %e, None
 
 
 def AddExperimentDetails(con,cur,expid,details,userid,private='n',commit=True):
@@ -82,6 +81,8 @@ def AddExperimentDetails(con,cur,expid,details,userid,private='n',commit=True):
 			return -1
 	print(details)
 	for ctype,cval in details:
+		ctype=ctype.lower()
+		cval=cval.lower()
 		cur.execute('INSERT INTO ExperimentsTable (expId,type,value,date,userid,private) VALUES(%s,%s,%s,%s,%s,%s)',[expid,ctype,cval,cdate,userid,private])
 	if commit:
 		con.commit()
@@ -123,3 +124,32 @@ def TestExpIdExists(con,cur,expid,userid=None):
 # except:
 	debug(7,"error in TestExpIdExists")
 	return False
+
+
+def GetDetailsFromExpId(con,cur,expid,userid=None):
+	"""
+	get the details of an experiment with id expid
+
+	input:
+	con,cur
+	expid : int
+		the experiment id
+	userid : int (optional)
+		the userid of the query (or None for anonymous user)
+
+	output:
+	err : str
+		the error msg or '' if no error encountered
+	details : list of (str,str)
+	list of (type,value) of the experiment details
+	"""
+	debug(1,'GetDetailsFromExpId %d' % expid)
+	cur.execute('SELECT type,value from ExperimentsTable WHERE expId=%s',[expid])
+	if cur.rowcount==0:
+		debug(3,'Experiment %d not found for GetDetailsFromExpId' % expid)
+		return "Experiment %d not found" % expid,-1
+	details=[]
+	for cdetail in cur:
+			details.append([cdetail[0],cdetail[1]])
+	debug(2,'Found %d details for expid %d' % (len(details),expid))
+	return '',details
