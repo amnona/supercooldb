@@ -115,13 +115,15 @@ def get_sequence_annotations():
 			(taxonomy from SequencesTable)
 			"annotations" : list of
 				{
+					"annotationid" : int
+						the id of the annotation
 					"user" : str
 						name of the user who added this annotation
 						(userName from UsersTable)
 					"addedDate" : str (DD-MM-YYYY HH:MM:SS)
 						date when the annotation was added
 						(addedDate from CurationsTable)
-					"idExp" : int
+					"expid" : int
 						the ID of the experiment from which this annotation originated
 						(uniqueId from ExperimentsTable)
 						(see Query Experiment)

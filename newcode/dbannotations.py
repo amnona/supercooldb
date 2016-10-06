@@ -216,6 +216,7 @@ def GetAnnotationsFromID(con,cur,annotationid,userid=0):
 		the error encountered or '' if ok
 	data : dict
 		the annotation data. includes:
+		'annotationid' : int
 		'description' : str
 		'method' : str
 		'agent' : str
@@ -251,6 +252,7 @@ def GetAnnotationsFromID(con,cur,annotationid,userid=0):
 	data['expid']=res['idexp']
 	data['userid']=res['iduser']
 	data['date']=res['addeddate'].isoformat()
+	data['annotationid']=annotationid
 
 	if res['isprivate']=='y':
 		if userid!=data['userid']:
