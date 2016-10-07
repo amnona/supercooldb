@@ -1,4 +1,4 @@
---
+﻿--
 -- PostgreSQL database dump
 --
 
@@ -1531,7 +1531,7 @@ INSERT INTO AnnotationDetailsTypesTable (description) VALUES ('low');
 INSERT INTO AnnotationDetailsTypesTable (description) VALUES ('all');
 
 
-INSERT INTO OntologyTable (description) VALUES ('feces')
+INSERT INTO OntologyTable (description) VALUES ('feces');
 
 --
 -- PostgreSQL database dump complete
