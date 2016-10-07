@@ -56,7 +56,6 @@ def add_sequences():
 	debug(2,'added/found %d sequences' % len(seqids))
 	return json.dumps({"seqIds":seqids})
 
-
 @Seq_Flask_Obj.route('/sequences/getid',methods=['GET'])
 def get_sequenceid():
 	"""
@@ -80,7 +79,7 @@ def get_sequenceid():
 		Validation:
 		Action:
 	"""
-	cfunc=add_sequences
+	cfunc=get_sequenceid
 	alldat=request.get_json()
 	sequence=alldat.get('sequence')
 	if sequence is None:
