@@ -128,6 +128,8 @@ def get_annotation_sequences():
 	"""
 	cfunc=get_annotation_sequences
 	alldat=request.get_json()
+	if alldat is None:
+		return ('No json parameters supplied',400)
 	annotationid=alldat.get('annotationid')
 	if annotationid is None:
 		return('annotationid parameter missing',400)
