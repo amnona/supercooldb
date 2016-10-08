@@ -100,3 +100,39 @@ def add_annotations():
 	debug(6,"error encountered %s" % err)
 	return ("error enountered %s" % err,400)
 
+
+@Annotation_Flask_Obj.route('/annotations/get_sequences',methods=['GET'])
+def get_annotation_sequences():
+	"""
+	Title: get_sequences
+	Description : Get all sequences associated with an annotation
+	URL: annotations/get_sequences
+	Method: GET
+	URL Params:
+	Data Params: JSON
+		{
+			annotationid : int
+				the annotationid to get the sequences for
+		}
+	Success Response:
+		Code : 200
+		Content :
+		{
+			seqids : list of int
+				the seqids for all sequences participating in this annotation
+		}
+	Details :
+		Validation:
+			If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
+			If annotation is not private, return it (no need for authentication)
+	"""
+	cfunc=get_sequence_annotations
+	alldat=request.get_json()
+	annotationid=alldat.get('annotationid')
+	if annotationid is None:
+		return('annotationid parameter missing',400)
+	err,seqids=dbannotations.GetSequencesFromAnnotationID(g.con,g.cur,annotationid)
+	if err:
+		debug(6,err)
+		return ('Problem geting details. error=%s' % err,400)
+	return json.dumps({'seqids':seqids})
