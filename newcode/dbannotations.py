@@ -266,6 +266,36 @@ def GetAnnotationsFromID(con,cur,annotationid,userid=0):
 	return '',data
 
 
+def IsAnnotationVisible(con,cur,annotationid,userid=0):
+	"""
+	Test if the user userid can see annotation annotationid
+
+	input:
+	con,cur
+	annotationid: int
+		the id of the annotation to test
+	userid : int (optional)
+		the user asking to view the annotation (or 0 for anonymous)
+
+	output:
+	err: str
+		the error encountered or '' if ok
+	isvisible: bool
+		True if user is allowed to see the annotation, False if not
+	"""
+	debug(1,'IsAnnotationVisible, annotationid %d, userid %d' % (annotationid,userid))
+	cur.execute('SELECT (isPrivate,userId) FROM AnnotationsTable WHERE id=%s LIMIT 1',[annotationid])
+	if cur.rowcount==0:
+		debug(3,'annotationid %d not found' % annotationid)
+		return 'Annotationid %d not found',False
+	res=cur.fetchone()
+	if res['isprivate']=='y':
+		if userid!=res['userid']:
+			debug(6,'Trying to view private annotation id %d from different user (orig user %d, current user %d)' % (annotationid,res['userid'],userid))
+			return '',False
+	return '',True
+
+
 def GetSequenceAnnotations(con,cur,sequence,region=None):
 	"""
 	Get all annotations for a sequence
@@ -341,3 +371,37 @@ def GetAnnotationsFromExpId(con,cur,expid,userid):
 			return err,None
 		annotations.append(cannotation)
 	return '',annotations
+
+
+def GetSequencesFromAnnotationID(con,cur,annotationid,userid=0):
+	"""
+	Get a list of sequences which are a part of the annotation annotationid
+
+	input:
+	con,cur:
+	annottionid : int
+		the annotationid to get the associated sequences for
+	userid : int (optional)
+		the user performing the query (or None if unknown). Used to hide private annotations not by the user
+
+	output:
+	err : str
+		The error encountered or '' if ok
+	seqids : list of int
+		the sequenceids associated with the annotationid
+	"""
+	debug(1,"GetSequencesFromAnnotationID for annotationid %d" % annotationid)
+	err,canview=IsAnnotationVisible(con,cur,annotationid,userid)
+	if err:
+		debug(6,'error encountered:%s' % err)
+		return err,None
+	if not canview:
+		debug(6,'user %d cannot view annotationid %d since it is private' % (userid,annotationid))
+		return 'Annotation is private',None
+	cur.execute('SELECT seqId from SequencesAnnotationTable WHERE annotationId=%s',[annotationid])
+	seqids=[]
+	res=cur.fetchall()
+	for cres in res:
+		seqids.append(cres[0])
+	debug(1,"Found %d sequences associated" % len(seqids))
+	return '',seqids
