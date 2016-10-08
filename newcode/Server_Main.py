@@ -1,10 +1,15 @@
 from flask import Flask,g
+from flask.ext.login import LoginManager, UserMixin, login_required
 from Seq_Flask import Seq_Flask_Obj
 from Exp_Flask import Exp_Flask_Obj
 from Annotation_Flask import Annotation_Flask_Obj
 from Ontology_Flask import Ontology_Flask_Obj
 from utils import debug,SetDebugLevel
 import db_access
+import dbuser
+
+dbDefaultUser = "na" #anonymos user in case the field is empty
+dbDefaultPwd =  ""
 
 
 app = Flask(__name__)
@@ -13,7 +18,16 @@ app.register_blueprint(Exp_Flask_Obj)
 app.register_blueprint(Annotation_Flask_Obj)
 app.register_blueprint(Ontology_Flask_Obj)
 
+login_manager = LoginManager()
+login_manager.init_app(app)
 
+class User(UserMixin):
+    
+    def __init__(self, username, password):
+        self.id = username
+        self.password = password
+
+    
 # whenever a new request arrives, connect to the database and store in g.db
 @app.before_request
 def before_request():
@@ -27,6 +41,33 @@ def before_request():
 def teardown_request(exception):
 	g.con.close()
 
+# the following function will be called for every request autentication is required
+@login_manager.request_loader
+def load_user(request):
+    debug(1,'>>>>>>>>>>>load_user login attempt')
+    user = None
+    alldat=request.get_json()
+    if (alldat is not None):
+        userName=alldat.get('user')
+        password=alldat.get('pwd')
+            
+        #use default user name when it was not sent
+        if(userName is None and password is None):
+            userName = dbDefaultUser #anonymos user in case the field is empty
+            password = dbDefaultPwd
+    
+        errorMes,userId = dbuser.GetUserId(g.con,g.cur,userName,password)
+        if userId >= 0:
+            debug(1,'user id is %d' % (userId))
+            user = User(userName,password)
+        else:
+            debug(1,'user login failed %s' % (errorMes))
+            user = None
+        debug(1,'>>>>>>>>>>>load_user login succeed')
+         
+            
+    return user
+    
 
 if __name__ == '__main__':
 	SetDebugLevel(0)
