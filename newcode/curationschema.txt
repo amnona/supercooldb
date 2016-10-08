@@ -783,7 +783,7 @@ ALTER TABLE AnnotationSchemaTest.SequencesAnnotationTable_AnnotationId_seq OWNER
 -- Name: SequencesAnnotationTable_AnnotationId_seq; Type: SEQUENCE OWNED BY; Schema: AnnotationSchema; Owner: postgres
 --
 
-ALTER SEQUENCE SequencesAnnotationTable_AnnotationId_seq OWNED BY SequencesAnnotationTable.curId;
+ALTER SEQUENCE SequencesAnnotationTable_AnnotationId_seq OWNED BY SequencesAnnotationTable.annotationId;
 
 
 --
@@ -1179,10 +1179,10 @@ ALTER TABLE ONLY SequencesAnnotationTable ALTER COLUMN seqId SET DEFAULT nextval
 
 
 --
--- Name: curId; Type: DEFAULT; Schema: AnnotationSchema; Owner: postgres
+-- Name: annotationId; Type: DEFAULT; Schema: AnnotationSchema; Owner: postgres
 --
 
-ALTER TABLE ONLY SequencesAnnotationTable ALTER COLUMN curId SET DEFAULT nextval('SequencesAnnotationTable_AnnotationId_seq'::regclass);
+ALTER TABLE ONLY SequencesAnnotationTable ALTER COLUMN annotationId SET DEFAULT nextval('SequencesAnnotationTable_AnnotationId_seq'::regclass);
 
 
 --
@@ -1329,7 +1329,7 @@ ALTER TABLE ONLY PrimersTable
 --
 
 ALTER TABLE ONLY SequencesAnnotationTable
-    ADD CONSTRAINT SequencesAnnotationTable_pkey PRIMARY KEY (seqId, curId);
+    ADD CONSTRAINT SequencesAnnotationTable_pkey PRIMARY KEY (seqId, annotationId);
 
 
 --
@@ -1362,6 +1362,13 @@ ALTER TABLE ONLY UsersTable
 
 ALTER TABLE ONLY testTable
     ADD CONSTRAINT testTable_pkey PRIMARY KEY (id);
+
+
+
+--
+-- Foreign keys
+--
+
 
 
 --
@@ -1466,7 +1473,7 @@ ALTER TABLE ONLY PrimersTable
 --
 
 ALTER TABLE ONLY SequencesAnnotationTable
-    ADD CONSTRAINT SequencesAnnotationTable_AnnotationId_fkey FOREIGN KEY (curId) REFERENCES AnnotationsTable(id);
+    ADD CONSTRAINT SequencesAnnotationTable_AnnotationId_fkey FOREIGN KEY (annotationId) REFERENCES AnnotationsTable(id);
 
 
 --
@@ -1484,6 +1491,16 @@ ALTER TABLE ONLY SequencesAnnotationTable
 ALTER TABLE ONLY SequencesTable
     ADD CONSTRAINT SequencesTable_idPrimer_fkey FOREIGN KEY (idPrimer) REFERENCES PrimersTable(id);
 
+--
+-- Added by amnon
+ALTER TABLE ONLY AnnotationListTable
+    ADD CONSTRAINT AnnotationListTable_idOntology_fkey FOREIGN KEY (idOntology) REFERENCES OntologyTable(id);
+
+ALTER TABLE ONLY AnnotationListTable
+    ADD CONSTRAINT AnnotationListTable_idAnnotation_fkey FOREIGN KEY (idAnnotation) REFERENCES AnnotationsTable(id);
+
+ALTER TABLE ONLY AnnotationListTable
+    ADD CONSTRAINT AnnotationListTable_idAnnotationDetail_fkey FOREIGN KEY (idAnnotationDetail) REFERENCES AnnotationsDetailsTypesTable(id);
 
 --
 -- Add the unknown user inter UsersTable id=0
