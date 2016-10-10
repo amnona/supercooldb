@@ -11,6 +11,7 @@ import dbuser
 dbDefaultUser = "na" #anonymos user in case the field is empty
 dbDefaultPwd =  ""
 
+recentLoginUsers = []
 
 app = Flask(__name__)
 app.register_blueprint(Seq_Flask_Obj)
@@ -55,11 +56,32 @@ def load_user(request):
         if(userName is None and password is None):
             userName = dbDefaultUser #anonymos user in case the field is empty
             password = dbDefaultPwd
-    
+        
+        #check if exist in the recent array first & password didnt change
+        for tempUser in recentLoginUsers:
+            if( tempUser.id == userName ):
+                if( tempUser.password == password):
+                    #user found, return
+                    debug(1,'user %s already found' % (tempUser.id))
+                    return tempUser
+                else:
+                    debug(1,'remove user %s since it might that the password was changed' % (tempUser.id))
+                    #user exist but with different password, remove the user and continue login
+                    recentLoginUsers.remove(tempUser)
+        
+        #user was not found in the cache memory            
         errorMes,userId = dbuser.GetUserId(g.con,g.cur,userName,password)
         if userId >= 0:
             debug(1,'user id is %d' % (userId))
             user = User(userName,password)
+            
+            #add the user to the recent users list
+            for tempUser in recentLoginUsers:
+                if( tempUser.id == user.id ):
+                    debug(1,'user %s already found' % (user.id))
+            #add the user to the list
+            recentLoginUsers.append(user)
+            
         else:
             debug(1,'user login failed %s' % (errorMes))
             user = None
