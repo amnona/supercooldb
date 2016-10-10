@@ -1,4 +1,4 @@
-﻿--
+--
 -- PostgreSQL database dump
 --
 
@@ -948,6 +948,10 @@ ALTER TABLE AnnotationSchemaTest.UsersTable_id_seq OWNER TO postgres;
 
 ALTER SEQUENCE UsersTable_id_seq OWNED BY UsersTable.id;
 
+--
+-- Add attemptscounter column
+--
+ALTER TABLE userstable ADD attemptscounter integer default 0;
 
 --
 -- Name: testTable; Type: TABLE; Schema: AnnotationSchema; Owner: postgres; Tablespace: 
