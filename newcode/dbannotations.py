@@ -284,14 +284,14 @@ def IsAnnotationVisible(con,cur,annotationid,userid=0):
 		True if user is allowed to see the annotation, False if not
 	"""
 	debug(1,'IsAnnotationVisible, annotationid %d, userid %d' % (annotationid,userid))
-	cur.execute('SELECT (isPrivate,userId) FROM AnnotationsTable WHERE id=%s LIMIT 1',[annotationid])
+	cur.execute('SELECT (isPrivate,idUser) FROM AnnotationsTable WHERE id=%s LIMIT 1',[annotationid])
 	if cur.rowcount==0:
 		debug(3,'annotationid %d not found' % annotationid)
 		return 'Annotationid %d not found',False
 	res=cur.fetchone()
-	if res['isprivate']=='y':
-		if userid!=res['userid']:
-			debug(6,'Trying to view private annotation id %d from different user (orig user %d, current user %d)' % (annotationid,res['userid'],userid))
+	if res[0]=='y':
+		if userid!=res[1]:
+			debug(6,'Trying to view private annotation id %d from different user (orig user %d, current user %d)' % (annotationid,res[1],userid))
 			return '',False
 	return '',True
 
