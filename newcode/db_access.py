@@ -19,6 +19,7 @@ def connect_db(schema='AnnotationSchemaTest'):
 		user='scdb'
 		password='magNiv'
 		port=29546
+		host='localhost'
 		if 'SCDB_SERVER_TYPE' in os.environ:
 			servertype=os.environ['SCDB_SERVER_TYPE'].lower()
 			if servertype=='develop':
@@ -39,8 +40,8 @@ def connect_db(schema='AnnotationSchemaTest'):
 		else:
 			debug(6,'server type not set (SCDB_SERVER_TYPE)')
 			print('SCDB_SERVER_TYPE not set')
-		debug(1,'connecting database=%s, user=%s, port=%d' % (database,user,port))
-		con = psycopg2.connect(database=database, user=user, password=password, port=port)
+		debug(1,'connecting host=%s, database=%s, user=%s, port=%d' % (host,database,user,port))
+		con = psycopg2.connect(host=host,database=database, user=user, password=password, port=port)
 		cur = con.cursor(cursor_factory=psycopg2.extras.DictCursor)
 		cur.execute('SET search_path to %s' % schema)
 		debug(1,'connected to database')
