@@ -289,9 +289,9 @@ def IsAnnotationVisible(con,cur,annotationid,userid=0):
 		debug(3,'annotationid %d not found' % annotationid)
 		return 'Annotationid %d not found',False
 	res=cur.fetchone()
-	if res['isprivate']=='y':
-		if userid!=res['userid']:
-			debug(6,'Trying to view private annotation id %d from different user (orig user %d, current user %d)' % (annotationid,res['userid'],userid))
+	if res[0]=='y':
+		if userid!=res[1]:
+			debug(6,'Trying to view private annotation id %d from different user (orig user %d, current user %d)' % (annotationid,res[1],userid))
 			return '',False
 	return '',True
 
