@@ -160,6 +160,8 @@ def get_sequence_annotations():
 	"""
 	cfunc=get_sequence_annotations
 	alldat=request.get_json()
+	if alldat is None:
+		return(getdoc(cfunc))
 	sequence=alldat.get('sequence')
 	if sequence is None:
 		return('sequence parameter missing',400)
