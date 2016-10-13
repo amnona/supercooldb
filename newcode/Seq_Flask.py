@@ -57,6 +57,7 @@ def add_sequences():
 	debug(2,'added/found %d sequences' % len(seqids))
 	return json.dumps({"seqIds":seqids})
 
+
 @Seq_Flask_Obj.route('/sequences/getid',methods=['GET'])
 @login_required
 def get_sequenceid():
