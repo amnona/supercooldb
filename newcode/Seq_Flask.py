@@ -57,8 +57,8 @@ def add_sequences():
 	debug(2,'added/found %d sequences' % len(seqids))
 	return json.dumps({"seqIds":seqids})
 
+
 @Seq_Flask_Obj.route('/sequences/getid',methods=['GET'])
-@login_required
 def get_sequenceid():
 	"""
 	Title: Get id for a given new sequences (or return -1 if does not exist)
@@ -95,7 +95,6 @@ def get_sequenceid():
 
 
 @Seq_Flask_Obj.route('/sequences/get_annotations',methods=['GET'])
-@login_required
 def get_sequence_annotations():
 	"""
 	Title: Query sequence:
