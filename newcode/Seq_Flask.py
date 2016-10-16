@@ -238,7 +238,7 @@ def get_sequence_list_annotations():
 			If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
 			If annotation is not private, return it (no need for authentication)
 	"""
-	cfunc=get_sequence_annotations
+	cfunc=get_sequence_list_annotations
 	alldat=request.get_json()
 	if alldat is None:
 		return(getdoc(cfunc))
