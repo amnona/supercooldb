@@ -23,12 +23,11 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 class User(UserMixin):
-    
-    def __init__(self, username, password):
-        self.id = username
-        self.password = password
+	def __init__(self, username, password):
+		self.id = username
+		self.password = password
 
-    
+
 # whenever a new request arrives, connect to the database and store in g.db
 @app.before_request
 def before_request():
@@ -42,54 +41,54 @@ def before_request():
 def teardown_request(exception):
 	g.con.close()
 
+
 # the following function will be called for every request autentication is required
 @login_manager.request_loader
 def load_user(request):
-    debug(1,'>>>>>>>>>>>load_user login attempt')
-    user = None
-    alldat=request.get_json()
-    if (alldat is not None):
-        userName=alldat.get('user')
-        password=alldat.get('pwd')
-            
-        #use default user name when it was not sent
-        if(userName is None and password is None):
-            userName = dbDefaultUser #anonymos user in case the field is empty
-            password = dbDefaultPwd
-        
-        #check if exist in the recent array first & password didnt change
-        for tempUser in recentLoginUsers:
-            if( tempUser.id == userName ):
-                if( tempUser.password == password):
-                    #user found, return
-                    debug(1,'user %s already found' % (tempUser.id))
-                    return tempUser
-                else:
-                    debug(1,'remove user %s since it might that the password was changed' % (tempUser.id))
-                    #user exist but with different password, remove the user and continue login
-                    recentLoginUsers.remove(tempUser)
-        
-        #user was not found in the cache memory            
-        errorMes,userId = dbuser.GetUserId(g.con,g.cur,userName,password)
-        if userId >= 0:
-            debug(1,'user id is %d' % (userId))
-            user = User(userName,password)
-            
-            #add the user to the recent users list
-            for tempUser in recentLoginUsers:
-                if( tempUser.id == user.id ):
-                    debug(1,'user %s already found' % (user.id))
-            #add the user to the list
-            recentLoginUsers.append(user)
-            
-        else:
-            debug(1,'user login failed %s' % (errorMes))
-            user = None
-        debug(1,'>>>>>>>>>>>load_user login succeed')
-         
-            
-    return user
-    
+	debug(1,'>>>>>>>>>>>load_user login attempt')
+	user = None
+	alldat=request.get_json()
+	if (alldat is not None):
+		userName=alldat.get('user')
+		password=alldat.get('pwd')
+
+		#use default user name when it was not sent
+		if(userName is None and password is None):
+			userName = dbDefaultUser #anonymos user in case the field is empty
+			password = dbDefaultPwd
+
+		#check if exist in the recent array first & password didnt change
+		for tempUser in recentLoginUsers:
+			if( tempUser.id == userName ):
+				if( tempUser.password == password):
+					#user found, return
+					debug(1,'user %s already found' % (tempUser.id))
+					return tempUser
+				else:
+					debug(1,'remove user %s since it might that the password was changed' % (tempUser.id))
+					#user exist but with different password, remove the user and continue login
+					recentLoginUsers.remove(tempUser)
+
+		#user was not found in the cache memory
+		errorMes,userId = dbuser.GetUserId(g.con,g.cur,userName,password)
+		if userId >= 0:
+			debug(1,'user id is %d' % (userId))
+			user = User(userName,password)
+
+			#add the user to the recent users list
+			for tempUser in recentLoginUsers:
+				if( tempUser.id == user.id ):
+					debug(1,'user %s already found' % (user.id))
+			#add the user to the list
+			recentLoginUsers.append(user)
+
+		else:
+			debug(1,'user login failed %s' % (errorMes))
+			user = None
+		debug(1,'>>>>>>>>>>>load_user login succeed')
+
+	return user
+
 
 if __name__ == '__main__':
 	SetDebugLevel(0)

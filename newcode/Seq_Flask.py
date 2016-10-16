@@ -57,8 +57,8 @@ def add_sequences():
 	debug(2,'added/found %d sequences' % len(seqids))
 	return json.dumps({"seqIds":seqids})
 
+
 @Seq_Flask_Obj.route('/sequences/getid',methods=['GET'])
-@login_required
 def get_sequenceid():
 	"""
 	Title: Get id for a given new sequences (or return -1 if does not exist)
@@ -95,7 +95,6 @@ def get_sequenceid():
 
 
 @Seq_Flask_Obj.route('/sequences/get_annotations',methods=['GET'])
-@login_required
 def get_sequence_annotations():
 	"""
 	Title: Query sequence:
@@ -170,4 +169,89 @@ def get_sequence_annotations():
 		debug(6,err)
 		return ('Problem geting details. error=%s' % err,400)
 	return json.dumps({'annotations':details})
+
+
+@Seq_Flask_Obj.route('/sequences/get_list_annotations',methods=['GET'])
+def get_sequence_list_annotations():
+	"""
+	Title: Query sequence:
+	Description : Get all the annotations about a given sequence
+	URL: /sequences/get_annotations
+	Method: GET
+	URL Params:
+	Data Params: JSON
+		{
+			sequences : list of str ('ACGT')
+				the list of sequence strings to query the database (can be any length)
+			region : int (optional)
+				the region id (default=1 which is V4 515F 806R)
+	Success Response:
+		Code : 200
+		Content :
+		{
+			'seqannotations': list
+			list of:
+				{
+				"taxonomy" : str
+				(taxonomy from SequencesTable)
+				"annotations" : list of
+					{
+						"annotationid" : int
+							the id of the annotation
+						"user" : str
+							name of the user who added this annotation
+							(userName from UsersTable)
+						"addedDate" : str (DD-MM-YYYY HH:MM:SS)
+							date when the annotation was added
+							(addedDate from CurationsTable)
+						"expid" : int
+							the ID of the experiment from which this annotation originated
+							(uniqueId from ExperimentsTable)
+							(see Query Experiment)
+						"currType" : str
+							curration type (differential expression/contaminant/etc.)
+							(description from CurationTypesTable)
+						"method" : str
+							The method used to detect this behavior (i.e. observation/ranksum/clustering/etc")
+							(description from MethodTypesTable)
+						"agentType" : str
+							Name of the program which submitted this annotation (i.e. heatsequer)
+							(description from AgentTypesTable)
+						"description" : str
+							Free text describing this annotation (i.e. "lower in green tomatoes comapred to red ones")
+						"private" : bool
+							True if the curation is private, False if not
+						"CurationList" : list of
+							{
+								"detail" : str
+									the type of detail (i.e. ALL/HIGH/LOW)
+									(description from CurationDetailsTypeTable)
+								"term" : str
+									the ontology term for this detail (i.e. feces/ibd/homo sapiens)
+									(description from OntologyTable)
+							}
+					}
+				}
+		}
+	Details :
+		Validation:
+			If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
+			If annotation is not private, return it (no need for authentication)
+	"""
+	cfunc=get_sequence_list_annotations
+	alldat=request.get_json()
+	if alldat is None:
+		return(getdoc(cfunc))
+	sequences=alldat.get('sequences')
+	if sequences is None:
+		return('sequences parameter missing',400)
+	seqannotations=[]
+	for cseq in sequences:
+		err,details=dbannotations.GetSequenceAnnotations(g.con,g.cur,cseq)
+		if err:
+			debug(6,err)
+			return ('Problem geting details. error=%s' % err,400)
+		seqannotations.append(details)
+
+	return json.dumps({'seqannotations':seqannotations})
 
