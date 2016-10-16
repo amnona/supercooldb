@@ -247,7 +247,7 @@ def get_sequence_list_annotations():
 		return('sequences parameter missing',400)
 	seqannotations=[]
 	for cseq in sequences:
-		err,details=dbannotations.GetSequenceAnnotations(g.con,g.cur,sequences)
+		err,details=dbannotations.GetSequenceAnnotations(g.con,g.cur,cseq)
 		if err:
 			debug(6,err)
 			return ('Problem geting details. error=%s' % err,400)
