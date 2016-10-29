@@ -110,6 +110,10 @@ def addTempUsers(con,cur):
         cur.execute(sql2)
         cur.execute(sql3)
         con.commit()
+        return ""
     except psycopg2.DatabaseError as e:
         debug(7,"error %s enountered in addTempUsers" % e)
-        return "error %s enountered in addTempUsers" % e,'',[]
+        return "error %s enountered in addTempUsers" % e
+    
+    
+    

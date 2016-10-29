@@ -2,6 +2,7 @@ from flask import Flask,g
 from flask.ext.login import LoginManager, UserMixin, login_required
 from Seq_Flask import Seq_Flask_Obj
 from Exp_Flask import Exp_Flask_Obj
+from Users_Flask import Users_Flask_Obj
 from Annotation_Flask import Annotation_Flask_Obj
 from Ontology_Flask import Ontology_Flask_Obj
 from utils import debug,SetDebugLevel
@@ -18,6 +19,7 @@ app.register_blueprint(Seq_Flask_Obj)
 app.register_blueprint(Exp_Flask_Obj)
 app.register_blueprint(Annotation_Flask_Obj)
 app.register_blueprint(Ontology_Flask_Obj)
+app.register_blueprint(Users_Flask_Obj)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
