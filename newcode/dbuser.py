@@ -115,5 +115,25 @@ def addTempUsers(con,cur):
         debug(7,"error %s enountered in addTempUsers" % e)
         return "error %s enountered in addTempUsers" % e
     
+def addTempUsers2(con,cur):
+    
+    pwd1 = "ptest1"
+    pwd2 = "ptest2"
+    pwd3 = "ptest3"
+    
+    
+    sql1 = "insert into  annotationschematest.userstable (username, passwordhash,name,description,isactive) values ('user1', 'puser1', 'user1 name', 'user1 description' , true)"
+    sql2 = "insert into  annotationschematest.userstable (username, passwordhash,name,description,isactive) values ('user2', 'puser2', 'user2 name', 'user2 description' , true)"
+    sql3 = "insert into  annotationschematest.userstable (username, passwordhash,name,description,isactive) values ('user3', 'puser3', 'user3 name', 'user3 description' , true)"
+    try:
+        cur.execute(sql1)
+        cur.execute(sql2)
+        cur.execute(sql3)
+        con.commit()
+        return ""
+    except psycopg2.DatabaseError as e:
+        debug(7,"error %s enountered in addTempUsers" % e)
+        return "error %s enountered in addTempUsers" % e
+    
     
     

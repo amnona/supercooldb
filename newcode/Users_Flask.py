@@ -26,16 +26,34 @@ def add_temp_users():
 	debug(2,'Added temp user completed successfully')
 	return ""
 
+@Users_Flask_Obj.route('/users/add_temp_users2',methods=['POST','GET'])
+def add_temp_users2():
+	"""
+	Title: Add temp users
+	URL: users/add_temp_users
+	Method: POST
+    """
+    
+	cfunc=add_temp_users2
+	if request.method=='GET':
+		return(getdoc(cfunc))
+	alldat=request.get_json()
 
-@Users_Flask_Obj.route('/users/test_user_login',methods=['POST','GET'])
-def test_user_login():
+	err=dbuser.addTempUsers2(g.con,g.cur)
+	if err:
+		return(err,400)
+	debug(2,'Added temp user completed successfully')
+	return ""
+
+@Users_Flask_Obj.route('/users/get_user_id',methods=['POST','GET'])
+def get_user_id():
 	"""
 	Title: Get user id
 	URL: users/test_user_login
 	Method: POST
     """    
     
-	cfunc=test_user_login
+	cfunc=get_user_id
 	if request.method=='GET':
 		return(getdoc(cfunc))
 	alldat=request.get_json()
@@ -49,4 +67,17 @@ def test_user_login():
 	return json.dumps({"user":userid})
 
 
+@Users_Flask_Obj.route('/users/test_user_login',methods=['POST','GET'])
+@login_required
+def test_user_login():
+	"""
+	Title: test user login
+	URL: users/test_user_login
+	Method: POST
+    """    
+    
+	return "login succeed"
 
+
+
+         
