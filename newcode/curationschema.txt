@@ -1558,3 +1558,6 @@ INSERT INTO OntologyTable (description) VALUES ('feces');
 -- PostgreSQL database dump complete
 --
 
+CREATE extension IF NOT EXISTS pgcrypto SCHEMA annotationschematest;
+update userstable set passwordhash=crypt('', gen_salt('bf')) where id=0;
+
