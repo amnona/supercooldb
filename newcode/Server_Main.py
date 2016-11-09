@@ -25,9 +25,10 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 class User(UserMixin):
-	def __init__(self, username, password):
-		self.id = username
+	def __init__(self, username, password, userId):
+		self.name = username
 		self.password = password
+		self.user_id = userId
 
 
 # whenever a new request arrives, connect to the database and store in g.db
@@ -36,7 +37,6 @@ def before_request():
 	con,cur=db_access.connect_db()
 	g.con = con
 	g.cur = cur
-
 
 # and when the request is over, disconnect
 @app.teardown_request
@@ -61,10 +61,10 @@ def load_user(request):
 
 		#check if exist in the recent array first & password didnt change
 		for tempUser in recentLoginUsers:
-			if( tempUser.id == userName ):
+			if( tempUser.name == userName ):
 				if( tempUser.password == password):
 					#user found, return
-					debug(1,'user %s already found' % (tempUser.id))
+					debug(1,'user %s already found' % (tempUser.name))
 					return tempUser
 				else:
 					debug(1,'remove user %s since it might that the password was changed' % (tempUser.id))
@@ -75,11 +75,10 @@ def load_user(request):
 		errorMes,userId = dbuser.GetUserId(g.con,g.cur,userName,password)
 		if userId >= 0:
 			debug(1,'user id is %d' % (userId))
-			user = User(userName,password)
-
+			user = User(userName,password,userId)
 			#add the user to the recent users list
 			for tempUser in recentLoginUsers:
-				if( tempUser.id == user.id ):
+				if( tempUser.name == user.name ):
 					debug(1,'user %s already found' % (user.id))
 			#add the user to the list
 			recentLoginUsers.append(user)

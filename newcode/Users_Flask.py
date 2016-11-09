@@ -1,5 +1,6 @@
 from flask import Blueprint,request,g
 from flask.ext.login import login_required
+from flask.ext.login import current_user
 import json
 import dbuser
 from utils import debug,getdoc
@@ -75,8 +76,10 @@ def test_user_login():
 	URL: users/test_user_login
 	Method: POST
     """    
+	
+	debug(6,'login succeed. id=%s' % current_user.user_id)
     
-	return "login succeed"
+	return 'login succeed. id=%s' % current_user.user_id
 
 
 
