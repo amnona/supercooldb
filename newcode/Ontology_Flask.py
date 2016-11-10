@@ -11,7 +11,7 @@ Ontology_Flask_Obj = Blueprint('Ontology_Flask_Obj', __name__,template_folder='t
 def ontology_add_term():
 	"""
 	Title: Add new ontology term
-	URL: /ontology/add_term
+	URL: /ontology/add
 	Description : Add a new term to the ontology term list and link to parent, synonyms
 	Method: POST
 	URL Params:
@@ -36,7 +36,7 @@ def ontology_add_term():
 		Code : 201
 		Content :
 		{
-			"id" : int
+			"termid" : int
 				the id of the new ontology term
 		}
 	Details:
@@ -135,7 +135,7 @@ def ontology_get_term():
 	"""
 	cid=request.args.get('startid')
 	if cid is None:
-		return(return_doc(ontology_get_term))
+		return(getdoc(ontology_get_term))
 	jsonRetData = db_access.DB_ACCESS_FLASK_OntologyTable_GetRecsByStartId(cid,con=g.con,cur=g.cur)
 	return json.dumps(jsonRetData, ensure_ascii=False)
 
@@ -169,6 +169,7 @@ def ontology_get_synonym():
 	"""
 	cid=request.args.get('startid')
 	if cid is None:
-		return(return_doc(ontology_get_synonym))
+		return(getdoc(ontology_get_synonym))
 	jsonRetData = db_access.DB_ACCESS_FLASK_SynonymTable_GetRecsByStartId(cid,g.con,g.cur)
 	return json.dumps(jsonRetData, ensure_ascii=False)
+

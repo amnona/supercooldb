@@ -7,12 +7,14 @@ using the rest API
 
 # amnonscript
 
-__version__ = "0.1"
+__version__ = "0.5"
 
 import oboparse
-import ontologygraph
 
 import requests
+
+import argparse
+import sys
 
 
 def getidname(ontofilename):
@@ -99,3 +101,16 @@ def addontology(ontofilename,ontoname,dbserver='http://127.0.0.1:5000',ontoprefi
 				print("parentid %s not found" % parentid)
 		data={'term':origname,'synonyms':synonyms,'parent':parent,'ontologyname':ontoname}
 		res=requests.post(url,json=data)
+	print('done')
+
+
+def main(argv):
+	parser=argparse.ArgumentParser(description='Add ontology file to database. Version '+__version__)
+	parser.add_argument('-i','--input',help='ontology file name (.obo)')
+	parser.add_argument('-n','--name',help='name for the ontolgy (i.e ENVO)')
+	parser.add_argument('-s','--server',help='web address of the server',default='http://amnonim.webfactional.com/scdb_main')
+	args=parser.parse_args(argv)
+	addontology(ontofilename=args.input,ontoname=args.name,dbserver=args.server)
+
+if __name__ == "__main__":
+	main(sys.argv[1:])

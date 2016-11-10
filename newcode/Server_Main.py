@@ -8,8 +8,8 @@ from utils import debug,SetDebugLevel
 import db_access
 import dbuser
 
-dbDefaultUser = "na" #anonymos user in case the field is empty
-dbDefaultPwd =  ""
+dbDefaultUser = "na"  # anonymos user in case the field is empty
+dbDefaultPwd = ""
 
 recentLoginUsers = []
 
@@ -21,6 +21,7 @@ app.register_blueprint(Ontology_Flask_Obj)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
+
 
 class User(UserMixin):
 	def __init__(self, username, password):
@@ -54,7 +55,7 @@ def load_user(request):
 
 		#use default user name when it was not sent
 		if(userName is None and password is None):
-			userName = dbDefaultUser #anonymos user in case the field is empty
+			userName = dbDefaultUser  # anonymos user in case the field is empty
 			password = dbDefaultPwd
 
 		#check if exist in the recent array first & password didnt change
