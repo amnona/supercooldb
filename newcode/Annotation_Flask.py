@@ -130,11 +130,11 @@ def get_annotation_sequences():
 			If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
 			If annotation is not private, return it (no need for authentication)
 	"""
-	return('userid %d' % current_user.user_id)
 	cfunc=get_annotation_sequences
 	alldat=request.get_json()
 	if alldat is None:
 		return ('No json parameters supplied',400)
+	return('userid %d' % current_user.user_id)
 	annotationid=alldat.get('annotationid')
 	if annotationid is None:
 		return('annotationid parameter missing',400)
