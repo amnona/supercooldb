@@ -296,7 +296,7 @@ def IsAnnotationVisible(con,cur,annotationid,userid=0):
 	return '',True
 
 
-def GetSequenceAnnotations(con,cur,sequence,region=None):
+def GetSequenceAnnotations(con,cur,sequence,region=None,userid=0):
 	"""
 	Get all annotations for a sequence
 
@@ -306,6 +306,8 @@ def GetSequenceAnnotations(con,cur,sequence,region=None):
 		the sequence to search for in the database
 	region : int (optional)
 		None to not compare region, or the regionid the sequence is from
+	userid : int (optional)
+		the id of the user requesting the annotations. Provate annotations with non-matching user will not be returned
 
 	output:
 	err : str

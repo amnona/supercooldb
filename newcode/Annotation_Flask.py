@@ -10,6 +10,7 @@ from flask.ext.login import login_required
 Annotation_Flask_Obj = Blueprint('Annottion_Flask_Obj', __name__,template_folder='templates')
 
 
+@login_required
 @Annotation_Flask_Obj.route('/annotations/add',methods=['POST','GET'])
 def add_annotations():
 	"""
@@ -94,7 +95,7 @@ def add_annotations():
 	agenttype=alldat.get('agentType')
 	description=alldat.get('description')
 	private=alldat.get('private')
-	userid=alldat.get('userId')
+	userid=current_user.user_id
 	annotationlist=alldat.get('annotationList')
 	err,annotationid=dbannotations.AddSequenceAnnotations(g.con,g.cur,sequences,primer,expid,annotationtype,annotationlist,method,description,agenttype,private,userid,commit=True)
 	if not err:
@@ -134,17 +135,17 @@ def get_annotation_sequences():
 	alldat=request.get_json()
 	if alldat is None:
 		return ('No json parameters supplied',400)
-	return('userid %d' % current_user.user_id)
 	annotationid=alldat.get('annotationid')
 	if annotationid is None:
 		return('annotationid parameter missing',400)
-	err,seqids=dbannotations.GetSequencesFromAnnotationID(g.con,g.cur,annotationid)
+	err,seqids=dbannotations.GetSequencesFromAnnotationID(g.con,g.cur,annotationid,userid=current_user.user_id)
 	if err:
 		debug(6,err)
 		return ('Problem geting details. error=%s' % err,400)
 	return json.dumps({'seqids':seqids})
 
 
+@login_required
 @Annotation_Flask_Obj.route('/annotations/delete',methods=['GET','POST'])
 def delete_annotation():
 	"""
@@ -179,7 +180,7 @@ def delete_annotation():
 	annotationid=alldat.get('annotationid')
 	if annotationid is None:
 		return('annotationid parameter missing',400)
-	err=dbannotations.DeleteAnnotation(g.con,g.cur,annotationid)
+	err=dbannotations.DeleteAnnotation(g.con,g.cur,annotationid,userid=current_user.user_id)
 	if err:
 		debug(6,err)
 		return ('Problem geting details. error=%s' % err,400)
