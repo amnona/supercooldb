@@ -405,3 +405,66 @@ def GetSequencesFromAnnotationID(con,cur,annotationid,userid=0):
 		seqids.append(cres[0])
 	debug(1,"Found %d sequences associated" % len(seqids))
 	return '',seqids
+
+
+def GetAnnotationUser(con,cur,annotationid):
+	"""
+	Get which user generated the annotation
+
+	input:
+	con,cur
+	annotationid: int
+		the id of the annotation to test
+
+	output:
+	err: str
+		the error encountered or '' if ok
+	userid: int
+		the userid which generated the annotation
+	"""
+	debug(1,'GetAnnotationUser, annotationid %d' % annotationid)
+	cur.execute('SELECT (idUser) FROM AnnotationsTable WHERE id=%s LIMIT 1',[annotationid])
+	if cur.rowcount==0:
+		debug(3,'annotationid %d not found' % annotationid)
+		return 'Annotationid %d not found',False
+	res=cur.fetchone()
+	return '',res[0]
+
+
+def DeleteAnnotation(con,cur,annotationid,userid=0,commit=True):
+	"""
+	Delete an annotation from the database
+	Also deletes all the sequence annotations and annotationdetails associated with it
+	Note only the user who created an annotation can delete it
+
+	input:
+	con,cur
+	annotationid : int
+		the annotationid to delete
+	userid : int
+		the user requesting the delete
+	commit : bool (optional)
+		True (default) to commit, False to wait with the commit
+
+	output:
+	err : str
+		The error encountered or '' if ok
+	"""
+	debug(1,'DeleteAnnotation for annotationid %d userid %d' % (annotationid,userid))
+	if userid==0:
+		debug(6,'cannot delete with default userid=0')
+		return('Cannot delete with default user. Please log in first')
+	origuser=GetAnnotationUser(con,cur,annotationid)
+	if origuser!=userid:
+		debug(6,'cannot delete. annotation %d was created by user %d but delete request was from user %d' % (annotationid,origuser,userid))
+		return 'Cannot delete. Annotation was created by a different user'
+
+	cur.execute('DELETE FROM AnnotationsTable WHERE id=%s',annotationid)
+	debug('deleted from annotationstable')
+	cur.execute('DELETE FROM AnnotationsListTable WHERE idannotation=%s',annotationid)
+	debug('deleted from annotationliststable')
+	cur.execute('DELETE FROM SequencesAnnotationTable WHERE annotationid=%s',annotationid)
+	debug('deleted from sequencesannotationtable')
+	if commit:
+		con.commit()
+	return('')

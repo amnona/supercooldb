@@ -138,3 +138,44 @@ def get_annotation_sequences():
 		debug(6,err)
 		return ('Problem geting details. error=%s' % err,400)
 	return json.dumps({'seqids':seqids})
+
+
+@Annotation_Flask_Obj.route('/annotations/delete',methods=['GET','POST'])
+def delete_annotation():
+	"""
+	Title: delete
+	Description : Delete annotation
+	URL: annotations/delete
+	Method: POST
+	URL Params:
+	Data Params: JSON
+		{
+			annotationid : int
+				the annotationid to delete
+		}
+	Success Response:
+		Code : 200
+		Content :
+		{
+			annotationid : int
+				the annotationid deleted
+		}
+	Details :
+		Validation:
+			If user is not logged in, cannot delete
+			Can only delete annotations created by the user
+	"""
+	cfunc=delete_annotation
+	if request.method=='GET':
+		return(getdoc(cfunc),400)
+	alldat=request.get_json()
+	if alldat is None:
+		return ('No json parameters supplied',400)
+	annotationid=alldat.get('annotationid')
+	if annotationid is None:
+		return('annotationid parameter missing',400)
+	err=dbannotations.DeleteAnnotation(g.con,g.cur,annotationid)
+	if err:
+		debug(6,err)
+		return ('Problem geting details. error=%s' % err,400)
+	return json.dumps({'annotationid':annotationid})
