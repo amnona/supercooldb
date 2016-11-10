@@ -3,6 +3,9 @@ import json
 import dbannotations
 import dbsequences
 from utils import debug,getdoc
+from flask.ext.login import current_user
+from flask.ext.login import login_required
+
 
 Annotation_Flask_Obj = Blueprint('Annottion_Flask_Obj', __name__,template_folder='templates')
 
@@ -101,6 +104,7 @@ def add_annotations():
 	return ("error enountered %s" % err,400)
 
 
+@login_required
 @Annotation_Flask_Obj.route('/annotations/get_sequences',methods=['GET'])
 def get_annotation_sequences():
 	"""
@@ -126,6 +130,7 @@ def get_annotation_sequences():
 			If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
 			If annotation is not private, return it (no need for authentication)
 	"""
+	return('userid %d' % current_user.user_id)
 	cfunc=get_annotation_sequences
 	alldat=request.get_json()
 	if alldat is None:
