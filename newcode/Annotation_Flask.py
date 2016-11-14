@@ -183,5 +183,52 @@ def delete_annotation():
 	err=dbannotations.DeleteAnnotation(g.con,g.cur,annotationid,userid=current_user.user_id)
 	if err:
 		debug(6,err)
-		return ('Problem geting details. error=%s' % err,400)
+		return ('Problem deleting annotation. error=%s' % err,400)
+	return json.dumps({'annotationid':annotationid})
+
+
+@login_required
+@Annotation_Flask_Obj.route('/annotations/delete_sequences_from_annotation',methods=['GET','POST'])
+def delete_sequences_from_annotation():
+	"""
+	Title: Delete sequences from annotation
+	Description : Delete sequences from an existing annotation
+	URL: annotations/delete_sequences_from_annotation
+	Method: POST
+	URL Params:
+	Data Params: JSON
+		{
+			annotationid : int
+				the annotationid to delete
+			sequences : list of str ('ACGT')
+				the sequences to delete from the annotation
+		}
+	Success Response:
+		Code : 200
+		Content :
+		{
+			annotationid : int
+				the annotationid from which the sequences were deleted
+		}
+	Details :
+		Validation:
+			If user is not logged in, cannot delete non-annonymous
+			Can only delete annotations created by the user
+	"""
+	cfunc=delete_sequences_from_annotation
+	if request.method=='GET':
+		return(getdoc(cfunc),400)
+	alldat=request.get_json()
+	if alldat is None:
+		return ('No json parameters supplied',400)
+	annotationid=alldat.get('annotationid')
+	if annotationid is None:
+		return('annotationid parameter missing',400)
+	sequences=alldat.get('sequences')
+	if sequences is None:
+		return('sequences parameter missing',400)
+	err=dbannotations.DeleteSequenceFromAnnotation(g.con,g.cur,sequences,annotationid,userid=current_user.user_id)
+	if err:
+		debug(6,err)
+		return ('Problem deleting sequences. error=%s' % err,400)
 	return json.dumps({'annotationid':annotationid})
