@@ -1511,6 +1511,7 @@ ALTER TABLE ONLY AnnotationListTable
 --
 
 INSERT INTO UsersTable (id,userName,name,description) VALUES (0,'na','na','unknown user');
+update UsersTable SET passwordhash=crypt('', gen_salt('bf')) where username='na';
 
 --
 -- Add the unknown method into MethodTypesTable id=0
@@ -1567,3 +1568,5 @@ alter table UsersTable ADD column email text;
 -- add user shareEmail flag (UsersTable)
 --
 alter table UsersTable ADD column shareEmail text;
+
+update UsersTable set passwordhash=crypt('', gen_salt('bf')) where username='na';
