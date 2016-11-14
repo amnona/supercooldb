@@ -26,7 +26,15 @@ def AddSequenceAnnotations(con,cur,sequences,primer,expid,annotationtype,annotat
 	annotationdetails : list of tuples (detailtype,ontologyterm) of str
 		detailtype is ("higher","lower","all")
 		ontologyterm is string which should match the ontologytable terms
-	user : str or None (optional)
+	method : str (optional)
+		the method used to discover this annotation (i.e. "permutation test", etc.) or '' for not specified
+	description : str (optional)
+		the text description of this annotation (i.e. "higher in sick people who like carrots")
+	agenttype : str (optional)
+		the agent program used to generate this annotation (i.e. 'heatsequer')
+	private : str (optional)
+		'n' (default) for this annotation to be visible to all users, 'y' to make it private (only current user can see)
+	userid : str or None (optional)
 		username of the user creating this annotation or None (default) for anonymous user
 	commit : bool (optional)
 		True (default) to commit, False to wait with the commit
@@ -201,7 +209,7 @@ def GetAnnotationDetails(con,cur,annotationid):
 
 def GetAnnotationsFromID(con,cur,annotationid,userid=0):
 	"""
-	get annotation details from an annotation id. NOTE: tests
+	get annotation details from an annotation id.
 
 	input:
 	con,cur
@@ -233,6 +241,11 @@ def GetAnnotationsFromID(con,cur,annotationid,userid=0):
 		return 'Annotationid %d not found',None
 	res=cur.fetchone()
 	debug(4,res)
+	if res['isprivate']=='y':
+		if res['iduser']!=userid:
+			debug(3,'cannot view annotation %d (created by user %d), request from used %d' % (annotationid,res['iduser'],userid))
+			return 'Annotationid %d is private. Cannot view' % annotationid, None
+
 	data={}
 	data['id']=annotationid
 	data['description']=res['description']
@@ -296,7 +309,7 @@ def IsAnnotationVisible(con,cur,annotationid,userid=0):
 	return '',True
 
 
-def GetSequenceAnnotations(con,cur,sequence,region=None):
+def GetSequenceAnnotations(con,cur,sequence,region=None,userid=0):
 	"""
 	Get all annotations for a sequence
 
@@ -306,6 +319,8 @@ def GetSequenceAnnotations(con,cur,sequence,region=None):
 		the sequence to search for in the database
 	region : int (optional)
 		None to not compare region, or the regionid the sequence is from
+	userid : int (optional)
+		the id of the user requesting the annotations. Provate annotations with non-matching user will not be returned
 
 	output:
 	err : str
@@ -365,6 +380,13 @@ def GetAnnotationsFromExpId(con,cur,expid,userid):
 	debug(1,'found %d annotations for expid %d' % (len(res),expid))
 	annotations=[]
 	for cres in res:
+		# test if annotation is private - don't show it
+		err,canview=IsAnnotationVisible(con,cur,cres[0],userid)
+		if err:
+			return err,None
+		if not canview:
+			continue
+
 		err,cannotation=GetAnnotationsFromID(con,cur,cres[0],userid)
 		if err:
 			debug(3,'error encountered for annotationid %d : %s' % (cres[0],err))
@@ -451,20 +473,60 @@ def DeleteAnnotation(con,cur,annotationid,userid=0,commit=True):
 		The error encountered or '' if ok
 	"""
 	debug(1,'DeleteAnnotation for annotationid %d userid %d' % (annotationid,userid))
-	if userid==0:
-		debug(6,'cannot delete with default userid=0')
-		return('Cannot delete with default user. Please log in first')
 	origuser=GetAnnotationUser(con,cur,annotationid)
-	if origuser!=userid:
-		debug(6,'cannot delete. annotation %d was created by user %d but delete request was from user %d' % (annotationid,origuser,userid))
-		return 'Cannot delete. Annotation was created by a different user'
+	if origuser!=0:
+		if userid==0:
+			debug(6,'cannot delete non-anonymous annotation with default userid=0')
+			return('Cannot delete non-anonymous annotation with default user. Please log in first')
+		if origuser!=userid:
+			debug(6,'cannot delete. annotation %d was created by user %d but delete request was from user %d' % (annotationid,origuser,userid))
+			return 'Cannot delete. Annotation was created by a different user'
 
 	cur.execute('DELETE FROM AnnotationsTable WHERE id=%s',annotationid)
-	debug('deleted from annotationstable')
+	debug(1,'deleted from annotationstable')
 	cur.execute('DELETE FROM AnnotationsListTable WHERE idannotation=%s',annotationid)
-	debug('deleted from annotationliststable')
+	debug(1,'deleted from annotationliststable')
 	cur.execute('DELETE FROM SequencesAnnotationTable WHERE annotationid=%s',annotationid)
-	debug('deleted from sequencesannotationtable')
+	debug(1,'deleted from sequencesannotationtable')
+	if commit:
+		con.commit()
+	return('')
+
+
+def DeleteSequenceFromAnnotation(con,cur,sequences,annotationid,userid=0,commit=True):
+	'''
+	remove sequences from an annotation
+	Note only the user who created an annotation can remove sequences from it
+
+	input:
+	con,cur
+	sequences : list of str
+		the sequences to remove from the annotation
+	annotationid : int
+		the annotation from which to remove the sequences
+	userid : int (optional)
+		the userid (for validating he can modify this annotation)
+	commit :bool (optional)
+		True (default) to commmit the change, False to not commit (the caller should commit)
+
+	output:
+	err: str
+		the error string or '' if no error encountered
+	'''
+	debug(1,'DeleteSequenceFromAnnotation for %d sequences, annotationid %d, userid %d' % (len(sequences),annotationid,userid))
+	origuser=GetAnnotationUser(con,cur,annotationid)
+	if origuser!=0:
+		if userid==0:
+			debug(6,'cannot delete non-anonymous annotation with default userid=0')
+			return('Cannot delete non-anonymous annotation with default user. Please log in first')
+		if origuser!=userid:
+			debug(6,'cannot delete. annotation %d was created by user %d but delete request was from user %d' % (annotationid,origuser,userid))
+			return 'Cannot delete. Annotation was created by a different user'
+
+	seqids=dbsequences.GetSequencesId(con,cur,sequences)
+	for cseqid in seqids:
+		cur.execute('DELETE FROM SequencesAnnotationTable WHERE annotationid=%s AND seqId=%s',(annotationid,cseqid))
+	debug(3,'deleted %d sequences from from sequencesannotationtable annotationid=%d' % (len(sequences),annotationid))
 	if commit:
 		con.commit()
 	return('')
