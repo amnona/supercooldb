@@ -486,7 +486,7 @@ def DeleteAnnotation(con,cur,annotationid,userid=0,commit=True):
 
 	cur.execute('DELETE FROM AnnotationsTable WHERE id=%s',[annotationid])
 	debug(1,'deleted from annotationstable')
-	cur.execute('DELETE FROM AnnotationsListTable WHERE idannotation=%s',[annotationid])
+	cur.execute('DELETE FROM AnnotationListTable WHERE idannotation=%s',[annotationid])
 	debug(1,'deleted from annotationliststable')
 	cur.execute('DELETE FROM SequencesAnnotationTable WHERE annotationid=%s',[annotationid])
 	debug(1,'deleted from sequencesannotationtable')
