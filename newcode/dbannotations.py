@@ -484,11 +484,11 @@ def DeleteAnnotation(con,cur,annotationid,userid=0,commit=True):
 			debug(6,'cannot delete. annotation %d was created by user %d but delete request was from user %d' % (annotationid,origuser,userid))
 			return 'Cannot delete. Annotation was created by a different user'
 
-	cur.execute('DELETE FROM AnnotationsTable WHERE id=%s',annotationid)
+	cur.execute('DELETE FROM AnnotationsTable WHERE id=%s',[annotationid])
 	debug(1,'deleted from annotationstable')
-	cur.execute('DELETE FROM AnnotationsListTable WHERE idannotation=%s',annotationid)
+	cur.execute('DELETE FROM AnnotationsListTable WHERE idannotation=%s',[annotationid])
 	debug(1,'deleted from annotationliststable')
-	cur.execute('DELETE FROM SequencesAnnotationTable WHERE annotationid=%s',annotationid)
+	cur.execute('DELETE FROM SequencesAnnotationTable WHERE annotationid=%s',[annotationid])
 	debug(1,'deleted from sequencesannotationtable')
 	if commit:
 		con.commit()
