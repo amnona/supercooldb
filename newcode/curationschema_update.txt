@@ -1,0 +1,3 @@
+SET search_path = AnnotationSchemaTest, pg_catalog;
+ALTER TABLE userstable ADD COLUMN email text;
+ALTER TABLE userstable ADD COLUMN publishEmail boolean default false;
