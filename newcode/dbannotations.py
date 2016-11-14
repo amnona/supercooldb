@@ -473,7 +473,9 @@ def DeleteAnnotation(con,cur,annotationid,userid=0,commit=True):
 		The error encountered or '' if ok
 	"""
 	debug(1,'DeleteAnnotation for annotationid %d userid %d' % (annotationid,userid))
-	origuser=GetAnnotationUser(con,cur,annotationid)
+	err,origuser=GetAnnotationUser(con,cur,annotationid)
+	if err:
+		return err
 	if origuser!=0:
 		if userid==0:
 			debug(6,'cannot delete non-anonymous annotation (userid=%d) with default userid=0' % origuser)
