@@ -476,7 +476,7 @@ def DeleteAnnotation(con,cur,annotationid,userid=0,commit=True):
 	origuser=GetAnnotationUser(con,cur,annotationid)
 	if origuser!=0:
 		if userid==0:
-			debug(6,'cannot delete non-anonymous annotation with default userid=0')
+			debug(6,'cannot delete non-anonymous annotation (userid=%d) with default userid=0' % origuser)
 			return('Cannot delete non-anonymous annotation with default user. Please log in first')
 		if origuser!=userid:
 			debug(6,'cannot delete. annotation %d was created by user %d but delete request was from user %d' % (annotationid,origuser,userid))

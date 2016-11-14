@@ -39,6 +39,7 @@ def before_request():
 	g.con = con
 	g.cur = cur
 
+
 # and when the request is over, disconnect
 @app.teardown_request
 def teardown_request(exception):
