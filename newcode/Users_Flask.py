@@ -94,7 +94,7 @@ def register_user():
 	err,retval=dbuser.addUser(g.con,g.cur,user,pwd,name,description,mail,publish)
 	if retval <= 0:
 		return(err,400)
-	debug(2,'Added temp user completed successfully')
+	debug(2,'Added user completed successfully')
 	return json.dumps({"status":1})
 
 #user, pwd, recipient, subject, body

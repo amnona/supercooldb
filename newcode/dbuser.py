@@ -145,17 +145,20 @@ def addUser(con,cur,user,pwd,name,description,mail,publish):
 		"" if ok, error msg if error encountered
 	id : int
         1 operaion ended succesfully
+        -1 empty user
+        -2 empty password
+        -3 user already exist
         -4 exception
 	"""
     if user == "":
-        return ("user can't be empty",400)
+        return ("user can't be empty",-1)
     if pwd == "":
-        return ("pwd can't be empty",400)
+        return ("pwd can't be empty",-2)
     
     #If the user already exist, return error
     err,val = isUserExist(con,cur,user)
     if val > 0 :
-        return ("user %s already exist" % user,400)
+        return ("user %s already exist" % user,-3)
     
     #default values
     isactive = "y"
@@ -164,7 +167,7 @@ def addUser(con,cur,user,pwd,name,description,mail,publish):
         debug(3,"insert into userstable (username, passwordhash,name,description,isactive,publishemail,email,attemptscounter) values (%s, crypt(%s, gen_salt('bf')), %s, %s , %s, %s, %s, %s)" % (user, pwd,name,description,isactive,publish,mail,attemptscounter))
         cur.execute("insert into userstable (username, passwordhash,name,description,isactive,publishemail,email,attemptscounter) values (%s, crypt(%s, gen_salt('bf')), %s, %s , %s, %s, %s, %s)" , [user,pwd,name,description,isactive,publish,mail,attemptscounter])
         con.commit()
-        return "",0
+        return "",1
     except psycopg2.DatabaseError as e:
         debug(7,"error %s enountered in addUser" % e)
         return ("error %s enountered in addUser" % e,-4)
