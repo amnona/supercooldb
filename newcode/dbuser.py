@@ -3,7 +3,7 @@ from utils import debug
 
 maxfailedattempt = 3
 
-def GetUserId(con,cur,user,password):
+def getUserId(con,cur,user,password):
     """
 	Get the user id after autontication
 
@@ -59,6 +59,36 @@ def GetUserId(con,cur,user,password):
 
     return "",userId
 
+def isUserExist(con,cur,user):
+    """
+	Check if user name is already in use
+
+	input:
+	con,cur : database connection and cursor
+	user : user name
+
+	output:
+	errmsg : str
+		"" if ok, error msg if error encountered
+	id : int
+        1 user exist
+        0 user doesnt exist
+        -4 exception
+	"""
+    try:
+        debug(1,'SELECT id,attemptscounter FROM userstable WHERE username=%s' % user)
+        cur.execute('SELECT id,attemptscounter FROM userstable WHERE username=%s' ,[user])
+        if cur.rowcount==0:
+            debug(3,'user %s was not found in userstable' % [user])
+            return "",0
+        else:
+            return "",1
+                
+    except psycopg2.DatabaseError as e:
+        debug(7,"error %s enountered in GetUserId" % e)
+        return "error %s enountered in GetUserId" % e,-4
+
+
 def setUserLoginAttempts(con,cur,usrid,val):
     """
 	Set user login attempt
@@ -95,7 +125,52 @@ def getUserLoginAttempts(con,cur,usrid):
     else:
         returnVal = cur.fetchone()[0]
     return returnVal
-        
+    
+    
+def addUser(con,cur,user,pwd,name,description,mail,publish):
+    """
+	Add new user
+
+	input:
+	con,cur : database connection and cursor
+	user : user name
+    pwd: user password
+    name: name
+    description: description (optional)
+    mail: user email
+    publish: publish user mail ('y' or 'n')
+
+	output:
+	errmsg : str
+		"" if ok, error msg if error encountered
+	id : int
+        1 operaion ended succesfully
+        -4 exception
+	"""
+    if user == "":
+        return ("user can't be empty",400)
+    if pwd == "":
+        return ("pwd can't be empty",400)
+    
+    #If the user already exist, return error
+    err,val = isUserExist(con,cur,user)
+    if val > 0 :
+        return ("user %s already exist" % user,400)
+    
+    #default values
+    isactive = "y"
+    attemptscounter = 0
+    try:
+        debug(3,"insert into userstable (username, passwordhash,name,description,isactive,publishemail,email,attemptscounter) values (%s, crypt(%s, gen_salt('bf')), %s, %s , %s, %s, %s, %s)" % (user, pwd,name,description,isactive,publish,mail,attemptscounter))
+        cur.execute("insert into userstable (username, passwordhash,name,description,isactive,publishemail,email,attemptscounter) values (%s, crypt(%s, gen_salt('bf')), %s, %s , %s, %s, %s, %s)" , [user,pwd,name,description,isactive,publish,mail,attemptscounter])
+        con.commit()
+        return "",0
+    except psycopg2.DatabaseError as e:
+        debug(7,"error %s enountered in addUser" % e)
+        return ("error %s enountered in addUser" % e,-4)
+
+    
+"""
 def addTempUsers(con,cur):
     
     pwd1 = "ptest1"
@@ -121,7 +196,7 @@ def addTempUsers2(con,cur):
     pwd2 = "ptest2"
     pwd3 = "ptest3"
     
-    
+      
     sql1 = "insert into  annotationschematest.userstable (username, passwordhash,name,description,isactive) values ('user1', 'puser1', 'user1 name', 'user1 description' , true)"
     sql2 = "insert into  annotationschematest.userstable (username, passwordhash,name,description,isactive) values ('user2', 'puser2', 'user2 name', 'user2 description' , true)"
     sql3 = "insert into  annotationschematest.userstable (username, passwordhash,name,description,isactive) values ('user3', 'puser3', 'user3 name', 'user3 description' , true)"
@@ -134,6 +209,4 @@ def addTempUsers2(con,cur):
     except psycopg2.DatabaseError as e:
         debug(7,"error %s enountered in addTempUsers" % e)
         return "error %s enountered in addTempUsers" % e
-    
-    
-    
+"""
