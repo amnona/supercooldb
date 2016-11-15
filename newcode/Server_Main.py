@@ -5,6 +5,8 @@ from Exp_Flask import Exp_Flask_Obj
 from Users_Flask import Users_Flask_Obj
 from Annotation_Flask import Annotation_Flask_Obj
 from Ontology_Flask import Ontology_Flask_Obj
+from Site_Main_Flask import Site_Main_Flask_Obj
+
 from utils import debug,SetDebugLevel
 import db_access
 import dbuser
@@ -20,6 +22,7 @@ app.register_blueprint(Exp_Flask_Obj)
 app.register_blueprint(Annotation_Flask_Obj)
 app.register_blueprint(Ontology_Flask_Obj)
 app.register_blueprint(Users_Flask_Obj)
+app.register_blueprint(Site_Main_Flask_Obj)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -55,40 +58,43 @@ def load_user(request):
 	if (alldat is not None):
 		userName=alldat.get('user')
 		password=alldat.get('pwd')
+	else:
+		userName = None
+		password = None
+	
+    #use default user name when it was not sent
+	if(userName is None and password is None):
+		userName = dbDefaultUser #anonymos user in case the field is empty
+		password = dbDefaultPwd
+		
+    #check if exist in the recent array first & password didnt change
+	#for tempUser in recentLoginUsers:
+	#	if( tempUser.name == userName ):
+	#		if( tempUser.password == password):
+                #user found, return
+	#			debug(1,'user %s already found' % (tempUser.name))
+	#			return tempUser
+	#		else:
+	#			debug(1,'remove user %s since it might that the password was changed' % (tempUser.id))
+				#user exist but with different password, remove the user and continue login
+	#			recentLoginUsers.remove(tempUser)
+	
+	#user was not found in the cache memory
+	errorMes,userId = dbuser.getUserId(g.con,g.cur,userName,password)
+	if userId >= 0:
+		debug(1,'user id is %d' % (userId))
+		user = User(userName,password,userId)
+        #add the user to the recent users list
+		#for tempUser in recentLoginUsers:
+		#	if( tempUser.name == user.name ):
+        #       debug(1,'user %s already found' % (user.id))
+		#add the user to the list
+	#	recentLoginUsers.append(user)
+	else:
+		debug(1,'user login failed %s' % (errorMes))
+		user = None
+	debug(1,'>>>>>>>>>>>load_user login succeed')
 
-		#use default user name when it was not sent
-		if(userName is None and password is None):
-			userName = dbDefaultUser  # anonymos user in case the field is empty
-			password = dbDefaultPwd
-
-		#check if exist in the recent array first & password didnt change
-		for tempUser in recentLoginUsers:
-			if( tempUser.name == userName ):
-				if( tempUser.password == password):
-					#user found, return
-					debug(1,'user %s already found' % (tempUser.name))
-					return tempUser
-				else:
-					debug(1,'remove user %s since it might that the password was changed' % (tempUser.id))
-					#user exist but with different password, remove the user and continue login
-					recentLoginUsers.remove(tempUser)
-
-		#user was not found in the cache memory
-		errorMes,userId = dbuser.GetUserId(g.con,g.cur,userName,password)
-		if userId >= 0:
-			debug(1,'user id is %d' % (userId))
-			user = User(userName,password,userId)
-			#add the user to the recent users list
-			for tempUser in recentLoginUsers:
-				if( tempUser.name == user.name ):
-					debug(1,'user %s already found' % (user.id))
-			#add the user to the list
-			recentLoginUsers.append(user)
-
-		else:
-			debug(1,'user login failed %s' % (errorMes))
-			user = None
-		debug(1,'>>>>>>>>>>>load_user login succeed')
 
 	return user
 
