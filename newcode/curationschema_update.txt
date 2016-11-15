@@ -1,3 +1,5 @@
-﻿SET search_path = AnnotationSchemaTest, pg_catalog;
+SET search_path = AnnotationSchemaTest, pg_catalog;
 ALTER TABLE userstable ADD COLUMN email text;
-ALTER TABLE userstable ADD COLUMN publishEmail text default 'n';
+ALTER TABLE userstable ADD COLUMN publishemail text default 'n';
+ALTER TABLE userstable DROP isactive;
+ALTER TABLE userstable ADD COLUMN isactive text default 'n';
