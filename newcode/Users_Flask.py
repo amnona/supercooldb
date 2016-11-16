@@ -105,8 +105,8 @@ def send_mail_test():
     Title: Send email test
     """
     
-	user = "o.eitan@gmail.com"
-	password = ""
+	user = "bactdb@gmail.com"
+	password = "databaseforbacteria"
 	recipient = "eitanozel@gmail.com"
 	subject = "test2"
 	body = "test3"
