@@ -88,6 +88,40 @@ def isUserExist(con,cur,user):
         debug(7,"error %s enountered in GetUserId" % e)
         return "error %s enountered in GetUserId" % e,-4
 
+def isAdmin(con,cur,user):
+    """
+	Check if user is admin
+
+	input:
+	con,cur : database connection and cursor
+	user : user name
+
+	output:
+	errmsg : str
+		"" if ok, error msg if error encountered
+	id : int
+        1 user is admin
+        0 user is not admin
+        -1 user was not found
+        -4 exception
+	"""
+    try:
+        debug(1,'SELECT isadmin FROM userstable WHERE username=%s' % user)
+        cur.execute('SELECT isadmin FROM userstable WHERE username=%s' ,[user])
+        if cur.rowcount==0:
+            debug(3,'user %s was not found in userstable' % [user])
+            return 'user %s was not found in userstable' % [user],-1
+        else:
+            admin = cur.fetchone()[0]
+            if admin and not admin.isspace() :
+                if admin == "y":
+                    return "",1
+            return "",0
+                
+    except psycopg2.DatabaseError as e:
+        debug(7,"error %s enountered in GetUserId" % e)
+        return "error %s enountered in GetUserId" % e,-4
+
 
 def setUserLoginAttempts(con,cur,usrid,val):
     """
@@ -104,6 +138,23 @@ def setUserLoginAttempts(con,cur,usrid,val):
     debug(3,'update userstable set attemptscounter=%s WHERE id=%s' % (val,usrid))
     cur.execute('update userstable set attemptscounter=%s WHERE id=%s',[val,usrid])
     con.commit()
+
+def setUserLoginAttemptsByName(con,cur,username,val):
+    """
+	Set user login attempt
+
+	input:
+	con,cur : database connection and cursor
+	username : user name
+    val: number of login attempt
+
+	output:
+	"""
+    returnVal = 0
+    debug(3,'update userstable set attemptscounter=%s WHERE username=%s' % (val,username))
+    cur.execute('update userstable set attemptscounter=%s WHERE username=%s',[val,username])
+    con.commit()
+    
     
 def getUserLoginAttempts(con,cur,usrid):
     """
@@ -172,6 +223,46 @@ def addUser(con,cur,user,pwd,name,description,mail,publish):
         debug(7,"error %s enountered in addUser" % e)
         return ("error %s enountered in addUser" % e,-4)
 
+def updateNewPassword(con,cur,user,newpwd):
+    """
+	Update password for user
+
+	input:
+	con,cur : database connection and cursor
+	user : user name
+    newpwd: update user password
+
+	output:
+	errmsg : str
+		"" if ok, error msg if error encountered
+	id : int
+        1 operaion ended succesfully
+        -1 empty user
+        -2 empty password
+        -3 user doesnt exist
+        -4 exception
+	"""
+    if user == "":
+        return ("user can't be empty",-1)
+    if newpwd == "":
+        return ("pwd can't be empty",-2)
+    
+    #If the user already exist, return error
+    err,val = isUserExist(con,cur,user)
+    if val < 0 :
+        return ("user %s doesnt exist" % user,-3)
+    
+    #default values
+    try:
+        debug(3,"update userstable set passwordhash = crypt(%s, gen_salt('bf')) where username=%s" % ( newpwd,user))
+        cur.execute("update userstable set passwordhash = crypt(%s, gen_salt('bf')) where username=%s" , [newpwd,user])
+        con.commit()
+        return "",1
+    except psycopg2.DatabaseError as e:
+        debug(7,"error %s enountered in addUser" % e)
+        return ("error %s enountered in addUser" % e,-4)
+
+    
 def getMail(con,cur,user):
     """
 	Get mail

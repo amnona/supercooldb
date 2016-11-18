@@ -3,7 +3,7 @@ from flask.ext.login import login_required
 from flask.ext.login import current_user
 import json
 import dbuser
-from utils import debug,getdoc,send_email
+from utils import debug,getdoc,send_email,random_str
 
 Users_Flask_Obj = Blueprint('Users_Flask_Obj', __name__,template_folder='templates')
 
@@ -106,8 +106,8 @@ def forgot_password():
 	URL Params:
 	Data Params: JSON
 		{
-			'user' : str
-				the user name
+            'user' : str
+				user name   
 		}
 	Success Response:
 		Code : 201
@@ -129,13 +129,23 @@ def forgot_password():
 	if retval <= 0:
 		return(err,400)
 	email = err
-	user = "bactdb@gmail.com"
-	password = "databaseforbacteria"
+	#generate and update new password
+	newpassword = random_str()
+	err,retval=dbuser.updateNewPassword(g.con,g.cur,user,newpassword)
+	if retval <= 0:
+		return(err,400)
+    
+    #reset the login attempts
+	dbuser.setUserLoginAttemptsByName(g.con,g.cur,user,0)
+    
+	guser = "bactdb@gmail.com"
+	gpassword = "databaseforbacteria"
 	recipient = email
-	subject = "Forgot password"
-	body = "Your passowrd is:"
-	send_email(user,password,recipient,subject,body)
-	debug(2,'Send password')
+	subject = "Password reset"
+	body = "Your new passowrd is: " + newpassword
+	debug(2,'Sent mail to %s' % email)
+	send_email(guser,gpassword,recipient,subject,body)
+	debug(2,'New password sent')
 	return json.dumps({"status":1})
 
 

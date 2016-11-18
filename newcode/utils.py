@@ -1,5 +1,7 @@
 import sys
 import smtplib
+import random
+import string
 
 def debug(level,msg):
 	"""
@@ -82,3 +84,12 @@ def send_email(user, pwd, recipient, subject, body):
         return ('successfully sent the mail')
     except:
         return ('failed to send mail')
+
+def random_str(size=6, chars=string.ascii_uppercase + string.digits):
+    """
+	generate str which can be used as a password
+
+	output:
+	random str : string of 6 characters 
+	"""
+    return ''.join(random.choice(chars) for _ in range(size))

@@ -29,10 +29,11 @@ login_manager.init_app(app)
 
 
 class User(UserMixin):
-	def __init__(self, username, password, userId):
+	def __init__(self, username, password, userId,isAdmin):
 		self.name = username
 		self.password = password
 		self.user_id = userId
+		self.is_admin = isAdmin
 
 
 # whenever a new request arrives, connect to the database and store in g.db
@@ -81,9 +82,11 @@ def load_user(request):
 	
 	#user was not found in the cache memory
 	errorMes,userId = dbuser.getUserId(g.con,g.cur,userName,password)
-	if userId >= 0:
-		debug(1,'user id is %d' % (userId))
-		user = User(userName,password,userId)
+	if userId >= 0 :
+		errorMes,isadmin = dbuser.isAdmin(g.con,g.cur,userName)
+		if isadmin != 1 :
+		  isadmin = 0
+		user = User(userName,password,userId,isadmin)
         #add the user to the recent users list
 		#for tempUser in recentLoginUsers:
 		#	if( tempUser.name == user.name ):
