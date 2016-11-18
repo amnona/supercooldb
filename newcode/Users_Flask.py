@@ -97,14 +97,52 @@ def register_user():
 	debug(2,'Added user completed successfully')
 	return json.dumps({"status":1})
 
-#user, pwd, recipient, subject, body
+@Users_Flask_Obj.route('/users/forgot_password',methods=['POST','GET'])
+def forgot_password():
+	"""
+    Title: send passowrd via mail
+	URL: /users/forgot_password
+	Method: POST
+	URL Params:
+	Data Params: JSON
+		{
+			'user' : str
+				the user name
+		}
+	Success Response:
+		Code : 201
+		Content :
+		{
+	       "status" : 1
+		}
+	Details:
+		Validation:
+		Action:
+    """    
+	cfunc=forgot_password
+	alldat=request.get_json()
+	if alldat is None:
+		return(getdoc(cfunc))
+               
+	user=alldat.get('user')
+	err,retval=dbuser.getMail(g.con,g.cur,user)
+	if retval <= 0:
+		return(err,400)
+	email = err
+	user = "bactdb@gmail.com"
+	password = "databaseforbacteria"
+	recipient = email
+	subject = "Forgot password"
+	body = "Your passowrd is:"
+	send_email(user,password,recipient,subject,body)
+	debug(2,'Send password')
+	return json.dumps({"status":1})
 
+
+"""
 @Users_Flask_Obj.route('/users/send_mail_test',methods=['POST','GET'])
 def send_mail_test():
-	"""
-    Title: Send email test
-    """
-    
+	 
 	user = "bactdb@gmail.com"
 	password = "databaseforbacteria"
 	recipient = "eitanozel@gmail.com"
@@ -115,12 +153,9 @@ def send_mail_test():
 	if request.method=='GET':
 		return(getdoc(cfunc))
 	
-	debug(3,"send email before");           
 	send_email(user,password,recipient,subject,body)
-	debug(3,"send email after");    
 	return json.dumps({"status":1})
 
-"""
 @Users_Flask_Obj.route('/users/add_temp_users',methods=['POST','GET'])
 def add_temp_users():
 	

@@ -172,6 +172,53 @@ def addUser(con,cur,user,pwd,name,description,mail,publish):
         debug(7,"error %s enountered in addUser" % e)
         return ("error %s enountered in addUser" % e,-4)
 
+def getMail(con,cur,user):
+    """
+	Get mail
+
+	input:
+	con,cur : database connection and cursor
+	user : user name
+
+	output:
+	errmsg : str
+		empty ok, error msg if error encountered
+    email : str
+		email address if ok, error msg if error encountered
+    password : str
+		email address if ok, error msg if error encountered    
+	id : int
+        1 operaion ended succesfully
+        -1 empty user
+        -2 user doesnt exist
+        -3 mail doesnt exist
+        -4 exception
+    
+	"""
+    if user == "":
+        return ("user can't be empty",-1)
+    #If the user already exist, return error
+    err,val = isUserExist(con,cur,user)
+    if val == 0 :
+        return ("user %s doesnt exist" % user,-2)
+    #default values
+    try:
+        debug(1,'SELECT email FROM userstable WHERE username=%s' % user)
+        cur.execute('SELECT email FROM userstable WHERE username=%s' ,[user])
+        if cur.rowcount > 0:
+            email = cur.fetchone()[0]
+            if email and not email.isspace() :
+                return (email,1)
+            else:
+                return ("user %s - email is empty" % user,-3)
+        else:
+            return ("user %s doesnt exist" % user,-2)
+            
+            
+    except psycopg2.DatabaseError as e:
+        debug(7,"error %s enountered in addUser" % e)
+        return ("error %s enountered in addUser" % e,-4)
+
     
 """
 def addTempUsers(con,cur):
