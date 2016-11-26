@@ -106,7 +106,7 @@ if __name__ == '__main__':
 	SetDebugLevel(0)
 	debug(2,'starting server')
 	# need to check for database in a nicer way
-	app.run(debug=True)
+	app.run(debug=True, threaded=True )
 	# if db_access.PostGresConnect() == 0:
 	# 	app.run(debug=True)
 	# else:
