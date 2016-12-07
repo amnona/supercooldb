@@ -310,6 +310,53 @@ def getMail(con,cur,user):
         debug(7,"error %s enountered in addUser" % e)
         return ("error %s enountered in addUser" % e,-4)
 
+def getUserInformation(con,cur,userid):
+    """
+	Get the public information of user
+
+	input:
+	con,cur : database connection and cursor
+	user: id
+
+	output:
+	errmsg : str
+		empty ok, error msg if error encountered
+    data: dict
+        the user data. includes:
+		'id' : int
+		'username' : str
+		'name' : str
+		'description' : str
+        'email' : str
+	"""
+    if userid < 0:
+        return ("user id can't be negative",None)
+
+    try:
+        debug(1,'SELECT * userstable WHERE id=%s' % userid)
+        cur.execute('SELECT * FROM userstable WHERE id=%s' ,[userid])
+        if cur.rowcount > 0:
+            data={}
+            res = cur.fetchone()
+            data['id']=userid
+            data['username']=res['username']
+            data['name']=res['name']
+            data['description']=res['description']
+            
+            sharemail=res['shareemail']
+            if sharemail is not None and sharemail == 'y':
+                data['email']=res['email']
+            else:
+                data['email'] = '-'
+            return ('',data)
+        else:
+            return ("user %s doesnt exist" % userid,None)
+            
+            
+    except psycopg2.DatabaseError as e:
+        debug(7,"error %s enountered in getUserInformation" % e)
+        return ("error %s enountered in getUserInformation" % e,None)
+
     
 """
 def addTempUsers(con,cur):

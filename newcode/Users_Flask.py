@@ -30,6 +30,27 @@ def get_user_id():
 	return json.dumps({"user":userid})
 
 
+@Users_Flask_Obj.route('/users/get_user_public_information',methods=['GET'])
+def get_user_public_information():
+	"""
+	Title: Return the user information
+	URL: users/get_user_public_information
+	Method: POST,GET
+    """    
+    
+	cfunc=get_user_public_information
+	if request.method=='POST':
+		return(getdoc(cfunc))
+	alldat=request.get_json()
+	userid=alldat.get('userid')
+
+	err,userinfo=dbuser.getUserInformation(g.con,g.cur,userid)
+	if err:
+	   return(err,400)
+	debug(2,err)
+	return json.dumps(userinfo)
+
+
 @Users_Flask_Obj.route('/users/test_user_login',methods=['POST','GET'])
 @login_required
 def test_user_login():

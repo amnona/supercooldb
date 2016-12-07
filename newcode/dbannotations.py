@@ -231,11 +231,12 @@ def GetAnnotationsFromID(con,cur,annotationid,userid=0):
 		'annotationtype' : str
 		'expid' : int
 		'userid' : int (the user who added this annotation)
+        'username' : string
 		'date' : str
 		'details' : list of (str,str) of type (i.e. 'higher in') and value (i.e. 'homo sapiens')
 	"""
 	debug(1,'get annotation from id %d' % annotationid)
-	cur.execute('SELECT * FROM AnnotationsTable WHERE id=%s',[annotationid])
+	cur.execute('SELECT AnnotationsTable.*,userstable.username FROM AnnotationsTable,userstable WHERE AnnotationsTable.iduser = userstable.id and AnnotationsTable.id=%s',[annotationid])
 	if cur.rowcount==0:
 		debug(3,'annotationid %d not found' % annotationid)
 		return 'Annotationid %d not found',None
@@ -264,6 +265,7 @@ def GetAnnotationsFromID(con,cur,annotationid,userid=0):
 	data['annotationtype']=annotationtype
 	data['expid']=res['idexp']
 	data['userid']=res['iduser']
+	data['username']=res['username']
 	data['date']=res['addeddate'].isoformat()
 	data['annotationid']=annotationid
 
