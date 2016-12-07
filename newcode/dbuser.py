@@ -329,7 +329,7 @@ def getUserInformation(con,cur,userid):
 		'description' : str
         'email' : str
 	"""
-    if userid < 0:
+    if userid is not None and userid < 0:
         return ("user id can't be negative",None)
 
     try:

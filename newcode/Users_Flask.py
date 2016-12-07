@@ -30,7 +30,7 @@ def get_user_id():
 	return json.dumps({"user":userid})
 
 
-@Users_Flask_Obj.route('/users/get_user_public_information',methods=['GET'])
+@Users_Flask_Obj.route('/users/get_user_public_information',methods=['POST','GET'])
 def get_user_public_information():
 	"""
 	Title: Return the user information
@@ -39,7 +39,7 @@ def get_user_public_information():
     """    
     
 	cfunc=get_user_public_information
-	if request.method=='POST':
+	if request.method=='GET':
 		return(getdoc(cfunc))
 	alldat=request.get_json()
 	userid=alldat.get('userid')

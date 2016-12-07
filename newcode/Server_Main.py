@@ -5,7 +5,6 @@ from Exp_Flask import Exp_Flask_Obj
 from Users_Flask import Users_Flask_Obj
 from Annotation_Flask import Annotation_Flask_Obj
 from Ontology_Flask import Ontology_Flask_Obj
-from Site_Main_Flask import Site_Main_Flask_Obj
 
 from utils import debug,SetDebugLevel
 import db_access
@@ -22,7 +21,6 @@ app.register_blueprint(Exp_Flask_Obj)
 app.register_blueprint(Annotation_Flask_Obj)
 app.register_blueprint(Ontology_Flask_Obj)
 app.register_blueprint(Users_Flask_Obj)
-app.register_blueprint(Site_Main_Flask_Obj)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -106,7 +104,7 @@ if __name__ == '__main__':
 	SetDebugLevel(0)
 	debug(2,'starting server')
 	# need to check for database in a nicer way
-	app.run(debug=True, threaded=True )
+	app.run(debug=True)
 	# if db_access.PostGresConnect() == 0:
 	# 	app.run(debug=True)
 	# else:

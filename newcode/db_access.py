@@ -15,10 +15,14 @@ def connect_db(schema='AnnotationSchemaTest'):
 	"""
 	debug(1,'connecting to database')
 	try:
-		database='scdb'
-		user='scdb'
-		password='magNiv'
-		port=29546
+		#database='scdb'
+		#user='scdb'
+		#password='magNiv'
+		#port=29546
+		database = 'scdb'
+		user = 'postgres'
+		password = 'admin123'
+		port=5432
 		host='localhost'
 		if 'SCDB_SERVER_TYPE' in os.environ:
 			servertype=os.environ['SCDB_SERVER_TYPE'].lower()
