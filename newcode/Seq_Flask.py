@@ -118,7 +118,10 @@ def get_sequence_annotations():
 				{
 					"annotationid" : int
 						the id of the annotation
-					"user" : str
+					"userid" : int
+						The user id
+						(id from UsersTable)
+                    "user" : str
 						name of the user who added this annotation
 						(userName from UsersTable)
 					"addedDate" : str (DD-MM-YYYY HH:MM:SS)
@@ -254,4 +257,21 @@ def get_sequence_list_annotations():
 		seqannotations.append(details)
 
 	return json.dumps({'seqannotations':seqannotations})
+
+
+@Seq_Flask_Obj.route('/sequences/get_annotations_string',methods=['GET'])
+def get_annotations_string():
+	cfunc=get_annotations_string
+	alldat=request.get_json()
+	if alldat is None:
+		return(getdoc(cfunc))
+	sequence=alldat.get('sequence')
+	if sequence is None:
+		return('sequence parameter missing',400)
+	err,details=dbannotations.GetSequenceAnnotations(g.con,g.cur,sequence)
+	if err:
+		debug(6,err)
+		return ('Problem geting details. error=%s' % err,400)
+	return json.dumps({'annotations':details})
+
 
