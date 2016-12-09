@@ -7,7 +7,7 @@ import dbstats
 DBStats_Flask_Obj = Blueprint('DBStats_Flask_Obj', __name__,template_folder='templates')
 
 
-@Stats_Flask_Obj.route('/stats/stats',methods=['GET'])
+@DBStats_Flask_Obj.route('/stats/stats',methods=['GET'])
 def dbdstats():
 	"""
 	Title: Get statistics about the database
