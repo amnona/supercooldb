@@ -175,7 +175,7 @@ def get_sequence_annotations():
 def get_sequence_list_annotations():
 	"""
 	Title: Query sequence:
-	Description : Get all the annotations about a given sequence
+	Description : Get all the annotations about a list of sequences
 	URL: /sequences/get_annotations
 	Method: GET
 	URL Params:
