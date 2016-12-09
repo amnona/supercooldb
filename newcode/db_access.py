@@ -27,13 +27,13 @@ def connect_db(schema='AnnotationSchemaTest'):
 		if 'SCDB_SERVER_TYPE' in os.environ:
 			servertype=os.environ['SCDB_SERVER_TYPE'].lower()
 			debug(1,'SCDB_SERVER_TYPE is %s' % servertype)
-			if servertype=='develop':
+			if servertype=='main':
 				debug(1,'servertype is main')
 				database='scdb'
 				user='scdb'
 				password='magNiv'
 				port=29546
-			if servertype=='develop':
+			elif servertype=='develop':
 				debug(1,'servertype is develop')
 				database='scdb_develop'
 				user='scdb'
