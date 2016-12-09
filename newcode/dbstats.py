@@ -19,4 +19,10 @@ def GetStats(con,cur):
 	stats={}
 	cur.execute("SELECT reltuples AS approximate_row_count FROM pg_class WHERE relname = 'sequencestable'")
 	stats['NumSequences']=cur.fetchone()[0]
+	cur.execute("SELECT reltuples AS approximate_row_count FROM pg_class WHERE relname = 'annotationstable'")
+	stats['NumAnnotations']=cur.fetchone()[0]
+	cur.execute("SELECT reltuples AS approximate_row_count FROM pg_class WHERE relname = 'sequencesannotationtable'")
+	stats['NumSeqAnnotations']=cur.fetchone()[0]
+	cur.execute("SELECT reltuples AS approximate_row_count FROM pg_class WHERE relname = 'ontologytable'")
+	stats['NumOntologyTerms']=cur.fetchone()[0]
 	return '',stats

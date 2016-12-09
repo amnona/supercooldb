@@ -26,6 +26,8 @@ def dbdstats():
 				number of unique annotations (each annotation contains many sequences)
 			"NumSeqAnnotations" : int
 				number of sequence annotations in the sequenceTable
+			"NumOntologyTerms" : int
+				number of ontology terms in the OntologyTable
 
 		}
 	Details:
