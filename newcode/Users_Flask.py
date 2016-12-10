@@ -1,6 +1,7 @@
 from flask import Blueprint,request,g
 from flask.ext.login import login_required
 from flask.ext.login import current_user
+import dbannotations
 import json
 import dbuser
 from utils import debug,getdoc,send_email,random_str
@@ -14,18 +15,18 @@ def get_user_id():
 	Title: Get user id
 	URL: users/test_user_login
 	Method: POST
-    """    
-    
+	"""
+
 	cfunc=get_user_id
 	if request.method=='GET':
 		return(getdoc(cfunc))
 	alldat=request.get_json()
 	user=alldat.get('user')
 	pwd=alldat.get('pwd')
-    
+
 	err,userid=dbuser.getUserId(g.con,g.cur,user,pwd)
 	if err:
-	   return(err,400)
+		return(err,400)
 	debug(2,err)
 	return json.dumps({"user":userid})
 
@@ -36,8 +37,8 @@ def get_user_public_information():
 	Title: Return the user information
 	URL: users/get_user_public_information
 	Method: POST,GET
-    """    
-    
+	"""
+
 	cfunc=get_user_public_information
 	if request.method=='GET':
 		return(getdoc(cfunc))
@@ -46,7 +47,7 @@ def get_user_public_information():
 
 	err,userinfo=dbuser.getUserInformation(g.con,g.cur,userid)
 	if err:
-	   return(err,400)
+		return(err,400)
 	debug(2,err)
 	return json.dumps(userinfo)
 
@@ -58,16 +59,17 @@ def test_user_login():
 	Title: test user login
 	URL: users/test_user_login
 	Method: POST
-    """    
-	
+	"""
+
 	debug(6,'login succeed. id=%s' % current_user.user_id)
-    
+
 	return 'login succeed. id=%s' % current_user.user_id
+
 
 @Users_Flask_Obj.route('/users/register_user',methods=['POST','GET'])
 def register_user():
 	"""
-    Title: register new user
+	Title: register new user
 	URL: /users/register_user
 	Method: POST
 	URL Params:
@@ -75,90 +77,91 @@ def register_user():
 		{
 			"sequence" : str
 				the sequence to get data about
-            'user': str
-                user name
-            'pwd': str,
-                password
-            'name': str
-                name (optional)
-            'description': str
-                description (optional)
-            'email': str
-                email address
-            'publish': 'y' or 'n'
-                publish user email
+			'user': str
+				user name
+			'pwd': str,
+				password
+			'name': str
+				name (optional)
+			'description': str
+				description (optional)
+			'email': str
+				email address
+			'publish': 'y' or 'n'
+				publish user email
 		}
 	Success Response:
 		Code : 201
 		Content :
 		{
-	       "status" : 1
+			"status" : 1
 		}
 	Details:
 		Validation:
 		Action:
-    """    
+	"""
 	cfunc=register_user
 	if request.method=='GET':
 		return(getdoc(cfunc))
 	alldat=request.get_json()
 	if alldat is None:
 		return(getdoc(cfunc))
-               
+
 	user=alldat.get('user')
 	pwd=alldat.get('pwd')
 	name=alldat.get('name')
 	description=alldat.get('description')
 	mail=alldat.get('email')
 	publish=alldat.get('publish')
-    
+
 	err,retval=dbuser.addUser(g.con,g.cur,user,pwd,name,description,mail,publish)
 	if retval <= 0:
 		return(err,400)
 	debug(2,'Added user completed successfully')
 	return json.dumps({"status":1})
 
+
 @Users_Flask_Obj.route('/users/forgot_password',methods=['POST','GET'])
 def forgot_password():
 	"""
-    Title: send passowrd via mail
+	Title: send passowrd via mail
 	URL: /users/forgot_password
 	Method: POST
 	URL Params:
 	Data Params: JSON
 		{
-            'user' : str
-				user name   
+			'user' : str
+				user name
 		}
 	Success Response:
 		Code : 201
 		Content :
 		{
-	       "status" : 1
+			"status" : 1
 		}
 	Details:
 		Validation:
 		Action:
-    """    
+	"""
 	cfunc=forgot_password
 	alldat=request.get_json()
 	if alldat is None:
 		return(getdoc(cfunc))
-               
+
 	user=alldat.get('user')
 	err,retval=dbuser.getMail(g.con,g.cur,user)
 	if retval <= 0:
 		return(err,400)
 	email = err
-	#generate and update new password
+	# generate and update new password
 	newpassword = random_str()
 	err,retval=dbuser.updateNewPassword(g.con,g.cur,user,newpassword)
 	if retval <= 0:
 		return(err,400)
-    
-    #reset the login attempts
+
+	# reset the login attempts
 	dbuser.setUserLoginAttemptsByName(g.con,g.cur,user,0)
-    
+
 	guser = "bactdb@gmail.com"
 	gpassword = "databaseforbacteria"
 	recipient = email
@@ -170,6 +173,87 @@ def forgot_password():
 	return json.dumps({"status":1})
 
 
+
+@Users_Flask_Obj.route('/users/get_user_annotations',methods=['GET'])
+def get_user_annotations():
+	"""
+	Title: Get user annotations
+	Description : Get all the annotations created by a user
+	URL: /sequences/get_user_annotations
+	Method: GET
+	URL Params:
+	Data Params: JSON
+		{
+			foruserid : int
+				the userid to get the annotations created by
+	Success Response:
+		Code : 200
+		Content :
+		{
+			'userannotations': list
+			list of:
+				{
+				"taxonomy" : str
+				(taxonomy from SequencesTable)
+				"annotations" : list of
+					{
+						"annotationid" : int
+							the id of the annotation
+						"user" : str
+							name of the user who added this annotation
+							(userName from UsersTable)
+						"addedDate" : str (DD-MM-YYYY HH:MM:SS)
+							date when the annotation was added
+							(addedDate from CurationsTable)
+						"expid" : int
+							the ID of the experiment from which this annotation originated
+							(uniqueId from ExperimentsTable)
+							(see Query Experiment)
+						"currType" : str
+							curration type (differential expression/contaminant/etc.)
+							(description from CurationTypesTable)
+						"method" : str
+							The method used to detect this behavior (i.e. observation/ranksum/clustering/etc")
+							(description from MethodTypesTable)
+						"agentType" : str
+							Name of the program which submitted this annotation (i.e. heatsequer)
+							(description from AgentTypesTable)
+						"description" : str
+							Free text describing this annotation (i.e. "lower in green tomatoes comapred to red ones")
+						"private" : bool
+							True if the curation is private, False if not
+						"CurationList" : list of
+							{
+								"detail" : str
+									the type of detail (i.e. ALL/HIGH/LOW)
+									(description from CurationDetailsTypeTable)
+								"term" : str
+									the ontology term for this detail (i.e. feces/ibd/homo sapiens)
+									(description from OntologyTable)
+							}
+					}
+				}
+		}
+	Details :
+		Validation:
+			If an annotation is private, return it only if user is authenticated and created the annotation. If user not authenticated, do not return it in the list
+			If annotation is not private, return it (no need for authentication)
+	"""
+	cfunc=get_user_annotations
+	alldat=request.get_json()
+	if alldat is None:
+		return(getdoc(cfunc))
+	foruserid=alldat.get('foruserid')
+	if foruserid is None:
+		return('foruserid parameter missing',400)
+	err,userannotations=dbannotations.GetUserAnnotations(g.con,g.cur,foruserid=foruserid)
+	if err:
+		debug(6,err)
+		return ('Problem geting user annotation details. error=%s' % err,400)
+
+	return json.dumps({'userannotations':userannotations})
+
+
 """
 @Users_Flask_Obj.route('/users/send_mail_test',methods=['POST','GET'])
 def send_mail_test():
@@ -179,7 +263,7 @@ def send_mail_test():
 	recipient = "eitanozel@gmail.com"
 	subject = "test2"
 	body = "test3"
-    
+	
 	cfunc=send_mail_test
 	if request.method=='GET':
 		return(getdoc(cfunc))
@@ -203,7 +287,7 @@ def add_temp_users():
 
 @Users_Flask_Obj.route('/users/add_temp_users2',methods=['POST','GET'])
 def add_temp_users2():
-    
+	
 	cfunc=add_temp_users2
 	if request.method=='GET':
 		return(getdoc(cfunc))
@@ -217,4 +301,3 @@ def add_temp_users2():
 """
 	
 	
-         
