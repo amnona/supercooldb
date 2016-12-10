@@ -330,7 +330,7 @@ def GetUserAnnotations(con,cur,foruserid,userid=0):
 	'''
 	details=[]
 	debug(1,'GetUserAnnotations userid %d' % userid)
-	cur.execute('SELECT id FROM AnnotationsTable WHERE userid=%s',[foruserid])
+	cur.execute('SELECT id FROM AnnotationsTable WHERE iduser=%s',[foruserid])
 	if cur.rowcount==0:
 		debug(3,'no annotations for userid %d' % foruserid)
 		return '',[]
