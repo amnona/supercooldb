@@ -111,6 +111,7 @@ def add_sequence_taxonomy(rdpfilename,servertype='main'):
 		cpos=2
 		while float(cc[cpos+1][:-1])>=80:
 			ctax+=cc[cpos]+';'
+			cpos+=2
 		print('%s: %s' % (cid,ctax))
 
 
