@@ -115,7 +115,7 @@ def add_sequence_taxonomy(rdpfilename,servertype='main'):
 			cpos+=2
 			if cpos>=len(cc):
 				break
-		cur.execute('SELECT taxonomy from SequenceTable WHERE id=%s',[cid])
+		cur.execute('SELECT taxonomy from SequencesTable WHERE id=%s',[cid])
 		if cur.rowcount==0:
 			print('id %s not found in database!' % cid)
 			continue
