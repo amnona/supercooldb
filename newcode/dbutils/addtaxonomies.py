@@ -89,12 +89,43 @@ def get_sequences_fasta(filename, servertype='main'):
 	print('id %s, sequence %s, taxonomy %s' % (cres[0],cres[1],cres[2]))
 
 
+def add_sequence_taxonomy(rdpfilename,servertype='main'):
+	'''
+	Add taxonomies from an RDP output file to the database
+
+	Parameters:
+	rdpfilename : str
+		name of the RDP output file (run on fasta from get_sequences_fasta)
+	servertype : str (optional)
+		database to connect to ('main' or 'develop' or 'local')
+	'''
+	con, cur = connect_db(servertype=servertype)
+	fl=open(rdpfilename,'r')
+	for cline in fl:
+		cc=cline.split(';')
+		# test if <4 after split it means it's a comment line
+		if len(cc)<4:
+			continue
+		cid = cc[0]
+		ctax = ''
+		cpos=2
+		while float(cc[cpos+1][:-1])>=80:
+			ctax+=cc[cpos]+';'
+		print('%s: %s' % (cid,ctax))
+
+
 def main(argv):
 	parser=argparse.ArgumentParser(description='Add taxonomies to database sequences. version '+__version__)
-	parser.add_argument('-f','--fasta',help='name of fasta file')
-	parser.add_argument('--db',help='name of database to connect to', default='main')
+	parser.add_argument('-f','--filename',help='name of fasta or rdp file')
+	parser.add_argument('--db',help='name of database to connect to (main/develop/local)', default='main')
+	parser.add_argument('-a','--action',help='action to perform: save to save to fasta or rdp to load rdp results', default='rdp')
 	args=parser.parse_args(argv)
-	get_sequences_fasta(filename=args.fasta, servertype=args.db)
+	if args.action=='save':
+		get_sequences_fasta(filename=args.filename, servertype=args.db)
+	elif args.action=='rdp':
+		add_sequence_taxonomy(rdpfilename=args.filename, servertype=args.db)
+	else:
+		print('action %s unknown' % args.action)
 
 if __name__ == "__main__":
 	main(sys.argv[1:])
