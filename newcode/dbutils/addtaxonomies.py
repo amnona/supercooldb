@@ -108,10 +108,10 @@ def add_sequence_taxonomy(rdpfilename,servertype='main'):
 		if len(cc)<4:
 			continue
 		cid = cc[0]
-		ctax = ''
+		newtax = ''
 		cpos=2
 		while float(cc[cpos+1][:-1])>=80:
-			ctax+=cc[cpos]+';'
+			newtax+=cc[cpos]+';'
 			cpos+=2
 			if cpos>=len(cc):
 				break
@@ -121,10 +121,9 @@ def add_sequence_taxonomy(rdpfilename,servertype='main'):
 			continue
 		ctax=cur.fetchone()[0]
 		if ctax=='na' or ctax=='':
-			print('setting taxonomy for id %s is %s' % (cid,ctax))
-			cur.execute('UPDATE SequencesTable SET taxonomy=%s WHERE id=%s',[ctax,cid])
+			cur.execute('UPDATE SequencesTable SET taxonomy=%s WHERE id=%s',[newtax,cid])
 		else:
-			print('taxonomy for id %s is %s' % (cid,ctax))
+			print('taxonomy for id %s is already set to %s. not updating' % (cid,ctax))
 	con.commit()
 
 
