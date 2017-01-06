@@ -89,7 +89,7 @@ def get_sequences_fasta(filename, servertype='main'):
 	print('id %s, sequence %s, taxonomy %s' % (cres[0],cres[1],cres[2]))
 
 
-def add_sequence_taxonomy(rdpfilename,servertype='main'):
+def add_sequence_taxonomy(rdpfilename, overwrite=False, servertype='main'):
 	'''
 	Add taxonomies from an RDP output file to the database
 
@@ -120,11 +120,11 @@ def add_sequence_taxonomy(rdpfilename,servertype='main'):
 			print('id %s not found in database!' % cid)
 			continue
 		ctax=cur.fetchone()[0]
-		cur.execute('UPDATE SequencesTable SET taxonomy=%s WHERE id=%s',[newtax.lower(),cid])
-		# if ctax=='na' or ctax=='':
-		# 	cur.execute('UPDATE SequencesTable SET taxonomy=%s WHERE id=%s',[newtax.lower(),cid])
-		# else:
-		# 	print('taxonomy for id %s is already set to %s. not updating' % (cid,ctax))
+		if overwrite:
+			cur.execute('UPDATE SequencesTable SET taxonomy=%s WHERE id=%s',[newtax.lower(),cid])
+		else:
+			if ctax=='na' or ctax=='':
+				cur.execute('UPDATE SequencesTable SET taxonomy=%s WHERE id=%s',[newtax.lower(),cid])
 	con.commit()
 
 
@@ -133,11 +133,12 @@ def main(argv):
 	parser.add_argument('-f','--filename',help='name of fasta or rdp file')
 	parser.add_argument('--db',help='name of database to connect to (main/develop/local)', default='main')
 	parser.add_argument('-a','--action',help='action to perform: save to save to fasta or rdp to load rdp results', default='rdp')
+	parser.add_argument('--overwrite',help='overwrite sequences with taxonomy present', action='store_true')
 	args=parser.parse_args(argv)
 	if args.action=='save':
 		get_sequences_fasta(filename=args.filename, servertype=args.db)
 	elif args.action=='rdp':
-		add_sequence_taxonomy(rdpfilename=args.filename, servertype=args.db)
+		add_sequence_taxonomy(rdpfilename=args.filename, overwrite=args.overwrite, servertype=args.db)
 	else:
 		print('action %s unknown' % args.action)
 
