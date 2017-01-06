@@ -82,8 +82,10 @@ def get_sequences_fasta(filename, servertype='main'):
 	'''
 	con, cur = connect_db(servertype=servertype)
 	cur.execute('SELECT id,sequence,taxonomy FROM SequencesTable')
+	fl=open(filename,'w')
 	for cres in cur:
-		pass
+		fl.write('>%s\n%s\n' % (cres[0], cres[1]))
+	fl.close()
 	print('id %s, sequence %s, taxonomy %s' % (cres[0],cres[1],cres[2]))
 
 
