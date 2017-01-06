@@ -120,9 +120,10 @@ def add_sequence_taxonomy(rdpfilename,servertype='main'):
 			print('id %s not found in database!' % cid)
 			continue
 		ctax=cur.fetchone()[0]
-		print(ctax)
 		if ctax=='na' or ctax=='':
 			cur.execute('UPDATE SequencesTable SET taxonomy=%s WHERE id=%s',[ctax,cid])
+		else:
+			print('taxonomy for id %s is %s' % (cid,ctax))
 	con.commit()
 
 
