@@ -102,6 +102,7 @@ def add_sequence_taxonomy(rdpfilename,servertype='main'):
 	con, cur = connect_db(servertype=servertype)
 	fl=open(rdpfilename,'r')
 	for cline in fl:
+		cline=cline.strip()
 		cc=cline.split(';')
 		# test if <4 after split it means it's a comment line
 		if len(cc)<4:
@@ -112,6 +113,8 @@ def add_sequence_taxonomy(rdpfilename,servertype='main'):
 		while float(cc[cpos+1][:-1])>=80:
 			ctax+=cc[cpos]+';'
 			cpos+=2
+			if cpos>=len(cc):
+				break
 		print('%s: %s' % (cid,ctax))
 
 
