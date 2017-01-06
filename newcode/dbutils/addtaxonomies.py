@@ -4,6 +4,7 @@ import sys
 
 import argparse
 import psycopg2
+import psycopg2.extras
 
 __version__ = "1.1"
 
