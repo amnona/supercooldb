@@ -1,4 +1,9 @@
+import sys
+
+import argparse
 import psycopg2
+
+__version__ = "1.1"
 
 
 def debug(level,msg):
@@ -77,3 +82,14 @@ def get_sequences_fasta(filename, servertype='main'):
 	for cres in cur:
 		pass
 	print('id %s, sequence %s, taxonomy %s' % (cres[0],cres[1],cres[2]))
+
+
+def main(argv):
+	parser=argparse.ArgumentParser(description='Add taxonomies to database sequences. version '+__version__)
+	parser.add_argument('-f','--fasta',help='name of fasta file')
+	parser.add_argument('--db',help='name of database to connect to', defaut='main')
+	args=parser.parse_args(argv)
+	get_sequences_fasta(filename=args.fasta, servertype=args.db)
+
+if __name__ == "__main__":
+	main(sys.argv[1:])
