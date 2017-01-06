@@ -89,7 +89,7 @@ def get_sequences_fasta(filename, servertype='main'):
 def main(argv):
 	parser=argparse.ArgumentParser(description='Add taxonomies to database sequences. version '+__version__)
 	parser.add_argument('-f','--fasta',help='name of fasta file')
-	parser.add_argument('--db',help='name of database to connect to', defaut='main')
+	parser.add_argument('--db',help='name of database to connect to', default='main')
 	args=parser.parse_args(argv)
 	get_sequences_fasta(filename=args.fasta, servertype=args.db)
 
