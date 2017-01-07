@@ -209,7 +209,9 @@ def AddAnnotationParents(con,cur,annotationid,annotationdetails,commit=True):
 		numadded=0
 		for (cdetailtype,contologyterm) in annotationdetails:
 			parents=GetParents(con,cur,contologyterm)
+			debug(2,'term %s parents %s' % (contologyterm, parents))
 			for cpar in parents:
+				debug(2,'adding parent %s' % cpar)
 				cur.execute('INSERT INTO AnnotationParentsTable (idAnnotation,annotationDetail,ontology) VALUES (%s,%s,%s)',[annotationid,cdetailtype,cpar])
 				numadded+=1
 		debug(1,"Added %d annotationparents items" % numadded)
