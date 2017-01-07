@@ -208,7 +208,10 @@ def AddAnnotationParents(con,cur,annotationid,annotationdetails,commit=True):
 	try:
 		numadded=0
 		for (cdetailtype,contologyterm) in annotationdetails:
-			parents=GetParents(con,cur,contologyterm)
+			err, parents=GetParents(con,cur,contologyterm)
+			if err:
+				debug(6,'error getting parents for term %s: %s' % (contologyterm,err))
+				continue
 			debug(2,'term %s parents %s' % (contologyterm, parents))
 			for cpar in parents:
 				debug(2,'adding parent %s' % cpar)
