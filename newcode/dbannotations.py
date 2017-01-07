@@ -5,6 +5,7 @@ from utils import debug
 import datetime
 import psycopg2
 import dbontology
+from dbontology import GetParents
 
 
 def AddSequenceAnnotations(con,cur,sequences,primer,expid,annotationtype,annotationdetails,method='',description='',agenttype='',private='n',userid=None,commit=True):
@@ -117,11 +118,21 @@ def AddAnnotation(con,cur,expid,annotationtype,annotationdetails,method='',descr
 				expid,userid,annotationtypeid,methodid,description,agenttypeid,private,cdate])
 	cid=cur.fetchone()[0]
 	debug(2,"added annotation id is %d. adding %d annotationdetails" % (cid,len(annotationdetails)))
+
+	# add the annotation details (which ontology term is higer/lower/all etc.)
 	err,numadded=AddAnnotationDetails(con,cur,cid,annotationdetails,commit=False)
 	if err:
 		debug(3,"failed to add annotation details. aborting")
 		return err,-1
 	debug(2,"%d annotationdetails added" % numadded)
+
+	# add the parents of each ontology term to the annotationparentstable
+	err,numadded=AddAnnotationParents(con,cur,cid,annotationdetails,commit=False)
+	if err:
+		debug(3,"failed to add annotation parents. aborting")
+		return err,-1
+	debug(2,"%d annotation parents added" % numadded)
+
 	if commit:
 		con.commit()
 	return '',cid
@@ -171,6 +182,42 @@ def AddAnnotationDetails(con,cur,annotationid,annotationdetails,commit=True):
 		return '',numadded
 	except psycopg2.DatabaseError as e:
 		debug(7,"error %s enountered in AddAnnotationDetails" % e)
+		return e,-2
+
+
+def AddAnnotationParents(con,cur,annotationid,annotationdetails,commit=True):
+	"""
+	Add all the parent terms of each annotation detail ontology to the annotationparentstable
+
+	input:
+	con,cur
+	annotationid : int
+		the idAnnotation field
+	annotationdetails : list of tuples (detailtype,ontologyterm) of str
+		detailtype is ("higher","lower","all")
+		ontologyterm is string which should match the ontologytable terms
+	commit : bool (optional)
+		True (default) to commit, False to not commit to database
+
+	output:
+	err : str
+		error encountered or '' if ok
+	numadded : int
+		Number of annotations added to the AnnotationListTable or -1 if error
+	"""
+	try:
+		numadded=0
+		for (cdetailtype,contologyterm) in annotationdetails:
+			parents=GetParents(con,cur,contologyterm)
+			for cpar in parents:
+				cur.execute('INSERT INTO AnnotationParentsTable (idAnnotation,annotationDetail,ontology) VALUES (%s,%s,%s)',[annotationid,cdetailtype,cpar])
+				numadded+=1
+		debug(1,"Added %d annotationparents items" % numadded)
+		if commit:
+			con.commit()
+		return '',numadded
+	except psycopg2.DatabaseError as e:
+		debug(7,"error %s enountered in AddAnnotationParents" % e)
 		return e,-2
 
 
