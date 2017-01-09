@@ -207,12 +207,19 @@ def AddAnnotationParents(con,cur,annotationid,annotationdetails,commit=True):
 	"""
 	try:
 		numadded=0
+		parentsdict={}
 		for (cdetailtype,contologyterm) in annotationdetails:
 			err, parents=GetParents(con,cur,contologyterm)
 			if err:
 				debug(6,'error getting parents for term %s: %s' % (contologyterm,err))
 				continue
 			debug(2,'term %s parents %s' % (contologyterm, parents))
+			if cdetailtype not in parentsdict:
+				parentsdict[cdetailtype]=parents
+			else:
+				parentsdict[cdetailtype].extend(parents)
+		for cdetailtype,parents in parentsdict.items():
+			parents=list(set(parents))
 			for cpar in parents:
 				debug(2,'adding parent %s' % cpar)
 				cur.execute('INSERT INTO AnnotationParentsTable (idAnnotation,annotationDetail,ontology) VALUES (%s,%s,%s)',[annotationid,cdetailtype,cpar])
