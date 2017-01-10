@@ -221,6 +221,8 @@ def AddAnnotationParents(con,cur,annotationid,annotationdetails,commit=True):
 		for cdetailtype,parents in parentsdict.items():
 			parents=list(set(parents))
 			for cpar in parents:
+				cpar=cpar.lower()
+				cdetailtype=cdetailtype.lower()
 				debug(2,'adding parent %s' % cpar)
 				cur.execute('INSERT INTO AnnotationParentsTable (idAnnotation,annotationDetail,ontology) VALUES (%s,%s,%s)',[annotationid,cdetailtype,cpar])
 				numadded+=1
