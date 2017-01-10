@@ -103,7 +103,7 @@ def AddAnnotation(con,cur,expid,annotationtype,annotationdetails,method='',descr
 	if methodid<0:
 		return 'method %s unknown' % method,-1
 	# get annotationtypeid
-	agenttypeid=dbidval.GetIdFromDescription(con,cur,'AgentTypesTable',agenttype,noneok=True)
+	agenttypeid=dbidval.GetIdFromDescription(con,cur,'AgentTypesTable',agenttype,noneok=True,addifnone=True,commit=False)
 	if agenttypeid<0:
 		return 'agenttype %s unknown' % agenttype,-1
 	# get the current date
