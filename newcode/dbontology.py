@@ -168,7 +168,7 @@ def GetParents(con,cur,term):
 			return 'ontolgy term %s not found' % term,[]
 		debug(2,'converted synonym to termid')
 	plist=[termid]
-	parents=[termid]
+	parents=[term]
 	while len(plist)>0:
 		cid=plist.pop(0)
 		err,cparentids=GetTreeParentsById(con,cur,cid)
