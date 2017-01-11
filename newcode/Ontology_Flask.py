@@ -20,7 +20,7 @@ def ontology_add_term():
 			"term" : str
 				the new term to add (description from OntologyTable)
 			"parent" : str (optional)
-				default="root"
+				default="na"
 				if supplied, the id of the parent of this term (description from OntologyTable)
 			"ontologyname" : str (optional)
 				default = "scdb"
@@ -58,7 +58,7 @@ def ontology_add_term():
 		return('term missing',400)
 	parent=alldat.get('parent')
 	if parent is None:
-		parent='root'
+		parent='na'
 	ontologyname=alldat.get('ontologyname')
 	if ontologyname is None:
 		ontologyname='scdb'

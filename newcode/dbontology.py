@@ -3,7 +3,7 @@ from utils import debug
 import dbidval
 
 
-def AddTerm(con,cur,term,parent='root',ontologyname='scdb',synonyms=[],commit=True):
+def AddTerm(con,cur,term,parent='na',ontologyname='scdb',synonyms=[],commit=True):
 	"""
 	Add a term to the ontology table. Also add parent and synonyms if supplied
 
