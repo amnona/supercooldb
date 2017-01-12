@@ -3,6 +3,7 @@ import dbontology
 import json
 from utils import getdoc,debug
 import dbannotations
+from flask.ext.login import login_required
 
 Ontology_Flask_Obj = Blueprint('Ontology_Flask_Obj', __name__,template_folder='templates')
 
@@ -176,7 +177,7 @@ def ontology_get_synonym():
 
 
 @login_required
-@Annotation_Flask_Obj.route('/ontology/get_annotations',methods=['GET'])
+@Ontology_Flask_Obj.route('/ontology/get_annotations',methods=['GET'])
 def get_ontology_annotations():
 	"""
 	Title: get_annotations
