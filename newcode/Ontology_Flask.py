@@ -241,10 +241,11 @@ def get_ontology_annotations():
 			If annotation is not private, return it (no need for authentication)
 	"""
 	cfunc=get_ontology_annotations
-	alldat=request.get_json()
-	if alldat is None:
-		return(getdoc(cfunc))
-	ontology_term=alldat.get('term')
+	ontology_term=request.args.get('term')
+	# alldat=request.get_json()
+	# if alldat is None:
+	# 	return(getdoc(cfunc))
+	# ontology_term=alldat.get('term')
 	if ontology_term is None:
 		return('term parameter missing',400)
 	err,annotations=dbontology.GetTermAnnotations(g.con,g.cur,ontology_term)
