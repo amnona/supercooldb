@@ -242,12 +242,8 @@ def get_ontology_annotations():
 	"""
 	cfunc=get_ontology_annotations
 	ontology_term=request.args.get('term')
-	# alldat=request.get_json()
-	# if alldat is None:
-	# 	return(getdoc(cfunc))
-	# ontology_term=alldat.get('term')
 	if ontology_term is None:
-		return('term parameter missing',400)
+		return(getdoc(cfunc))
 	err,annotations=dbontology.GetTermAnnotations(g.con,g.cur,ontology_term)
 	if err:
 		debug(6,err)
