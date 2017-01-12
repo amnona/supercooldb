@@ -5,6 +5,7 @@ from utils import debug
 import datetime
 import psycopg2
 import dbontology
+from dbontology import GetParents
 
 
 def AddSequenceAnnotations(con,cur,sequences,primer,expid,annotationtype,annotationdetails,method='',description='',agenttype='',private='n',userid=None,commit=True):
@@ -102,7 +103,7 @@ def AddAnnotation(con,cur,expid,annotationtype,annotationdetails,method='',descr
 	if methodid<0:
 		return 'method %s unknown' % method,-1
 	# get annotationtypeid
-	agenttypeid=dbidval.GetIdFromDescription(con,cur,'AgentTypesTable',agenttype,noneok=True)
+	agenttypeid=dbidval.GetIdFromDescription(con,cur,'AgentTypesTable',agenttype,noneok=True,addifnone=True,commit=False)
 	if agenttypeid<0:
 		return 'agenttype %s unknown' % agenttype,-1
 	# get the current date
@@ -117,11 +118,21 @@ def AddAnnotation(con,cur,expid,annotationtype,annotationdetails,method='',descr
 				expid,userid,annotationtypeid,methodid,description,agenttypeid,private,cdate])
 	cid=cur.fetchone()[0]
 	debug(2,"added annotation id is %d. adding %d annotationdetails" % (cid,len(annotationdetails)))
+
+	# add the annotation details (which ontology term is higer/lower/all etc.)
 	err,numadded=AddAnnotationDetails(con,cur,cid,annotationdetails,commit=False)
 	if err:
 		debug(3,"failed to add annotation details. aborting")
 		return err,-1
 	debug(2,"%d annotationdetails added" % numadded)
+
+	# add the parents of each ontology term to the annotationparentstable
+	err,numadded=AddAnnotationParents(con,cur,cid,annotationdetails,commit=False)
+	if err:
+		debug(3,"failed to add annotation parents. aborting")
+		return err,-1
+	debug(2,"%d annotation parents added" % numadded)
+
 	if commit:
 		con.commit()
 	return '',cid
@@ -172,6 +183,88 @@ def AddAnnotationDetails(con,cur,annotationid,annotationdetails,commit=True):
 	except psycopg2.DatabaseError as e:
 		debug(7,"error %s enountered in AddAnnotationDetails" % e)
 		return e,-2
+
+
+def AddAnnotationParents(con,cur,annotationid,annotationdetails,commit=True):
+	"""
+	Add all the parent terms of each annotation detail ontology to the annotationparentstable
+
+	input:
+	con,cur
+	annotationid : int
+		the idAnnotation field
+	annotationdetails : list of tuples (detailtype,ontologyterm) of str
+		detailtype is ("higher","lower","all")
+		ontologyterm is string which should match the ontologytable terms
+	commit : bool (optional)
+		True (default) to commit, False to not commit to database
+
+	output:
+	err : str
+		error encountered or '' if ok
+	numadded : int
+		Number of annotations added to the AnnotationListTable or -1 if error
+	"""
+	try:
+		numadded=0
+		parentsdict={}
+		for (cdetailtype,contologyterm) in annotationdetails:
+			err, parents=GetParents(con,cur,contologyterm)
+			if err:
+				debug(6,'error getting parents for term %s: %s' % (contologyterm,err))
+				continue
+			debug(2,'term %s parents %s' % (contologyterm, parents))
+			if cdetailtype not in parentsdict:
+				parentsdict[cdetailtype]=parents
+			else:
+				parentsdict[cdetailtype].extend(parents)
+		for cdetailtype,parents in parentsdict.items():
+			parents=list(set(parents))
+			for cpar in parents:
+				cpar=cpar.lower()
+				cdetailtype=cdetailtype.lower()
+				debug(2,'adding parent %s' % cpar)
+				cur.execute('INSERT INTO AnnotationParentsTable (idAnnotation,annotationDetail,ontology) VALUES (%s,%s,%s)',[annotationid,cdetailtype,cpar])
+				numadded+=1
+		debug(1,"Added %d annotationparents items" % numadded)
+		if commit:
+			con.commit()
+		return '',numadded
+	except psycopg2.DatabaseError as e:
+		debug(7,"error %s enountered in AddAnnotationParents" % e)
+		return e,-2
+
+
+def GetAnnotationParents(con,cur,annotationid):
+	'''
+	Get the ontology parents list for the annotation
+
+	inpit:
+	con,cur
+	annotationid : int
+		the annotationid for which to show the list of ontology terms
+
+	output:
+	err: str
+		error encountered or '' if ok
+	parents : dict of (str:list of str) (detail type (i.e. 'higher in'), list of ontology terms)
+	'''
+	debug(1,'GetAnnotationParents for id %d' % annotationid)
+	cur.execute('SELECT (annotationdetail,ontology) FROM AnnotationParentsTable WHERE idannotation=%s',[annotationid])
+	if cur.rowcount==0:
+		errmsg='No Annotation Parents found for annotationid %d in AnnotationParentsTable' % annotationid
+		debug(3,errmsg)
+		return(errmsg,{})
+	parents={}
+	for cres in cur.fetchall():
+		cdetail=cres[0]
+		conto=cres[1]
+		if cdetail in parents:
+			parents[cdetail].append(conto)
+		else:
+			parents[cdetail]=[conto]
+	debug(1,'found %d detail types' % len(parents))
+	return '',parents
 
 
 def GetAnnotationDetails(con,cur,annotationid):

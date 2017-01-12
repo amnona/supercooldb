@@ -2,6 +2,8 @@ from flask import Blueprint, g,request
 import dbontology
 import json
 from utils import getdoc,debug
+import dbannotations
+from flask.ext.login import login_required
 
 Ontology_Flask_Obj = Blueprint('Ontology_Flask_Obj', __name__,template_folder='templates')
 
@@ -20,7 +22,7 @@ def ontology_add_term():
 			"term" : str
 				the new term to add (description from OntologyTable)
 			"parent" : str (optional)
-				default="root"
+				default="na"
 				if supplied, the id of the parent of this term (description from OntologyTable)
 			"ontologyname" : str (optional)
 				default = "scdb"
@@ -58,7 +60,7 @@ def ontology_add_term():
 		return('term missing',400)
 	parent=alldat.get('parent')
 	if parent is None:
-		parent='root'
+		parent='na'
 	ontologyname=alldat.get('ontologyname')
 	if ontologyname is None:
 		ontologyname='scdb'
@@ -173,3 +175,77 @@ def ontology_get_synonym():
 	jsonRetData = db_access.DB_ACCESS_FLASK_SynonymTable_GetRecsByStartId(cid,g.con,g.cur)
 	return json.dumps(jsonRetData, ensure_ascii=False)
 
+
+@login_required
+@Ontology_Flask_Obj.route('/ontology/get_annotations',methods=['GET'])
+def get_ontology_annotations():
+	"""
+	Title: get_annotations
+	Description : Get all annotations associated with an ontology term
+	URL: ontology/get_annotations
+	Method: GET
+	URL Params:
+	Data Params: JSON
+		{
+			term : str
+				the ontology term to get the annotations for
+		}
+	Success Response:
+		Code : 200
+		Content :
+		{
+			"annotations" : list of
+				{
+					"annotationid" : int
+						the id of the annotation
+					"userid" : int
+						The user id
+						(id from UsersTable)
+					"user" : str
+						name of the user who added this annotation
+						(userName from UsersTable)
+					"addedDate" : str (DD-MM-YYYY HH:MM:SS)
+						date when the annotation was added
+						(addedDate from CurationsTable)
+					"expid" : int
+						the ID of the experiment from which this annotation originated
+						(uniqueId from ExperimentsTable)
+						(see Query Experiment)
+					"currType" : str
+						curration type (differential expression/contaminant/etc.)
+						(description from CurationTypesTable)
+					"method" : str
+						The method used to detect this behavior (i.e. observation/ranksum/clustering/etc")
+						(description from MethodTypesTable)
+					"agentType" : str
+						Name of the program which submitted this annotation (i.e. heatsequer)
+						(description from AgentTypesTable)
+					"description" : str
+						Free text describing this annotation (i.e. "lower in green tomatoes comapred to red ones")
+					"private" : bool
+						True if the curation is private, False if not
+					"CurationList" : list of
+						{
+							"detail" : str
+								the type of detail (i.e. ALL/HIGH/LOW)
+								(description from CurationDetailsTypeTable)
+							"term" : str
+								the ontology term for this detail (i.e. feces/ibd/homo sapiens)
+								(description from OntologyTable)
+						}
+				}
+		}
+	Details :
+		Validation:
+			If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
+			If annotation is not private, return it (no need for authentication)
+	"""
+	cfunc=get_ontology_annotations
+	ontology_term=request.args.get('term')
+	if ontology_term is None:
+		return(getdoc(cfunc))
+	err,annotations=dbontology.GetTermAnnotations(g.con,g.cur,ontology_term)
+	if err:
+		debug(6,err)
+		return ('Problem geting details. error=%s' % err,400)
+	return json.dumps({'annotations':annotations})
