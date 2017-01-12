@@ -1,6 +1,7 @@
 import psycopg2
 from utils import debug
 import dbidval
+import dbannotations
 
 
 def AddTerm(con,cur,term,parent='na',ontologyname='scdb',synonyms=[],commit=True):
@@ -211,3 +212,32 @@ def GetSynonymTermId(con,cur,synonym):
 	except psycopg2.DatabaseError as e:
 		debug(7,"error %s enountered in GetSynonymTermId" % e)
 		return "error %s enountered in GetSynonymTermId" % e,-2
+
+
+def GetTermAnnotations(con,cur,term):
+	'''
+	Get details for all annotations which contain the ontology term "term" as a parent of (or exact) annotation detail
+
+	input:
+	con, cur
+	term : str
+		the ontology term to search
+
+	output:
+	annotations : list of dict
+		list of annotation details per annotation which contains the term
+	'''
+	cur.execute('SELECT idannotation FROM AnnotationParentsTable WHERE ontology=%s',[term])
+	if cur.rowcount==0:
+		debug(3,'no annotations for term %s' % term)
+		return '',[]
+	res=cur.fetchall()
+	annotations=[]
+	for cres in res:
+		err,cdetails=dbannotations.GetAnnotationsFromID(con,cur,cres[0])
+		if err:
+			debug(6,err)
+			continue
+		annotations.append(cdetails)
+	debug(3,'found %d annotations' % len(annotations))
+	return '',annotations

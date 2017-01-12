@@ -235,6 +235,38 @@ def AddAnnotationParents(con,cur,annotationid,annotationdetails,commit=True):
 		return e,-2
 
 
+def GetAnnotationParents(con,cur,annotationid):
+	'''
+	Get the ontology parents list for the annotation
+
+	inpit:
+	con,cur
+	annotationid : int
+		the annotationid for which to show the list of ontology terms
+
+	output:
+	err: str
+		error encountered or '' if ok
+	parents : dict of (str:list of str) (detail type (i.e. 'higher in'), list of ontology terms)
+	'''
+	debug(1,'GetAnnotationParents for id %d' % annotationid)
+	cur.execute('SELECT (annotationdetail,ontology) FROM AnnotationParentsTable WHERE idannotation=%s',[annotationid])
+	if cur.rowcount==0:
+		errmsg='No Annotation Parents found for annotationid %d in AnnotationParentsTable' % annotationid
+		debug(3,errmsg)
+		return(errmsg,{})
+	parents={}
+	for cres in cur.fetchall():
+		cdetail=cres[0]
+		conto=cres[1]
+		if cdetail in parents:
+			parents[cdetail].append(conto)
+		else:
+			parents[cdetail]=[conto]
+	debug(1,'found %d detail types' % len(parents))
+	return '',parents
+
+
 def GetAnnotationDetails(con,cur,annotationid):
 	"""
 	Get the annotation details list for annotationid
