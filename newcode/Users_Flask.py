@@ -75,8 +75,6 @@ def register_user():
 	URL Params:
 	Data Params: JSON
 		{
-			"sequence" : str
-				the sequence to get data about
 			'user': str
 				user name
 			'pwd': str,

@@ -215,8 +215,8 @@ def addUser(con,cur,user,pwd,name,description,mail,publish):
     isactive = "y"
     attemptscounter = 0
     try:
-        debug(3,"insert into userstable (username, passwordhash,name,description,isactive,publishemail,email,attemptscounter) values (%s, crypt(%s, gen_salt('bf')), %s, %s , %s, %s, %s, %s)" % (user, pwd,name,description,isactive,publish,mail,attemptscounter))
-        cur.execute("insert into userstable (username, passwordhash,name,description,isactive,publishemail,email,attemptscounter) values (%s, crypt(%s, gen_salt('bf')), %s, %s , %s, %s, %s, %s)" , [user,pwd,name,description,isactive,publish,mail,attemptscounter])
+        debug(3,"insert into userstable (username, passwordhash,name,description,isactive,shareemail,email,attemptscounter) values (%s, crypt(%s, gen_salt('bf')), %s, %s , %s, %s, %s, %s)" % (user, pwd,name,description,isactive,publish,mail,attemptscounter))
+        cur.execute("insert into userstable (username, passwordhash,name,description,isactive,shareemail,email,attemptscounter) values (%s, crypt(%s, gen_salt('bf')), %s, %s , %s, %s, %s, %s)" , [user,pwd,name,description,isactive,publish,mail,attemptscounter])
         con.commit()
         return "",1
     except psycopg2.DatabaseError as e:
