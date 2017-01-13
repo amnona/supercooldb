@@ -1,5 +1,6 @@
 from flask import Blueprint,request,g
 from flask.ext.login import login_required
+from flask.ext.login import current_user
 import json
 import dbsequences
 import dbannotations
@@ -161,6 +162,7 @@ def get_sequence_annotations():
 			If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
 			If annotation is not private, return it (no need for authentication)
 	"""
+	debug(1,'current user: %s' % current_user.user_id)
 	cfunc=get_sequence_annotations
 	alldat=request.get_json()
 	if alldat is None:
