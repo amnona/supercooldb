@@ -698,7 +698,7 @@ def GetFastAnnotations(con,cur,sequences,region=None,userid=0):
 		if sid == -1:
 			continue
 		# get annotations for the sequence
-		cur.execute('SELECT annotationid FROM SequenceAnnotationTable WHERE seqid=%s',[sid])
+		cur.execute('SELECT annotationid FROM SequencesAnnotationTable WHERE seqid=%s',[sid])
 		res = cur.fetchall()
 		for cres in res:
 			cannotationid = cres[0]
