@@ -162,7 +162,6 @@ def get_sequence_annotations():
 			If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
 			If annotation is not private, return it (no need for authentication)
 	"""
-	debug(1,'current user: %s' % current_user.user_id)
 	cfunc=get_sequence_annotations
 	alldat=request.get_json()
 	if alldat is None:
@@ -170,13 +169,14 @@ def get_sequence_annotations():
 	sequence=alldat.get('sequence')
 	if sequence is None:
 		return('sequence parameter missing',400)
-	err,details=dbannotations.GetSequenceAnnotations(g.con,g.cur,sequence)
+	err,details=dbannotations.GetSequenceAnnotations(g.con,g.cur,sequence, userid=current_user.user_id)
 	if err:
 		debug(6,err)
 		return ('Problem geting details. error=%s' % err,400)
 	return json.dumps({'annotations':details})
 
 
+@login_required
 @Seq_Flask_Obj.route('/sequences/get_list_annotations',methods=['GET'])
 def get_sequence_list_annotations():
 	"""
@@ -253,7 +253,7 @@ def get_sequence_list_annotations():
 		return('sequences parameter missing',400)
 	seqannotations=[]
 	for cseq in sequences:
-		err,details=dbannotations.GetSequenceAnnotations(g.con,g.cur,cseq)
+		err,details=dbannotations.GetSequenceAnnotations(g.con,g.cur,cseq,userid=current_user.user_id)
 		if err:
 			debug(6,err)
 			return ('Problem geting details. error=%s' % err,400)
@@ -262,6 +262,7 @@ def get_sequence_list_annotations():
 	return json.dumps({'seqannotations':seqannotations})
 
 
+@login_required
 @Seq_Flask_Obj.route('/sequences/get_annotations_string',methods=['GET'])
 def get_annotations_string():
 	cfunc=get_annotations_string
@@ -271,10 +272,8 @@ def get_annotations_string():
 	sequence=alldat.get('sequence')
 	if sequence is None:
 		return('sequence parameter missing',400)
-	err,details=dbannotations.GetSequenceAnnotations(g.con,g.cur,sequence)
+	err,details=dbannotations.GetSequenceAnnotations(g.con,g.cur,sequence,userid=current_user.user_id)
 	if err:
 		debug(6,err)
 		return ('Problem geting details. error=%s' % err,400)
 	return json.dumps({'annotations':details})
-
-
