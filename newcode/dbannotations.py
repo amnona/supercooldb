@@ -712,7 +712,7 @@ def GetFastAnnotations(con,cur,sequences,region=None,userid=0):
 				debug(1,'adding details')
 				annotations[cannotationid] = cdetails
 			else:
-				debug(1,'annotation %d already in list', cannotationid)
+				debug(1,'annotation %d already in list' % cannotationid)
 			cseqannotationids.append(cannotationid)
 		seqannotations.append((cseqpos, cseqannotationids))
 	debug(1,'found %d annotations, %d annotated sequences' % (len(annotations), len(seqannotations)))
