@@ -702,17 +702,13 @@ def GetFastAnnotations(con,cur,sequences,region=None,userid=0):
 		res = cur.fetchall()
 		for cres in res:
 			cannotationid = cres[0]
-			debug(1,'%d' % cannotationid)
 			# if annotation not in annotations list - add it
 			if cannotationid not in annotations:
 				err,cdetails=GetAnnotationsFromID(con,cur,cannotationid,userid=userid)
 				# if we didn't get annotation details, probably they are private - just ignore
 				if cdetails is None:
 					continue
-				debug(1,'adding details')
 				annotations[cannotationid] = cdetails
-			else:
-				debug(1,'annotation %d already in list' % cannotationid)
 			cseqannotationids.append(cannotationid)
 		seqannotations.append((cseqpos, cseqannotationids))
 	debug(1,'found %d annotations, %d annotated sequences' % (len(annotations), len(seqannotations)))
