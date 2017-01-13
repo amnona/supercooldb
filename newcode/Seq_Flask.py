@@ -254,9 +254,9 @@ def get_sequence_list_annotations():
 	seqannotations=[]
 	for cseq in sequences:
 		err,details=dbannotations.GetSequenceAnnotations(g.con,g.cur,cseq,userid=current_user.user_id)
-		if err:
-			debug(6,err)
-			return ('Problem geting details. error=%s' % err,400)
+		# if err:
+		# 	debug(6,err)
+		# 	return ('Problem geting details. error=%s' % err,400)
 		seqannotations.append(details)
 
 	return json.dumps({'seqannotations':seqannotations})
