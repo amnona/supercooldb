@@ -250,7 +250,7 @@ def GetAnnotationParents(con,cur,annotationid):
 	parents : dict of (str:list of str) (detail type (i.e. 'higher in'), list of ontology terms)
 	'''
 	debug(1,'GetAnnotationParents for id %d' % annotationid)
-	cur.execute('SELECT (annotationdetail,ontology) FROM AnnotationParentsTable WHERE idannotation=%s',[annotationid])
+	cur.execute('SELECT annotationdetail,ontology FROM AnnotationParentsTable WHERE idannotation=%s',[annotationid])
 	if cur.rowcount==0:
 		errmsg='No Annotation Parents found for annotationid %d in AnnotationParentsTable' % annotationid
 		debug(3,errmsg)
@@ -258,9 +258,6 @@ def GetAnnotationParents(con,cur,annotationid):
 	parents={}
 	res=cur.fetchall()
 	for cres in res:
-		debug(1,cres)
-		debug(1,cres[0])
-		debug(1,cres[1])
 		cdetail=cres[0]
 		conto=cres[1]
 		if cdetail in parents:
