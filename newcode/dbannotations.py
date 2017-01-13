@@ -256,7 +256,8 @@ def GetAnnotationParents(con,cur,annotationid):
 		debug(3,errmsg)
 		return(errmsg,{})
 	parents={}
-	for cres in cur.fetchall():
+	res=cur.fetchall()
+	for cres in res:
 		debug(1,cres)
 		debug(1,cres[0])
 		debug(1,cres[1])
