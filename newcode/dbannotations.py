@@ -662,3 +662,54 @@ def DeleteSequenceFromAnnotation(con,cur,sequences,annotationid,userid=0,commit=
 	if commit:
 		con.commit()
 	return('')
+
+
+
+def GetFastAnnotations(con,cur,sequences,region=None,userid=0):
+	"""
+	Get annotations for a list of sequences in a compact form
+
+	input:
+	con,cur :
+	sequences : list of str ('ACGT')
+		the sequences to search for in the database
+	region : int (optional)
+		None to not compare region, or the regionid the sequence is from
+	userid : int (optional)
+		the id of the user requesting the annotations. Provate annotations with non-matching user will not be returned
+
+	output:
+	err : str
+		The error encountered or '' if ok
+	annotations : dict of (annotationid : annotation details (see GetAnnotationsFromID() )
+		a dict containing all annotations relevant to any of the sequences and the details about them
+	seqannotations : list of (seqpos, annotationids)
+		list of tuples.
+		seqpos : the position (in sequences) of the sequence with annotations
+		annotationsids : list of int
+			the ids of annotations about this sequence
+	"""
+	debug(1,'GetFastAnnotations for %d sequences' % len(sequences))
+	annotations={}
+	seqannotations=[]
+	for cseqpos, cseq in enumerate(sequences):
+		cseqannotationids = []
+		err,sid=dbsequences.GetSequenceId(con,cur,cseq,region)
+		if sid == -1:
+			continue
+		# get annotations for the sequence
+		cur.execute('SELECT annotationid FROM SequenceAnnotationTable WHERE seqid=%s',[sid])
+		res = cur.fetchall()
+		for cres in res:
+			cannotationid = cres[0]
+			# if annotation not in annotations list - add it
+			if cannotationid not in annotations:
+				err,cdetails=GetAnnotationsFromID(con,cur,cres[0],userid=userid)
+				# if we didn't get annotation details, probably they are private - just ignore
+				if cdetails is None:
+					continue
+				annotations[cannotationid] = cdetails
+			cseqannotationids.append(cannotationid)
+		seqannotations.append((cseqpos, cseqannotationids))
+	debug(1,'found %d annotations, %d annotated sequences' % (len(annotations), len(seqannotations)))
+	return '', annotations, seqannotations
