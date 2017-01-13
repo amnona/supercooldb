@@ -257,6 +257,7 @@ def GetAnnotationParents(con,cur,annotationid):
 		return(errmsg,{})
 	parents={}
 	for cres in cur.fetchall():
+		debug(1,cres)
 		cdetail=cres[0]
 		conto=cres[1]
 		if cdetail in parents:
