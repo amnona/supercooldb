@@ -94,6 +94,7 @@ def get_sequenceid():
 	return json.dumps({"seqId":seqid})
 
 
+@login_required
 @Seq_Flask_Obj.route('/sequences/get_annotations',methods=['GET'])
 def get_sequence_annotations():
 	"""
