@@ -708,6 +708,8 @@ def GetFastAnnotations(con,cur,sequences,region=None,userid=0):
 				# if we didn't get annotation details, probably they are private - just ignore
 				if cdetails is None:
 					continue
+				err,parents = GetAnnotationParents(con,cur,cannotationid)
+				cdetails['parents']=parents
 				annotations[cannotationid] = cdetails
 			cseqannotationids.append(cannotationid)
 		seqannotations.append((cseqpos, cseqannotationids))
