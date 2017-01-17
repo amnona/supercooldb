@@ -402,7 +402,7 @@ def get_taxonomy_annotation_ids():
 	taxonomy=alldat.get('taxonomy')
 	if taxonomy is None:
 		return('taxonomy parameter missing',400)
-	err, annotationids = dbsequences.GetTaxonomuAnnotationIDs(g.con, g.cur, taxonomy, userid=current_user.user_id)
+	err, annotationids = dbsequences.GetTaxonomyAnnotationIDs(g.con, g.cur, taxonomy, userid=current_user.user_id)
 	if err:
 		errmsg='error encountered searching for taxonomy annotations for taxonomy %s: %s' % (taxonomy, err)
 		debug(6,errmsg)
