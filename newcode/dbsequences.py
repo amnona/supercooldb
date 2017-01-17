@@ -216,9 +216,15 @@ def GetTaxonomyAnnotationIDs(con, cur, taxonomy, userid=None):
 	debug(1,'GetTaxonomyAnnotationIDS for taxonomy %s' % taxonomy)
 	cur.execute('SELECT id from SequencesTable where taxonomy LIKE %s',['%'+taxonomy+'%'])
 	res = cur.fetchall()
-	annotationids = []
+	seqids = []
 	for cres in res:
-		annotationids.append(cres[0])
-	annotationids = list(set(annotationids))
-	debug(1,'found %d matching unqiue annoations for the taxonomy' % len(annotationids))
-	return '',annotationids
+		seqids.append(cres[0])
+	debug(1,'found %d matching sequences for the taxonomy' % len(seqids))
+	annotationids = set()
+	for cseq in seqids:
+		cur.execute('SELECT annotationid from sequencesAnnotationTable where seqid=%s',[cseq])
+		res = cur.fetchall()
+		for cres in res:
+			annotationids.add(cres[0])
+	debug(1,'found %d unique annotations for the taxonomy' % len(annotationids))
+	return '',list(annotationids)
