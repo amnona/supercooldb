@@ -345,3 +345,39 @@ def get_annotation():
 		debug(6,err)
 		return ('Problem geting details. error=%s' % err,400)
 	return json.dumps(annotation)
+
+
+@login_required
+@Annotation_Flask_Obj.route('/annotations/get_annotation_ontology_parents',methods=['GET'])
+def get_annotation_ontology_parents():
+	"""
+	Title: get_annotation_ontology_parents
+	Description : Get all the ontology terms (and their parents in the ontolgy DAG) for the annotation
+	URL: annotations/get_annotation_ontology_parents
+	Method: GET
+	URL Params:
+	Data Params: JSON
+		{
+			annotationid : int
+				the annotationid to get the ontology parents for
+		}
+	Success Response:
+		Code : 200
+		Content :
+		{
+			parents : dict of (str:list of str) (detail type (i.e. 'higher in'), list of ontology terms)
+		}
+	Details :
+		Validation:
+			If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
+			If annotation is not private, return it (no need for authentication)
+	"""
+	cfunc=get_annotation_ontology_parents
+	annotationid=int(request.args.get('annotationid'))
+	if annotationid is None:
+		return(getdoc(cfunc))
+	err,parents=dbannotations.GetAnnotationParents(g.con,g.cur,annotationid)
+	if err:
+		debug(6,err)
+		return ('Problem geting details. error=%s' % err,400)
+	return json.dumps(parents)
