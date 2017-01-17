@@ -408,3 +408,43 @@ def get_taxonomy_annotation_ids():
 		debug(6,errmsg)
 		return(errmsg, 400)
 	return json.dumps({'annotationids':annotationids})
+
+
+@login_required
+@Seq_Flask_Obj.route('/sequences/get_taxonomy_annotations',methods=['GET'])
+def get_taxonomy_annotations():
+	"""
+	Title: Get taxonomy annotation ids
+	Description : Get annotation ids for taxonomy substring
+	URL: /sequences/get_taxonomy_annotation_ids
+	Method: GET
+	URL Params:
+	Data Params: JSON
+		{
+			taxonomy : str
+				the taxonomy substring to look for
+		}
+	Success Response:
+		Code : 200
+		Content :
+		{
+			annotations : list of annotation details
+				the annotation details for all annotations that contain a sequence with the requested taxonomy (see /sequences/get_annotations)
+		}
+	Validation:
+		If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
+		If annotation is not private, return it (no need for authentication)
+	"""
+	cfunc=get_taxonomy_annotations
+	alldat=request.get_json()
+	if alldat is None:
+		return(getdoc(cfunc))
+	taxonomy=alldat.get('taxonomy')
+	if taxonomy is None:
+		return('taxonomy parameter missing',400)
+	err, annotations = dbsequences.GetTaxonomyAnnotations(g.con, g.cur, taxonomy, userid=current_user.user_id)
+	if err:
+		errmsg='error encountered searching for taxonomy annotations for taxonomy %s: %s' % (taxonomy, err)
+		debug(6,errmsg)
+		return(errmsg, 400)
+	return json.dumps({'annotations':annotations})

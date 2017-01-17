@@ -2,6 +2,8 @@ import primers
 from utils import debug
 import psycopg2
 
+import dbannotations
+
 # length for the seed sequence
 # used for fast searching of sub sequences
 SEED_SEQ_LEN = 100
@@ -226,5 +228,42 @@ def GetTaxonomyAnnotationIDs(con, cur, taxonomy, userid=None):
 		res = cur.fetchall()
 		for cres in res:
 			annotationids.add(cres[0])
+	# NOTE: need to add user validation for the ids!!!!!!
 	debug(1,'found %d unique annotations for the taxonomy' % len(annotationids))
 	return '',list(annotationids)
+
+
+def GetTaxonomyAnnotations(con, cur, taxonomy, userid=None):
+	'''
+	Get annotations for all annotations containing any sequence matching the taxonomy (substring)
+
+	Parameters
+	----------
+	con,cur
+	taxonomy : str
+		the taxonomy substring to look for
+	userid : int (optional)
+		the userid of the querying user (to enable searching private annotations)
+
+	Returns
+	-------
+	annotations : list of annotations (see dbannotations.GetAnnotationsFromID() )
+		list containing the details for all annotations that contain a sequence with the taxonomy
+	'''
+	debug(1,'GetTaxonomyAnnotations for taxonomy %s' % taxonomy)
+	# get the annotation ids
+	err,annotationids = GetTaxonomyAnnotationIDs(con, cur, taxonomy, userid)
+	if err:
+		errmsg = 'Failed to get annotationIDs for taxonomy %s: %s' % (taxonomy, err)
+		debug(6, errmsg)
+		return errmsg,None
+	# and get the annotation details for each
+	annotations=[]
+	for cid in annotationids:
+		err,cdetails = dbannotations.GetAnnotationsFromID(con,cur,cid)
+		if err:
+			debug(6,err)
+			continue
+		annotations.append(cdetails)
+	debug(1,'got %d details' % len(annotations))
+	return '',annotations
