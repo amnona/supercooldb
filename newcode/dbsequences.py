@@ -193,3 +193,32 @@ def GetSequenceId(con,cur,sequence,idprimer=None, use_full_lengh=False):
 	# 		return "",sid
 	# debug(2,'sequence %s not found with primer. non primer matches: %d' % (sequence,cur.rowcount))
 	# return 'sequence %s not found with primer. non primer matches: %d' % (sequence,cur.rowcount),-1
+
+
+def GetTaxonomyAnnotationIDs(con, cur, taxonomy, userid=None):
+	'''
+	Get annotationids for all annotations containing any sequence matching the taxonomy (substring)
+
+	Parameters
+	----------
+	con,cur
+	taxonomy : str
+		the taxonomy substring to look for
+	userid : int (optional)
+		the userid of the querying user (to enable searching private annotations)
+
+	Returns
+	-------
+	annotationids : list of int
+		list containing the ids of all annotations that contain a sequence with teh taxonomy
+	'''
+	taxonomy = taxonomy.lower()
+	debug(1,'GetTaxonomyAnnotationIDS for taxonomy %s' % taxonomy)
+	cur.execute('SELECT id from SequencesTable where taxonomy LIKE %s',['%'+taxonomy+'%'])
+	res = cur.fetchall()
+	annotationids = []
+	for cres in res:
+		annotationids.append(cres[0])
+	annotationids = list(set(annotationids))
+	debug(1,'found %d matching unqiue annoations for the taxonomy' % len(annotationids))
+	return '',annotationids
