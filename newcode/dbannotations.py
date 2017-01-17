@@ -584,7 +584,7 @@ def GetFullSequencesFromAnnotationID(con,cur,annotationid,userid=0):
 	err,seqs = dbsequences.SeqFromID(con,cur,seqids)
 	if err:
 		return err,[]
-	return seqs
+	return '',seqs
 
 
 def GetAnnotationUser(con,cur,annotationid):
