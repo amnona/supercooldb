@@ -373,7 +373,11 @@ def get_annotation_ontology_parents():
 			If annotation is not private, return it (no need for authentication)
 	"""
 	cfunc=get_annotation_ontology_parents
-	annotationid=int(request.args.get('annotationid'))
+	alldat=request.get_json()
+	if alldat is None:
+		return ('No json parameters supplied',400)
+	annotationid=alldat.get('annotationid')
+	# annotationid=int(request.args.get('annotationid'))
 	if annotationid is None:
 		return(getdoc(cfunc))
 	err,parents=dbannotations.GetAnnotationParents(g.con,g.cur,annotationid)
