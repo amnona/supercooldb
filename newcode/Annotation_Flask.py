@@ -110,7 +110,7 @@ def add_annotations():
 def get_annotation_sequences():
 	"""
 	Title: get_sequences
-	Description : Get all sequences associated with an annotation
+	Description : Get all sequences ids associated with an annotation
 	URL: annotations/get_sequences
 	Method: GET
 	URL Params:
@@ -143,6 +143,46 @@ def get_annotation_sequences():
 		debug(6,err)
 		return ('Problem geting details. error=%s' % err,400)
 	return json.dumps({'seqids':seqids})
+
+
+@login_required
+@Annotation_Flask_Obj.route('/annotations/get_full_sequences',methods=['GET'])
+def get_annotation_full_sequences():
+	"""
+	Title: get_full_sequences
+	Description : Get all the sequences (ACGT) associated with an annotation
+	URL: annotations/get_full_sequences
+	Method: GET
+	URL Params:
+	Data Params: JSON
+		{
+			annotationid : int
+				the annotationid to get the sequences for
+		}
+	Success Response:
+		Code : 200
+		Content :
+		{
+			seqs : list of str (ACGT)
+				the sequences participating in this annotation
+		}
+	Details :
+		Validation:
+			If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
+			If annotation is not private, return it (no need for authentication)
+	"""
+	cfunc=get_annotation_full_sequences
+	alldat=request.get_json()
+	if alldat is None:
+		return ('No json parameters supplied',400)
+	annotationid=alldat.get('annotationid')
+	if annotationid is None:
+		return('annotationid parameter missing',400)
+	err,seqids=dbannotations.GetFullSequencesFromAnnotationID(g.con,g.cur,annotationid,userid=current_user.user_id)
+	if err:
+		debug(6,err)
+		return ('Problem geting details. error=%s' % err,400)
+	return json.dumps({'seqs':seqids})
 
 
 @login_required

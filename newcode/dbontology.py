@@ -227,6 +227,7 @@ def GetTermAnnotations(con,cur,term):
 	annotations : list of dict
 		list of annotation details per annotation which contains the term
 	'''
+	term = term.lower()
 	cur.execute('SELECT idannotation FROM AnnotationParentsTable WHERE ontology=%s',[term])
 	if cur.rowcount==0:
 		debug(3,'no annotations for term %s' % term)

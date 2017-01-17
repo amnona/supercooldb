@@ -69,6 +69,32 @@ def AddSequences(con,cur,sequences,taxonomies=None,ggids=None,primer='V4',commit
 		return "database error %s" % e,None
 
 
+def SeqFromID(con,cur,seqids):
+	'''
+	Get sequences (ACGT) from sequence id or list of sequence ids
+
+	input:
+	con,cur
+	seqids : int or list of int
+		the ids to get the sequences for
+
+	output:
+	seqs : list of str (ACGT)
+		list of sequences (one per input). Note if sequence id does not exist, this sequence is empty ('') in the list
+	'''
+	if isinstance(seqids,int):
+		seqids=[seqids]
+	seqs=[]
+	for cseqid in seqids:
+		cur.execute('SELECT sequence FROM SequencesTable WHERE id=%s',[cseqid])
+		if cur.rowcount==0:
+			seqs.append('')
+			continue
+		res = cur.fetchone()
+		seqs.append(res[0])
+	return '',seqs
+
+
 def GetSequencesId(con,cur,sequences):
 	"""
 	Get sequence ids for a sequence or list of sequences
@@ -83,6 +109,8 @@ def GetSequencesId(con,cur,sequences):
 	ids : ilist of int
 		the list of ids for each sequence (-1 for sequences which were not found)
 	"""
+	if isinstance(sequences,str):
+		sequences=[sequences]
 	ids=[]
 	for cseq in sequences:
 		err,cid=GetSequenceId(con,cur,cseq)
@@ -94,7 +122,7 @@ def GetSequencesId(con,cur,sequences):
 
 def GetSequenceId(con,cur,sequence,idprimer=None, use_full_lengh=False):
 	"""
-	Get sequence ids for a sequence or list of sequences
+	Get sequence ids for a sequence
 
 	input:
 	con,cur : database connection and cursor

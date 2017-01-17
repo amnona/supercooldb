@@ -528,7 +528,7 @@ def GetAnnotationsFromExpId(con,cur,expid,userid):
 
 def GetSequencesFromAnnotationID(con,cur,annotationid,userid=0):
 	"""
-	Get a list of sequences which are a part of the annotation annotationid
+	Get a list of sequence ids which are a part of the annotation annotationid
 
 	input:
 	con,cur:
@@ -541,7 +541,7 @@ def GetSequencesFromAnnotationID(con,cur,annotationid,userid=0):
 	err : str
 		The error encountered or '' if ok
 	seqids : list of int
-		the sequenceids associated with the annotationid
+		the sequence ids associated with the annotationid
 	"""
 	debug(1,"GetSequencesFromAnnotationID for annotationid %d" % annotationid)
 	err,canview=IsAnnotationVisible(con,cur,annotationid,userid)
@@ -558,6 +558,33 @@ def GetSequencesFromAnnotationID(con,cur,annotationid,userid=0):
 		seqids.append(cres[0])
 	debug(1,"Found %d sequences associated" % len(seqids))
 	return '',seqids
+
+
+def GetFullSequencesFromAnnotationID(con,cur,annotationid,userid=0):
+	"""
+	Get a list of sequences (ACGT) which are a part of the annotation annotationid
+
+	input:
+	con,cur:
+	annottionid : int
+		the annotationid to get the associated sequences for
+	userid : int (optional)
+		the user performing the query (or None if unknown). Used to hide private annotations not by the user
+
+	output:
+	err : str
+		The error encountered or '' if ok
+	seqs : list of str (ACGT)
+		the sequences associated with the annotationid
+	"""
+	debug(1,"GetSequencesFromAnnotationID for annotationid %d" % annotationid)
+	err, seqids = GetSequencesFromAnnotationID(con,cur,annotationid,userid)
+	if err:
+		return err,[]
+	err,seqs = dbsequences.SeqFromID(con,cur,seqids)
+	if err:
+		return err,[]
+	return seqs
 
 
 def GetAnnotationUser(con,cur,annotationid):
