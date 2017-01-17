@@ -384,4 +384,4 @@ def get_annotation_ontology_parents():
 	if err:
 		debug(6,err)
 		return ('Problem geting details. error=%s' % err,400)
-	return json.dumps(parents)
+	return json.dumps({'parents':parents})
