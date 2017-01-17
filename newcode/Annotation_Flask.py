@@ -163,7 +163,7 @@ def get_annotation_full_sequences():
 		Code : 200
 		Content :
 		{
-			seqs : list of str (ACGT)
+			sequences : list of str (ACGT)
 				the sequences participating in this annotation
 		}
 	Details :
@@ -182,7 +182,7 @@ def get_annotation_full_sequences():
 	if err:
 		debug(6,err)
 		return ('Problem geting details. error=%s' % err,400)
-	return json.dumps({'seqs':seqids})
+	return json.dumps({'sequences':seqids})
 
 
 @login_required
