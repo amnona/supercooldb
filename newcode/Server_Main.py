@@ -62,6 +62,7 @@ def load_user(request):
 	else:
 		userName = None
 		password = None
+	debug(1,'username is %s' % userName)
 
 	# use default user name when it was not sent
 	if(userName is None and password is None):
@@ -83,7 +84,7 @@ def load_user(request):
 	# user was not found in the cache memory
 	errorMes,userId = dbuser.getUserId(g.con,g.cur,userName,password)
 	if userId >= 0:
-		debug('load_user login succeeded userid=%d' % userId)
+		debug(1, 'load_user login succeeded userid=%d' % userId)
 		errorMes,isadmin = dbuser.isAdmin(g.con,g.cur,userName)
 		if isadmin != 1:
 			isadmin = 0
@@ -95,12 +96,12 @@ def load_user(request):
 		# add the user to the list
 		# recentLoginUsers.append(user)
 	else:
-		debug(1,'user login failed %s' % (errorMes))
+		debug(1, 'user login failed %s' % (errorMes))
 		# login failed, so fallback to default user
 		errorMes,userId = dbuser.getUserId(g.con,g.cur,dbDefaultUser,dbDefaultPwd)
 		isadmin = 0
 		if userId >= 0:
-			debug('logged in as default user userid=%d' % userId)
+			debug(1, 'logged in as default user userid=%d' % userId)
 			user = User(dbDefaultUser,dbDefaultPwd,userId,isadmin)
 	return user
 
