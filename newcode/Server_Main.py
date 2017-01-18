@@ -62,43 +62,46 @@ def load_user(request):
 	else:
 		userName = None
 		password = None
-	
-    #use default user name when it was not sent
+
+	# use default user name when it was not sent
 	if(userName is None and password is None):
-		userName = dbDefaultUser #anonymos user in case the field is empty
+		userName = dbDefaultUser  # anonymos user in case the field is empty
 		password = dbDefaultPwd
-		
-    #check if exist in the recent array first & password didnt change
-	#for tempUser in recentLoginUsers:
-	#	if( tempUser.name == userName ):
-	#		if( tempUser.password == password):
-                #user found, return
-	#			debug(1,'user %s already found' % (tempUser.name))
-	#			return tempUser
-	#		else:
-	#			debug(1,'remove user %s since it might that the password was changed' % (tempUser.id))
-				#user exist but with different password, remove the user and continue login
+
+	# check if exist in the recent array first & password didnt change
+	# for tempUser in recentLoginUsers:
+	# 	if( tempUser.name == userName ):
+	# 		if( tempUser.password == password):
+	# 			user found, return
+	# 			debug(1,'user %s already found' % (tempUser.name))
+	# 			return tempUser
+	# 		else:
+	# 			debug(1,'remove user %s since it might that the password was changed' % (tempUser.id))
+	#			# user exist but with different password, remove the user and continue login
 	#			recentLoginUsers.remove(tempUser)
-	
-	#user was not found in the cache memory
+
+	# user was not found in the cache memory
 	errorMes,userId = dbuser.getUserId(g.con,g.cur,userName,password)
-	if userId >= 0 :
+	if userId >= 0:
+		debug('load_user login succeeded userid=%d' % userId)
 		errorMes,isadmin = dbuser.isAdmin(g.con,g.cur,userName)
-		if isadmin != 1 :
-		  isadmin = 0
+		if isadmin != 1:
+			isadmin = 0
 		user = User(userName,password,userId,isadmin)
-        #add the user to the recent users list
-		#for tempUser in recentLoginUsers:
+		# add the user to the recent users list
+		# for tempUser in recentLoginUsers:
 		#	if( tempUser.name == user.name ):
-        #       debug(1,'user %s already found' % (user.id))
-		#add the user to the list
-	#	recentLoginUsers.append(user)
+		#       debug(1,'user %s already found' % (user.id))
+		# add the user to the list
+		# recentLoginUsers.append(user)
 	else:
 		debug(1,'user login failed %s' % (errorMes))
-		user = None
-	debug(1,'>>>>>>>>>>>load_user login succeed')
-
-
+		# login failed, so fallback to default user
+		errorMes,userId = dbuser.getUserId(g.con,g.cur,dbDefaultUser,dbDefaultPwd)
+		isadmin = 0
+		if userId >= 0:
+			debug('logged in as default user userid=%d' % userId)
+			user = User(dbDefaultUser,dbDefaultPwd,userId,isadmin)
 	return user
 
 
