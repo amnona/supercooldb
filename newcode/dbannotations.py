@@ -442,9 +442,10 @@ def GetUserAnnotations(con,cur,foruserid,userid=0):
 
 def GetSequenceAnnotations(con,cur,sequence,region=None,userid=0):
 	"""
-	Get all annotations for a sequence
+	Get all annotations for a sequence. Returns a list of annotations (empty list if sequence is not found)
 
-	input:
+	Parameters
+	----------
 	con,cur :
 	sequence : str ('ACGT')
 		the sequence to search for in the database
@@ -453,21 +454,22 @@ def GetSequenceAnnotations(con,cur,sequence,region=None,userid=0):
 	userid : int (optional)
 		the id of the user requesting the annotations. Provate annotations with non-matching user will not be returned
 
-	output:
+	Returns
+	-------
 	err : str
 		The error encountered or '' if ok
 	details: list of dict
 		a list of all the info about each annotation (see GetAnnotationsFromID())
 	"""
-	details=[]
-	debug(1,'GetSequenceAnnotations sequence %s' % sequence)
-	err,sid=dbsequences.GetSequenceId(con,cur,sequence,region)
+	details = []
+	debug(1, 'GetSequenceAnnotations sequence %s' % sequence)
+	err,sid = dbsequences.GetSequenceId(con,cur, sequence, region)
+	if sid==-1:
+		debug(2,'Sequence %s not found for GetSequenceAnnotations.' % sequence)
+		return '',[]
 	if err:
 		debug(6,'Sequence %s not found for GetSequenceAnnotations. error : %s' % (sequence,err))
 		return err,None
-	if sid==-1:
-		debug(6,'Sequence %s not found for GetSequenceAnnotations.' % sequence)
-		return '',[]
 	debug(1,'sequenceid=%d' % sid)
 	cur.execute('SELECT annotationId FROM SequencesAnnotationTable WHERE seqId=%s',[sid])
 	if cur.rowcount==0:
