@@ -14,6 +14,12 @@ def AddTerm(con,cur,term,parent='na',ontologyname='scdb',synonyms=[],commit=True
 
 	"""
 	try:
+		# convert everything to lower case before interacting with the database
+		term = term.lower()
+		parent = parent.lower()
+		ontologyname = ontologyname.lower()
+		synonyms = [csyn.lower() for csyn in synonyms]
+
 		# add/get the ontology term
 		err,termid=dbidval.AddItem(con,cur,table='OntologyTable',description=term,commit=False)
 		if err:
