@@ -38,7 +38,7 @@ def GetStats(con, cur):
     res = cur.fetchall()
     explist = set()
     for cres in res:
-        explist.add([cres[0]])
+        explist.add(cres[0])
     stats['NumOntologyTerms'] = len(explist)
 
     return '', stats
