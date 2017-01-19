@@ -186,6 +186,7 @@ def GetExperimentsList(con, cur, userid=None):
             if userid != cuserid:
                 debug(1, 'experiment %d is private and not the creating user. skipping' % cid)
                 continue
+        debug(1, cid)
         explist[cid].append([ctype, cvalue])
     explist = list(explist.items())
     return '', explist
