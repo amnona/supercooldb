@@ -151,8 +151,9 @@ def GetSequenceId(con, cur, sequence, idprimer=None, use_full_lengh=False):
     cur.execute('SELECT id,sequence FROM SequencesTable WHERE seedsequence=%s', [cseedseq])
     if cur.rowcount == 0:
         sid = -1
-        debug(2, 'sequence %s not found' % sequence)
-        return '', sid
+        errmsg = 'sequence %s not found' % sequence
+        debug(1, errmsg)
+        return errmsg, sid
 
     cseqlen = len(cseq)
     res = cur.fetchall()
@@ -168,13 +169,13 @@ def GetSequenceId(con, cur, sequence, idprimer=None, use_full_lengh=False):
         if cseq[:comparelen] == resseq[:comparelen]:
             if idprimer is None:
                 return '', resid
-            cur.execute('SELECT idPrimer FROM SequencesTable WHERE id=%s LIMIT 1', [sid])
+            cur.execute('SELECT idPrimer FROM SequencesTable WHERE id=%s LIMIT 1', [resid])
             res = cur.fetchone()
             if res[0] == idprimer:
                 return '', resid
     # reached here so sequence was not found
-    errmsg='sequence %s not found' % sequence
-    debug(1,errmsg)
+    errmsg = 'sequence %s not found' % sequence
+    debug(1, errmsg)
     return errmsg, -1
 
     # # if no regionid specified, fetch only 1 (faster)
