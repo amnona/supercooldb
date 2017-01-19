@@ -39,6 +39,6 @@ def GetStats(con, cur):
     explist = set()
     for cres in res:
         explist.add(cres[0])
-    stats['NumOntologyTerms'] = len(explist)
+    stats['NumSequences'] = len(explist)
 
     return '', stats
