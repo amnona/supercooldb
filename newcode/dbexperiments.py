@@ -177,16 +177,15 @@ def GetExperimentsList(con, cur, userid=None):
     cur.execute('SELECT expid,userid,private,type,value from ExperimentsTable')
     res = cur.fetchall()
     for cres in res:
-        cid = res[0]
-        cuserid = res[1]
-        cprivate = res[2]
-        ctype = res[3]
-        cvalue = res[4]
+        cid = cres[0]
+        cuserid = cres[1]
+        cprivate = cres[2]
+        ctype = cres[3]
+        cvalue = cres[4]
         if cprivate == 'y':
             if userid != cuserid:
                 debug(1, 'experiment %d is private and not the creating user. skipping' % cid)
                 continue
-        debug(1, cid)
         explist[cid].append([ctype, cvalue])
     explist = list(explist.items())
     return '', explist
