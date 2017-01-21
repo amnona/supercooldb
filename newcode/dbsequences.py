@@ -1,7 +1,7 @@
 import primers
 from utils import debug
 import psycopg2
-
+from collections import defaultdict
 import dbannotations
 
 # length for the seed sequence
@@ -213,26 +213,29 @@ def GetTaxonomyAnnotationIDs(con, cur, taxonomy, userid=None):
 
     Returns
     -------
-    annotationids : list of int
-        list containing the ids of all annotations that contain a sequence with teh taxonomy
+    annotationids : list of (int, int) (annotationid, count)
+        list containing the ids of all annotations that contain a sequence with the taxonomy and the count of number of sequences from the taxonomy in that annotation
     '''
     taxonomy = taxonomy.lower()
-    debug(1,'GetTaxonomyAnnotationIDS for taxonomy %s' % taxonomy)
-    cur.execute('SELECT id from SequencesTable where taxonomy LIKE %s',['%'+taxonomy+'%'])
+    debug(1, 'GetTaxonomyAnnotationIDS for taxonomy %s' % taxonomy)
+    cur.execute('SELECT id from SequencesTable where taxonomy LIKE %s', ['%'+taxonomy+'%'])
     res = cur.fetchall()
     seqids = []
     for cres in res:
         seqids.append(cres[0])
-    debug(1,'found %d matching sequences for the taxonomy' % len(seqids))
-    annotationids = set()
+    debug(1, 'found %d matching sequences for the taxonomy' % len(seqids))
+    annotationids_dict = defaultdict(int)
     for cseq in seqids:
-        cur.execute('SELECT annotationid from sequencesAnnotationTable where seqid=%s',[cseq])
+        cur.execute('SELECT annotationid from sequencesAnnotationTable where seqid=%s', [cseq])
         res = cur.fetchall()
         for cres in res:
-            annotationids.add(cres[0])
+            annotationids_dict[cres[0]] += 1
     # NOTE: need to add user validation for the ids!!!!!!
-    debug(1,'found %d unique annotations for the taxonomy' % len(annotationids))
-    return '',list(annotationids)
+    debug(1, 'found %d unique annotations for the taxonomy' % len(annotationids_dict))
+    annotationids = []
+    for k, v in annotationids_dict.items():
+        annotationids.append((k, v))
+    return '', annotationids
 
 
 def GetTaxonomyAnnotations(con, cur, taxonomy, userid=None):
@@ -249,23 +252,27 @@ def GetTaxonomyAnnotations(con, cur, taxonomy, userid=None):
 
     Returns
     -------
-    annotations : list of annotations (see dbannotations.GetAnnotationsFromID() )
+    annotations : list of tuples (annotation, counts)
         list containing the details for all annotations that contain a sequence with the taxonomy
+        annotation - (see dbannotations.GetAnnotationsFromID() )
+        counts - the number of sequences from taxonomy appearing in this annotations
     '''
-    debug(1,'GetTaxonomyAnnotations for taxonomy %s' % taxonomy)
+    debug(1, 'GetTaxonomyAnnotations for taxonomy %s' % taxonomy)
     # get the annotation ids
-    err,annotationids = GetTaxonomyAnnotationIDs(con, cur, taxonomy, userid)
+    err, annotationids = GetTaxonomyAnnotationIDs(con, cur, taxonomy, userid)
     if err:
         errmsg = 'Failed to get annotationIDs for taxonomy %s: %s' % (taxonomy, err)
         debug(6, errmsg)
-        return errmsg,None
+        return errmsg, None
     # and get the annotation details for each
-    annotations=[]
-    for cid in annotationids:
-        err,cdetails = dbannotations.GetAnnotationsFromID(con,cur,cid)
+    annotations = []
+    for cres in annotationids:
+        cid = cres[0]
+        ccount = cres[1]
+        err, cdetails = dbannotations.GetAnnotationsFromID(con, cur, cid)
         if err:
-            debug(6,err)
+            debug(6, err)
             continue
-        annotations.append(cdetails)
-    debug(1,'got %d details' % len(annotations))
-    return '',annotations
+        annotations.append((cdetails, ccount))
+    debug(1, 'got %d details' % len(annotations))
+    return '', annotations
