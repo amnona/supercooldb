@@ -453,3 +453,47 @@ def get_taxonomy_annotations():
         debug(6, errmsg)
         return(errmsg, 400)
     return json.dumps({'annotations': annotations})
+
+
+@Seq_Flask_Obj.route('/sequences/get_info', methods=['GET'])
+def get_sequence_info():
+    """
+    Title: Get sequences information
+    Description : Get information (sequence, taxonomy) from sequence ids
+    URL: /sequences/get_info
+    Method: GET
+    URL Params:
+    Data Params: JSON
+        {
+            seqids : int or list of int
+                the sequence ids to get information for
+        }
+    Success Response:
+        Code : 200
+        Content :
+        {
+            'sequences' : list of dict
+                information about each sequence in the annotation
+                {
+                    'seq' : str (ACGT)
+                        the sequence
+                    'taxonomy' : str
+                        the taxonomy of the sequence (or '' if not present)
+                }
+        }
+    Validation:
+    """
+    cfunc = get_sequence_info
+    alldat = request.get_json()
+    if alldat is None:
+        return(getdoc(cfunc))
+    seqids = alldat.get('seqids')
+    if seqids is None:
+        return('seqids parameter missing', 400)
+    err, sequences = dbsequences.SeqFromID(g.con, g.cur, seqids)
+    if err:
+        errmsg = 'error encountered searching for sequence information: %s' % err
+        debug(6, errmsg)
+        return(errmsg, 400)
+    return json.dumps({'sequences': sequences})
+
