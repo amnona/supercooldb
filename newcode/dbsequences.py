@@ -71,30 +71,36 @@ def AddSequences(con,cur,sequences,taxonomies=None,ggids=None,primer='V4',commit
         return "database error %s" % e,None
 
 
-def SeqFromID(con,cur,seqids):
-    '''
-    Get sequences (ACGT) from sequence id or list of sequence ids
+def SeqFromID(con, cur, seqids):
+    '''Get the information about the sequence.
+    Get the sequence (ACGT) and taxonomy from sequence id or list of sequence ids
 
-    input:
-    con,cur
+    Parameters
+    ----------
+    con, cur
     seqids : int or list of int
         the ids to get the sequences for
 
-    output:
-    seqs : list of str (ACGT)
-        list of sequences (one per input). Note if sequence id does not exist, this sequence is empty ('') in the list
+    Returns
+    -------
+    sequences : list of dict (one per sequence). contains:
+        'seq' : str (ACGT)
+            the sequence
+        'taxonomy' : str
+            the taxonomy of the sequence or '' if unknown
     '''
-    if isinstance(seqids,int):
-        seqids=[seqids]
-    seqs=[]
+    if isinstance(seqids, int):
+        seqids = [seqids]
+    sequences = []
     for cseqid in seqids:
-        cur.execute('SELECT sequence FROM SequencesTable WHERE id=%s',[cseqid])
-        if cur.rowcount==0:
-            seqs.append('')
+        cur.execute('SELECT sequence,taxonomy FROM SequencesTable WHERE id=%s', [cseqid])
+        if cur.rowcount == 0:
+            sequences.append({'seq': ''})
             continue
         res = cur.fetchone()
-        seqs.append(res[0])
-    return '',seqs
+        cseqinfo = {'seq': res[0], 'taxonomy': res[1]}
+        sequences.append(cseqinfo)
+    return '', sequences
 
 
 def GetSequencesId(con,cur,sequences):

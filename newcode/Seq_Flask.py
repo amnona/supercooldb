@@ -337,6 +337,11 @@ def get_fast_annotations():
                                 the ontology term for this detail (i.e. feces/ibd/homo sapiens)
                                 (description from OntologyTable)
                         }
+                    "parents" : list of tuples (type, list of terms)
+                        {
+                            type : type of the annotation type ('high'/'low','all')
+                            list of terms - list of ontology terms which are annotated or parents of annotated ontology term
+                        }
                 }
             seqannotations : list of (seqid, annotationids):
             {
@@ -352,20 +357,20 @@ def get_fast_annotations():
         If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
         If annotation is not private, return it (no need for authentication)
     """
-    cfunc=get_fast_annotations
-    alldat=request.get_json()
+    cfunc = get_fast_annotations
+    alldat = request.get_json()
     if alldat is None:
         return(getdoc(cfunc))
-    sequences=alldat.get('sequences')
+    sequences = alldat.get('sequences')
     if sequences is None:
-        return('sequences parameter missing',400)
+        return('sequences parameter missing', 400)
     region = alldat.get('region')
-    err,annotations,seqannotations=dbannotations.GetFastAnnotations(g.con,g.cur,sequences,region=region,userid=current_user.user_id)
+    err, annotations, seqannotations = dbannotations.GetFastAnnotations(g.con, g.cur, sequences, region=region, userid=current_user.user_id)
     if err:
-        errmsg='error encountered while getting the fast annotations: %s' % err
-        debug(6,errmsg)
+        errmsg = 'error encountered while getting the fast annotations: %s' % err
+        debug(6, errmsg)
         return(errmsg, 400)
-    return json.dumps({'annotations':annotations,'seqannotations':seqannotations})
+    return json.dumps({'annotations': annotations, 'seqannotations': seqannotations})
 
 
 @login_required

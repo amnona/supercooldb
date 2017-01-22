@@ -247,7 +247,7 @@ def GetAnnotationParents(con,cur,annotationid):
     output:
     err: str
         error encountered or '' if ok
-    parents : dict of (str:list of str) (detail type (i.e. 'higher in'), list of ontology terms)
+    parents : dict of (str:list of str) (detail type (i.e. 'higher in'): list of ontology terms)
     '''
     debug(1,'GetAnnotationParents for id %d' % annotationid)
     cur.execute('SELECT annotationdetail,ontology FROM AnnotationParentsTable WHERE idannotation=%s',[annotationid])
@@ -562,32 +562,37 @@ def GetSequencesFromAnnotationID(con,cur,annotationid,userid=0):
     return '',seqids
 
 
-def GetFullSequencesFromAnnotationID(con,cur,annotationid,userid=0):
-    """
-    Get a list of sequences (ACGT) which are a part of the annotation annotationid
+def GetFullSequencesFromAnnotationID(con, cur, annotationid, userid=0):
+    '''Get information about sequences which are a part of the annotation annotationid.
+    Retrieves full details including the sequence and the taxonomy
 
-    input:
-    con,cur:
+    Parameters
+    ----------
+    con, cur:
     annottionid : int
         the annotationid to get the associated sequences for
     userid : int (optional)
         the user performing the query (or None if unknown). Used to hide private annotations not by the user
 
-    output:
+    Returns
+    -------
     err : str
         The error encountered or '' if ok
-    seqs : list of str (ACGT)
-        the sequences associated with the annotationid
-    """
-    debug(1,"GetSequencesFromAnnotationID for annotationid %d" % annotationid)
-    err, seqids = GetSequencesFromAnnotationID(con,cur,annotationid,userid)
+    sequences : list of dict (one per sequence). contains:
+        'seq' : str (ACGT)
+            the sequence
+        'taxonomy' : str
+            the taxonomy of the sequence or '' if unknown
+    '''
+    debug(1, "GetSequencesFromAnnotationID for annotationid %d" % annotationid)
+    err, seqids = GetSequencesFromAnnotationID(con, cur, annotationid, userid)
     if err:
-        return err,[]
-    debug(1,'Found %s sequences' % len(seqids))
-    err,seqs = dbsequences.SeqFromID(con,cur,seqids)
+        return err, []
+    debug(1, 'Found %s sequences' % len(seqids))
+    err, sequences = dbsequences.SeqFromID(con, cur, seqids)
     if err:
-        return err,[]
-    return '',seqs
+        return err, []
+    return '', sequences
 
 
 def GetAnnotationUser(con,cur,annotationid):
@@ -695,8 +700,7 @@ def DeleteSequenceFromAnnotation(con,cur,sequences,annotationid,userid=0,commit=
     return('')
 
 
-
-def GetFastAnnotations(con,cur,sequences,region=None,userid=0):
+def GetFastAnnotations(con, cur, sequences, region=None, userid=0):
     """
     Get annotations for a list of sequences in a compact form
 
@@ -714,15 +718,16 @@ def GetFastAnnotations(con,cur,sequences,region=None,userid=0):
         The error encountered or '' if ok
     annotations : dict of (annotationid : annotation details (see GetAnnotationsFromID() )
         a dict containing all annotations relevant to any of the sequences and the details about them
+        * includes 'parents' - list of all ontology term parents for each annotation
     seqannotations : list of (seqpos, annotationids)
         list of tuples.
         seqpos : the position (in sequences) of the sequence with annotations
         annotationsids : list of int
             the ids of annotations about this sequence
     """
-    debug(1,'GetFastAnnotations for %d sequences' % len(sequences))
-    annotations={}
-    seqannotations=[]
+    debug(1, 'GetFastAnnotations for %d sequences' % len(sequences))
+    annotations = {}
+    seqannotations = []
     for cseqpos, cseq in enumerate(sequences):
         cseqannotationids = []
         err,sid=dbsequences.GetSequenceId(con,cur,cseq,region)
@@ -740,7 +745,7 @@ def GetFastAnnotations(con,cur,sequences,region=None,userid=0):
                 if cdetails is None:
                     continue
                 err,parents = GetAnnotationParents(con,cur,cannotationid)
-                cdetails['parents']=parents
+                cdetails['parents'] = parents
                 annotations[cannotationid] = cdetails
             cseqannotationids.append(cannotationid)
         seqannotations.append((cseqpos, cseqannotationids))
