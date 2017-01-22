@@ -343,7 +343,7 @@ def get_annotation():
             If annotation is not private, return it (no need for authentication)
     """
     cfunc = get_annotation
-    annotationid = int(request.args.get('annotationid'))
+    annotationid = request.args.get('annotationid')
     if annotationid is None:
         alldat = request.get_json()
         if alldat is None:
@@ -351,6 +351,7 @@ def get_annotation():
         annotationid = alldat.get('annotationid')
         if annotationid is None:
             return(getdoc(cfunc))
+    annotationid = int(annotationid)
     err, annotation = dbannotations.GetAnnotationsFromID(g.con, g.cur, annotationid)
     if err:
         debug(6, err)
