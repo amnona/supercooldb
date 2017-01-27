@@ -188,7 +188,7 @@ def get_sequence_annotations():
         debug(6, err)
         return ('Problem geting details. error=%s' % err, 400)
     if get_term_info:
-        term_info = dbontology.get_annotations_term_counts(con, cur, details)
+        term_info = dbontology.get_annotations_term_counts(g.con, g.cur, details)
         details['term_info'] = term_info
     else:
         details['term_info'] = {}
