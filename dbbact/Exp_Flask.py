@@ -55,28 +55,28 @@ def add_details():
             Return the new expId for these details
             for each "type"/"value" in the "details" list, if "type" exists in ExperimentTypesTable, get the id and add it to "type" field in ExperimentsIdentifiers table. Otherwise, create it there and get the id and add it to "type" field in ExperimentsIdentifiers.
     """
-    cfunc=add_details
-    if request.method=='GET':
+    cfunc = add_details
+    if request.method == 'GET':
         return(getdoc(cfunc))
-    alldat=request.get_json()
-    expid=alldat.get('expId')
-    details=alldat.get('details')
+    alldat = request.get_json()
+    expid = alldat.get('expId')
+    details = alldat.get('details')
     if details is None:
         return(getdoc(cfunc))
-    private=alldat.get('private')
+    private = alldat.get('private')
     if private is None:
-        private='n'
+        private = 'n'
     # TODO: get userid
-    userid=0
-    res=dbexperiments.AddExperimentDetails(g.con,g.cur,expid=expid,details=details,userid=userid,private=private,commit=True)
-    if res>0:
-        return(json.dumps({'expId':res}))
-    if res==-1:
-        return('expId %d does not exist' % expid,400)
-    return("AddExperimentDetails failed",400)
+    userid = 0
+    res = dbexperiments.AddExperimentDetails(g.con, g.cur, expid=expid, details=details, userid=userid, private=private, commit=True)
+    if res > 0:
+        return(json.dumps({'expId': res}))
+    if res == -1:
+        return('expId %d does not exist' % expid, 400)
+    return("AddExperimentDetails failed", 400)
 
 
-@Exp_Flask_Obj.route('/experiments/get_id',methods=['GET'])
+@Exp_Flask_Obj.route('/experiments/get_id', methods=['GET'])
 def get_id():
     """
     Title: Query experiment based on type/value:
@@ -107,21 +107,20 @@ def get_id():
             If study is private, return only if user is authenticated and created the study. If user not authenticated, do not return it in the list
             If study is not private, return it (no need for authentication)
     """
-    alldat=request.get_json()
-    details=alldat.get('details')
+    alldat = request.get_json()
+    details = alldat.get('details')
     if details is None:
         return('no details')
     # TODO: get userid
-    userid=0
-    err,cids=dbexperiments.GetExperimentId(g.con,g.cur,details,userid)
+    userid = 0
+    err, cids = dbexperiments.GetExperimentId(g.con, g.cur, details, userid)
     if not err:
-        return json.dumps({'expId':cids})
+        return json.dumps({'expId': cids})
     else:
-        return (err,400)
+        return (err, 400)
 
 
-
-@Exp_Flask_Obj.route('/experiments/get_details',methods=['GET'])
+@Exp_Flask_Obj.route('/experiments/get_details', methods=['GET'])
 def get_details():
     """
     Title: Query experiment based on experiment id
@@ -151,21 +150,21 @@ def get_details():
             If study is not private, return details (no need for authentication)
             if study not found - return error
     """
-    alldat=request.get_json()
+    alldat = request.get_json()
     if alldat is None:
-        return('no expId supplied',400)
-    expid=alldat.get('expId')
+        return('no expId supplied', 400)
+    expid = alldat.get('expId')
     if expid is None:
-        return('no expId supplied',400)
+        return('no expId supplied', 400)
     # TODO: get userid
-    userid=0
-    err,details=dbexperiments.GetDetailsFromExpId(g.con,g.cur,expid,userid)
+    userid = 0
+    err, details = dbexperiments.GetDetailsFromExpId(g.con, g.cur, expid, userid)
     if err:
-        return(err,400)
-    return json.dumps({'details':details})
+        return(err, 400)
+    return json.dumps({'details': details})
 
 
-@Exp_Flask_Obj.route('/experiments/get_annotations',methods=['GET'])
+@Exp_Flask_Obj.route('/experiments/get_annotations', methods=['GET'])
 def get_annotations():
     """
     Title: Query annotations based on experiment id
@@ -198,18 +197,18 @@ def get_annotations():
             if annotation is private, return only if created by the same user as the querying
             if study not found - return error
     """
-    alldat=request.get_json()
+    alldat = request.get_json()
     if alldat is None:
-        return('no expId supplied',400)
-    expid=alldat.get('expId')
+        return('no expId supplied', 400)
+    expid = alldat.get('expId')
     if expid is None:
-        return('no expId supplied',400)
+        return('no expId supplied', 400)
     # TODO: get userid
-    userid=0
-    err,annotations=dbannotations.GetAnnotationsFromExpId(g.con,g.cur,expid,userid)
+    userid = 0
+    err, annotations = dbannotations.GetAnnotationsFromExpId(g.con, g.cur, expid, userid)
     if err:
-        return(err,400)
-    return json.dumps({'annotations':annotations})
+        return(err, 400)
+    return json.dumps({'annotations': annotations})
 
 
 @Exp_Flask_Obj.route('/experiments/get_experiments_list', methods=['GET'])

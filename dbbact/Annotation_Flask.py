@@ -80,37 +80,37 @@ def add_annotations():
             Add all annotation details to AnnotationsTable (automatically adding userId and addedDate)
             Add all pairs to AnnotationListTable
     """
-    cfunc=add_annotations
-    if request.method=='GET':
-        return(getdoc(cfunc),400)
-    alldat=request.get_json()
-    expid=alldat.get('expId')
+    cfunc = add_annotations
+    if request.method == 'GET':
+        return(getdoc(cfunc), 400)
+    alldat = request.get_json()
+    expid = alldat.get('expId')
     if expid is None:
-        return(getdoc(cfunc),400)
-    sequences=alldat.get('sequences')
+        return(getdoc(cfunc), 400)
+    sequences = alldat.get('sequences')
     if sequences is None:
-        return(getdoc(cfunc),400)
-    primer=alldat.get('region')
+        return(getdoc(cfunc), 400)
+    primer = alldat.get('region')
     if primer is None:
-        primer='na'
-    annotationtype=alldat.get('annotationType')
-    method=alldat.get('method')
-    agenttype=alldat.get('agentType')
-    description=alldat.get('description')
-    private=alldat.get('private')
-    userid=current_user.user_id
-    annotationlist=alldat.get('annotationList')
-    err,annotationid=dbannotations.AddSequenceAnnotations(g.con,g.cur,sequences,primer,expid,annotationtype,annotationlist,method,description,agenttype,private,userid=userid,commit=True)
+        primer = 'na'
+    annotationtype = alldat.get('annotationType')
+    method = alldat.get('method')
+    agenttype = alldat.get('agentType')
+    description = alldat.get('description')
+    private = alldat.get('private')
+    userid = current_user.user_id
+    annotationlist = alldat.get('annotationList')
+    err, annotationid = dbannotations.AddSequenceAnnotations(g.con, g.cur, sequences, primer, expid, annotationtype, annotationlist, method, description, agenttype, private, userid=userid, commit=True)
     if not err:
-        debug(2,'added sequece annotations')
-        return json.dumps({"annotationId":annotationid})
-    debug(6,"error encountered %s" % err)
-    return ("error enountered %s" % err,400)
+        debug(2, 'added sequece annotations')
+        return json.dumps({"annotationId": annotationid})
+    debug(6, "error encountered %s" % err)
+    return ("error enountered %s" % err, 400)
 
 
 @login_required
 @auto.doc()
-@Annotation_Flask_Obj.route('/annotations/get_sequences',methods=['GET'])
+@Annotation_Flask_Obj.route('/annotations/get_sequences', methods=['GET'])
 def get_annotation_sequences():
     """
     Title: get_sequences
@@ -135,19 +135,19 @@ def get_annotation_sequences():
             If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
             If annotation is not private, return it (no need for authentication)
     """
-    debug(1,g.amnon)
-    cfunc=get_annotation_sequences
-    alldat=request.get_json()
+    debug(1, g.amnon)
+    cfunc = get_annotation_sequences
+    alldat = request.get_json()
     if alldat is None:
-        return ('No json parameters supplied',400)
-    annotationid=alldat.get('annotationid')
+        return ('No json parameters supplied', 400)
+    annotationid = alldat.get('annotationid')
     if annotationid is None:
-        return('annotationid parameter missing',400)
-    err,seqids=dbannotations.GetSequencesFromAnnotationID(g.con,g.cur,annotationid,userid=current_user.user_id)
+        return('annotationid parameter missing', 400)
+    err, seqids = dbannotations.GetSequencesFromAnnotationID(g.con, g.cur, annotationid, userid=current_user.user_id)
     if err:
-        debug(6,err)
-        return ('Problem geting details. error=%s' % err,400)
-    return json.dumps({'seqids':seqids})
+        debug(6, err)
+        return ('Problem geting details. error=%s' % err, 400)
+    return json.dumps({'seqids': seqids})
 
 
 @login_required
@@ -199,7 +199,7 @@ def get_annotation_full_sequences():
 
 @login_required
 @auto.doc()
-@Annotation_Flask_Obj.route('/annotations/delete',methods=['GET','POST'])
+@Annotation_Flask_Obj.route('/annotations/delete', methods=['GET', 'POST'])
 def delete_annotation():
     """
     Title: delete
@@ -224,25 +224,25 @@ def delete_annotation():
             If user is not logged in, cannot delete
             Can only delete annotations created by the user
     """
-    cfunc=delete_annotation
-    if request.method=='GET':
-        return(getdoc(cfunc),400)
-    alldat=request.get_json()
+    cfunc = delete_annotation
+    if request.method == 'GET':
+        return(getdoc(cfunc), 400)
+    alldat = request.get_json()
     if alldat is None:
-        return ('No json parameters supplied',400)
-    annotationid=alldat.get('annotationid')
+        return ('No json parameters supplied', 400)
+    annotationid = alldat.get('annotationid')
     if annotationid is None:
-        return('annotationid parameter missing',400)
-    err=dbannotations.DeleteAnnotation(g.con,g.cur,annotationid,userid=current_user.user_id)
+        return('annotationid parameter missing', 400)
+    err = dbannotations.DeleteAnnotation(g.con, g.cur, annotationid, userid=current_user.user_id)
     if err:
-        debug(6,err)
-        return ('Problem deleting annotation. error=%s' % err,400)
-    return json.dumps({'annotationid':annotationid})
+        debug(6, err)
+        return ('Problem deleting annotation. error=%s' % err, 400)
+    return json.dumps({'annotationid': annotationid})
 
 
 @login_required
 @auto.doc()
-@Annotation_Flask_Obj.route('/annotations/delete_sequences_from_annotation',methods=['GET','POST'])
+@Annotation_Flask_Obj.route('/annotations/delete_sequences_from_annotation', methods=['GET', 'POST'])
 def delete_sequences_from_annotation():
     """
     Title: Delete sequences from annotation
@@ -269,29 +269,28 @@ def delete_sequences_from_annotation():
             If user is not logged in, cannot delete non-annonymous
             Can only delete annotations created by the user
     """
-    cfunc=delete_sequences_from_annotation
-    if request.method=='GET':
-        return(getdoc(cfunc),400)
-    alldat=request.get_json()
+    cfunc = delete_sequences_from_annotation
+    if request.method == 'GET':
+        return(getdoc(cfunc), 400)
+    alldat = request.get_json()
     if alldat is None:
-        return ('No json parameters supplied',400)
-    annotationid=alldat.get('annotationid')
+        return ('No json parameters supplied', 400)
+    annotationid = alldat.get('annotationid')
     if annotationid is None:
-        return('annotationid parameter missing',400)
-    sequences=alldat.get('sequences')
+        return('annotationid parameter missing', 400)
+    sequences = alldat.get('sequences')
     if sequences is None:
-        return('sequences parameter missing',400)
-    err=dbannotations.DeleteSequenceFromAnnotation(g.con,g.cur,sequences,annotationid,userid=current_user.user_id)
+        return('sequences parameter missing', 400)
+    err = dbannotations.DeleteSequenceFromAnnotation(g.con, g.cur, sequences, annotationid, userid=current_user.user_id)
     if err:
-        debug(6,err)
-        return ('Problem deleting sequences. error=%s' % err,400)
-    return json.dumps({'annotationid':annotationid})
-
+        debug(6, err)
+        return ('Problem deleting sequences. error=%s' % err, 400)
+    return json.dumps({'annotationid': annotationid})
 
 
 @login_required
 @auto.doc()
-@Annotation_Flask_Obj.route('/annotations/get_annotation',methods=['GET'])
+@Annotation_Flask_Obj.route('/annotations/get_annotation', methods=['GET'])
 def get_annotation():
     """
     Title: get_annotation
@@ -370,7 +369,7 @@ def get_annotation():
 
 @login_required
 @auto.doc()
-@Annotation_Flask_Obj.route('/annotations/get_annotation_ontology_parents',methods=['GET'])
+@Annotation_Flask_Obj.route('/annotations/get_annotation_ontology_parents', methods=['GET'])
 def get_annotation_ontology_parents():
     """
     Title: get_annotation_ontology_parents
@@ -394,16 +393,16 @@ def get_annotation_ontology_parents():
             If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
             If annotation is not private, return it (no need for authentication)
     """
-    cfunc=get_annotation_ontology_parents
-    alldat=request.get_json()
+    cfunc = get_annotation_ontology_parents
+    alldat = request.get_json()
     if alldat is None:
-        return ('No json parameters supplied',400)
-    annotationid=alldat.get('annotationid')
+        return ('No json parameters supplied', 400)
+    annotationid = alldat.get('annotationid')
     # annotationid=int(request.args.get('annotationid'))
     if annotationid is None:
         return(getdoc(cfunc))
-    err,parents=dbannotations.GetAnnotationParents(g.con,g.cur,annotationid)
+    err, parents = dbannotations.GetAnnotationParents(g.con, g.cur, annotationid)
     if err:
-        debug(6,err)
-        return ('Problem geting details. error=%s' % err,400)
-    return json.dumps({'parents':parents})
+        debug(6, err)
+        return ('Problem geting details. error=%s' % err, 400)
+    return json.dumps({'parents': parents})
