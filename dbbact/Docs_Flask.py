@@ -12,14 +12,6 @@ def docs():
     '''
     The documentation for all the REST API using flask-autodoc
     '''
-    return auto.html()
-
-
-@Docs_Flask_Obj.route('/docs2', methods=['POST', 'GET'])
-def docs2():
-    '''
-    The documentation for all the REST API using flask-autodoc
-    '''
     output = '<html>\n<title>dbBact REST API Documentation</title><head>\n</head><body>'
     doclist = auto.generate()
     for cdoc in doclist:
