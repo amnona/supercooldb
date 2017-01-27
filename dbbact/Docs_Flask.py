@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint, render_template
 # from flask.ext.login import current_user
 
 from .autodoc import auto
@@ -20,4 +20,9 @@ def docs2():
     '''
     The documentation for all the REST API using flask-autodoc
     '''
-    return '%s' % auto.generate()
+    output = '<html>\n<title>dbBact REST API Documentation</title><head>\n</head><body>'
+    doclist = auto.generate()
+    for cdoc in doclist:
+        output += '<h2>cdoc' + ['rule'] + '<\h2>'
+    output += '</body>'
+    return output
