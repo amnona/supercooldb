@@ -3,12 +3,13 @@ from flask import Blueprint, g, request
 from flask.ext.login import login_required
 from . import dbontology
 from .utils import getdoc, debug
-
+from .autodoc import auto
 
 Ontology_Flask_Obj = Blueprint('Ontology_Flask_Obj', __name__, template_folder='templates')
 
 
 @Ontology_Flask_Obj.route('/ontology/add', methods=['GET', 'POST'])
+@auto.doc()
 def ontology_add_term():
     """
     Title: Add new ontology term
@@ -72,6 +73,7 @@ def ontology_add_term():
 
 
 @Ontology_Flask_Obj.route('/ontology/get_parents', methods=['GET'])
+@auto.doc()
 def ontology_get_parents():
     """
     Title: Get all parents for a given ontology term
@@ -110,6 +112,7 @@ def ontology_get_parents():
 
 
 @Ontology_Flask_Obj.route('/ontology/get_term', methods=['GET'])
+@auto.doc()
 def ontology_get_term():
     """
     Title: Query Ontology terms
@@ -142,6 +145,7 @@ def ontology_get_term():
 
 
 @Ontology_Flask_Obj.route('/ontology/get_synonym', methods=['GET'])
+@auto.doc()
 def ontology_get_synonym():
     """
     Title: Query Ontology synonyms
@@ -177,6 +181,7 @@ def ontology_get_synonym():
 
 @login_required
 @Ontology_Flask_Obj.route('/ontology/get_annotations', methods=['GET'])
+@auto.doc()
 def get_ontology_annotations():
     """
     Title: get_annotations

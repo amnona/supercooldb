@@ -12,6 +12,7 @@ Exp_Flask_Obj = Blueprint('Exp_Flask_Obj', __name__)
 
 
 @Exp_Flask_Obj.route('/experiments/add_details', methods=['GET', 'POST'])
+@auto.doc()
 def add_details():
     """
     Title: Add new experiment detail
@@ -77,6 +78,7 @@ def add_details():
 
 
 @Exp_Flask_Obj.route('/experiments/get_id', methods=['GET'])
+@auto.doc()
 def get_id():
     """
     Title: Query experiment based on type/value:
@@ -121,6 +123,7 @@ def get_id():
 
 
 @Exp_Flask_Obj.route('/experiments/get_details', methods=['GET'])
+@auto.doc()
 def get_details():
     """
     Title: Query experiment based on experiment id
@@ -165,6 +168,7 @@ def get_details():
 
 
 @Exp_Flask_Obj.route('/experiments/get_annotations', methods=['GET'])
+@auto.doc()
 def get_annotations():
     """
     Title: Query annotations based on experiment id
@@ -212,6 +216,7 @@ def get_annotations():
 
 
 @Exp_Flask_Obj.route('/experiments/get_experiments_list', methods=['GET'])
+@auto.doc()
 def get_experiments_list():
     """
     Title: get_experiments_list
