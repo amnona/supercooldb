@@ -301,6 +301,8 @@ def get_fast_annotations():
                 the list of sequence strings to query the database (can be any length)
             region : int (optional)
                 the region id (default=1 which is V4 515F 806R)
+            get_term_info: bool (optional)
+                True (info) to return also information about each term, False not to return
     Success Response:
         Code : 200
         Content :
@@ -355,6 +357,14 @@ def get_fast_annotations():
                     annotationids : list of int
                             the annotationsid associated with this sequence
             }
+            term_info : dict of {term, dict}:
+            Information about each term which appears in the annotation parents. Key is the ontolgy term. the value dict is:
+            {
+                    'total_annotations' : int
+                        total number of annotations where this term appears (as a parent)
+                    'total_sequences' : int
+                        total number of sequences in annotations where this term appears (as a parent)
+            }
         }
     Details :
         Return a dict of details for all the annotations associated with at least one of the sequences used as input, and a list of seqpos and the associated annotationids describing it
@@ -371,12 +381,14 @@ def get_fast_annotations():
     if sequences is None:
         return('sequences parameter missing', 400)
     region = alldat.get('region')
-    err, annotations, seqannotations = dbannotations.GetFastAnnotations(g.con, g.cur, sequences, region=region, userid=current_user.user_id)
+    get_term_info = alldat.get('get_term_info', True)
+    err, annotations, seqannotations, term_info = dbannotations.GetFastAnnotations(g.con, g.cur, sequences, region=region, userid=current_user.user_id, get_term_info=get_term_info)
     if err:
         errmsg = 'error encountered while getting the fast annotations: %s' % err
         debug(6, errmsg)
         return(errmsg, 400)
-    return json.dumps({'annotations': annotations, 'seqannotations': seqannotations})
+    res = {'annotations': annotations, 'seqannotations': seqannotations, 'term_info': term_info}
+    return json.dumps(res)
 
 
 @login_required

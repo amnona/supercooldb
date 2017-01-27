@@ -245,3 +245,40 @@ def GetTermAnnotations(con, cur, term):
         annotations.append(cdetails)
     debug(3, 'found %d annotations' % len(annotations))
     return '', annotations
+
+
+def GetTermCounts(con, cur, terms):
+    '''
+    Get information about each ontology term in terms
+
+    Parameters
+    ----------
+    con, cur
+    terms : list of str
+        The list of terms to get information about
+
+    Returns
+    -------
+    term_info : dict of {str: dict}:
+        Key is the ontology term.
+        Value is a dict of pairs:
+            'total_annotations' : int
+                The total number of annotations where this ontology term is a predecessor
+            'total_squences' : int
+                The total number of sequences in annotations where this ontology term is a predecessor
+    '''
+    # get rid of duplicate terms
+    debug(1, 'GetTermCounts for %d terms' % len(terms))
+    terms = list(set(terms))
+    term_info = {}
+    for cterm in terms:
+        cur.execute('SELECT seqCount, annotationCount from AnnotationsTable WHERE description=%s LIMIT 1', [cterm])
+        if cur.rowcount == 0:
+            debug(2, 'Term %s not found in ontology table' % cterm)
+            continue
+        res = cur.fetchone()
+        term_info[cterm] = {}
+        term_info[cterm]['total_sequences'] = res[0]
+        term_info[cterm]['total_annotations'] = res[1]
+    debug(1, 'found info for %d terms' % len(term_info))
+    return term_info

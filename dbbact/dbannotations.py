@@ -248,7 +248,7 @@ def GetAnnotationParents(con, cur, annotationid):
     '''
     Get the ontology parents list for the annotation
 
-    inpit:
+    input:
     con,cur
     annotationid : int
         the annotationid for which to show the list of ontology terms
@@ -708,7 +708,7 @@ def DeleteSequenceFromAnnotation(con, cur, sequences, annotationid, userid=0, co
     return('')
 
 
-def GetFastAnnotations(con, cur, sequences, region=None, userid=0):
+def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info=True):
     """
     Get annotations for a list of sequences in a compact form
 
@@ -720,11 +720,12 @@ def GetFastAnnotations(con, cur, sequences, region=None, userid=0):
         None to not compare region, or the regionid the sequence is from
     userid : int (optional)
         the id of the user requesting the annotations. Provate annotations with non-matching user will not be returned
-
+    get_term_info : bool (optional)
+        True (default) to get the information about each term, False to skip this step
     output:
     err : str
         The error encountered or '' if ok
-    annotations : dict of (annotationid : annotation details (see GetAnnotationsFromID() )
+    annotations : dict of {annotationid : annotation details (see GetAnnotationsFromID() }
         a dict containing all annotations relevant to any of the sequences and the details about them
         * includes 'parents' - list of all ontology term parents for each annotation
     seqannotations : list of (seqpos, annotationids)
@@ -732,10 +733,18 @@ def GetFastAnnotations(con, cur, sequences, region=None, userid=0):
         seqpos : the position (in sequences) of the sequence with annotations
         annotationsids : list of int
             the ids of annotations about this sequence
+    term_info : dict of {term, dict}
+        Information about each term which appears in the annotation parents. Key is the ontolgy term. the value dict is:
+            'total_annotations' : int
+                total number of annotations where this term appears (as a parent)
+            'total_sequences' : int
+                total number of sequences in annotations where this term appears (as a parent)
     """
     debug(1, 'GetFastAnnotations for %d sequences' % len(sequences))
     annotations = {}
     seqannotations = []
+    all_terms = set()
+    term_info = {}
     for cseqpos, cseq in enumerate(sequences):
         cseqannotationids = []
         err, sid = dbsequences.GetSequenceId(con, cur, cseq, region)
@@ -754,8 +763,16 @@ def GetFastAnnotations(con, cur, sequences, region=None, userid=0):
                     continue
                 err, parents = GetAnnotationParents(con, cur, cannotationid)
                 cdetails['parents'] = parents
+                # add to the set of all terms to get the info for
+                for ctype, cterms in parents.items():
+                    for cterm in cterms:
+                        all_terms.add(cterm)
                 annotations[cannotationid] = cdetails
             cseqannotationids.append(cannotationid)
         seqannotations.append((cseqpos, cseqannotationids))
+    if get_term_info:
+        term_info = dbontology.GetTermCounts(con, cur, all_terms)
+    else:
+        term_info = {}
     debug(1, 'found %d annotations, %d annotated sequences' % (len(annotations), len(seqannotations)))
-    return '', annotations, seqannotations
+    return '', annotations, seqannotations, term_info
