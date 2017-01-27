@@ -89,6 +89,9 @@ def fill_parents(servertype='develop', overwrite=False):
     con, cur = connect_db(servertype=servertype)
     skipped = 0
     added = 0
+    if overwrite:
+        # delete the current counts since we are updating all entries (and addparents adds 1 to the counts...)
+        cur.execute('UPDATE OntologyTable SET seqCount=0, annotationCount=0')
     cur.execute('SELECT id,seqCount from AnnotationsTable')
     annotations = cur.fetchall()
     for cres in annotations:
