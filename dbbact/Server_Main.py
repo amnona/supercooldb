@@ -44,6 +44,7 @@ class User(UserMixin):
 # whenever a new request arrives, connect to the database and store in g.db
 @app.before_request
 def before_request():
+    debug(1,'************before')
     con, cur = db_access.connect_db()
     g.con = con
     g.cur = cur
