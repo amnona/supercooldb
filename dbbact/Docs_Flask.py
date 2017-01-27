@@ -27,7 +27,7 @@ def docs2():
         output += '<summary>'
         output += cdoc['rule']
         output += '</summary>'
-        output += cdoc['doc']
+        output += cdoc.get('doc', 'na')
     output += '</details>'
     output += '</body>'
     return output
