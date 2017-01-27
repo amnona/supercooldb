@@ -44,11 +44,9 @@ class User(UserMixin):
 # whenever a new request arrives, connect to the database and store in g.db
 @app.before_request
 def before_request():
-    debug(1,'************before')
     con, cur = db_access.connect_db()
     g.con = con
     g.cur = cur
-    g.amnon ='amnon'
 
 
 # and when the request is over, disconnect
@@ -60,61 +58,61 @@ def teardown_request(exception):
 # the following function will be called for every request autentication is required
 @login_manager.request_loader
 def load_user(request):
-    debug(1, '>>>>>>>>>>>load_user login attempt')
     try:
-        debug(1,g.amnon)
+        debug(1, '>>>>>>>>>>>load_user login attempt')
+        user = None
+        alldat = request.get_json()
+        if (alldat is not None):
+            userName = alldat.get('user')
+            password = alldat.get('pwd')
+        else:
+            userName = None
+            password = None
+        debug(1, 'username is %s' % userName)
+
+        # use default user name when it was not sent
+        if(userName is None and password is None):
+            userName = dbDefaultUser  # anonymos user in case the field is empty
+            password = dbDefaultPwd
+
+        # check if exist in the recent array first & password didnt change
+        # for tempUser in recentLoginUsers:
+        #   if( tempUser.name == userName ):
+        #       if( tempUser.password == password):
+        #           user found, return
+        #           debug(1,'user %s already found' % (tempUser.name))
+        #           return tempUser
+        #       else:
+        #           debug(1,'remove user %s since it might that the password was changed' % (tempUser.id))
+        #           # user exist but with different password, remove the user and continue login
+        #           recentLoginUsers.remove(tempUser)
+
+        # user was not found in the cache memory
+        errorMes, userId = dbuser.getUserId(g.con, g.cur, userName, password)
+        if userId >= 0:
+            debug(1, 'load_user login succeeded userid=%d' % userId)
+            errorMes, isadmin = dbuser.isAdmin(g.con, g.cur, userName)
+            if isadmin != 1:
+                isadmin = 0
+            user = User(userName, password, userId, isadmin)
+            # add the user to the recent users list
+            # for tempUser in recentLoginUsers:
+            #   if( tempUser.name == user.name ):
+            #       debug(1,'user %s already found' % (user.id))
+            # add the user to the list
+            # recentLoginUsers.append(user)
+        else:
+            debug(1, 'user login failed %s' % (errorMes))
+            # login failed, so fallback to default user
+            errorMes, userId = dbuser.getUserId(g.con, g.cur, dbDefaultUser, dbDefaultPwd)
+            isadmin = 0
+            if userId >= 0:
+                debug(1, 'logged in as default user userid=%d' % userId)
+                user = User(dbDefaultUser, dbDefaultPwd, userId, isadmin)
+        return user
+    # we need this except for flask-autodoc (it does not have flask.g ?!?!)
     except:
         return None
-    user = None
-    alldat = request.get_json()
-    if (alldat is not None):
-        userName = alldat.get('user')
-        password = alldat.get('pwd')
-    else:
-        userName = None
-        password = None
-    debug(1, 'username is %s' % userName)
-
-    # use default user name when it was not sent
-    if(userName is None and password is None):
-        userName = dbDefaultUser  # anonymos user in case the field is empty
-        password = dbDefaultPwd
-
-    # check if exist in the recent array first & password didnt change
-    # for tempUser in recentLoginUsers:
-    #   if( tempUser.name == userName ):
-    #       if( tempUser.password == password):
-    #           user found, return
-    #           debug(1,'user %s already found' % (tempUser.name))
-    #           return tempUser
-    #       else:
-    #           debug(1,'remove user %s since it might that the password was changed' % (tempUser.id))
-    #           # user exist but with different password, remove the user and continue login
-    #           recentLoginUsers.remove(tempUser)
-
-    # user was not found in the cache memory
-    errorMes, userId = dbuser.getUserId(g.con, g.cur, userName, password)
-    if userId >= 0:
-        debug(1, 'load_user login succeeded userid=%d' % userId)
-        errorMes, isadmin = dbuser.isAdmin(g.con, g.cur, userName)
-        if isadmin != 1:
-            isadmin = 0
-        user = User(userName, password, userId, isadmin)
-        # add the user to the recent users list
-        # for tempUser in recentLoginUsers:
-        #   if( tempUser.name == user.name ):
-        #       debug(1,'user %s already found' % (user.id))
-        # add the user to the list
-        # recentLoginUsers.append(user)
-    else:
-        debug(1, 'user login failed %s' % (errorMes))
-        # login failed, so fallback to default user
-        errorMes, userId = dbuser.getUserId(g.con, g.cur, dbDefaultUser, dbDefaultPwd)
-        isadmin = 0
-        if userId >= 0:
-            debug(1, 'logged in as default user userid=%d' % userId)
-            user = User(dbDefaultUser, dbDefaultPwd, userId, isadmin)
-    return user
 
 
 if __name__ == '__main__':

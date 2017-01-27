@@ -6,12 +6,14 @@ from flask.ext.login import login_required
 
 from . import dbannotations
 from .utils import debug, getdoc
+from .autodoc import auto
 
 
 Annotation_Flask_Obj = Blueprint('Annottion_Flask_Obj', __name__, template_folder='templates')
 
 
 @login_required
+@auto.doc
 @Annotation_Flask_Obj.route('/annotations/add', methods=['POST', 'GET'])
 def add_annotations():
     """
