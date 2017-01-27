@@ -47,6 +47,7 @@ def before_request():
     con, cur = db_access.connect_db()
     g.con = con
     g.cur = cur
+    g.amnon ='amnon'
 
 
 # and when the request is over, disconnect
@@ -59,6 +60,7 @@ def teardown_request(exception):
 @login_manager.request_loader
 def load_user(request):
     debug(1, '>>>>>>>>>>>load_user login attempt')
+    debug(1,g.amnon)
     user = None
     alldat = request.get_json()
     if (alldat is not None):
