@@ -109,6 +109,7 @@ def add_annotations():
 
 
 @login_required
+@auto.doc()
 @Annotation_Flask_Obj.route('/annotations/get_sequences',methods=['GET'])
 def get_annotation_sequences():
     """
@@ -150,6 +151,7 @@ def get_annotation_sequences():
 
 
 @login_required
+@auto.doc()
 @Annotation_Flask_Obj.route('/annotations/get_full_sequences', methods=['GET'])
 def get_annotation_full_sequences():
     """
@@ -196,6 +198,7 @@ def get_annotation_full_sequences():
 
 
 @login_required
+@auto.doc()
 @Annotation_Flask_Obj.route('/annotations/delete',methods=['GET','POST'])
 def delete_annotation():
     """
@@ -238,6 +241,7 @@ def delete_annotation():
 
 
 @login_required
+@auto.doc()
 @Annotation_Flask_Obj.route('/annotations/delete_sequences_from_annotation',methods=['GET','POST'])
 def delete_sequences_from_annotation():
     """
@@ -286,6 +290,7 @@ def delete_sequences_from_annotation():
 
 
 @login_required
+@auto.doc()
 @Annotation_Flask_Obj.route('/annotations/get_annotation',methods=['GET'])
 def get_annotation():
     """
@@ -364,6 +369,7 @@ def get_annotation():
 
 
 @login_required
+@auto.doc()
 @Annotation_Flask_Obj.route('/annotations/get_annotation_ontology_parents',methods=['GET'])
 def get_annotation_ontology_parents():
     """

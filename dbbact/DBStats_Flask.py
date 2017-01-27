@@ -1,6 +1,7 @@
 import json
 from flask import Blueprint, g
 from .utils import debug
+from .autodoc import auto
 from . import dbstats
 
 
@@ -8,6 +9,7 @@ DBStats_Flask_Obj = Blueprint('DBStats_Flask_Obj', __name__, template_folder='te
 
 
 @DBStats_Flask_Obj.route('/stats/stats', methods=['GET'])
+@auto.doc()
 def dbdstats():
     """
     Title: Get statistics about the database
