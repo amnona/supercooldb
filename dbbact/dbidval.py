@@ -2,7 +2,7 @@ import psycopg2
 from .utils import debug
 
 
-def GetIdFromDescription(con,cur,table,description,noneok=False,addifnone=False,commit=True):
+def GetIdFromDescription(con, cur, table, description, noneok=False, addifnone=False, commit=True):
     """
     Get the id based on a value for a given table (and add if doesn't exists if addifnone=True)
 
@@ -29,27 +29,27 @@ def GetIdFromDescription(con,cur,table,description,noneok=False,addifnone=False,
                 return 0
             else:
                 return -1
-        description=description.lower()
-        cur.execute('SELECT id from %s WHERE description=%s LIMIT 1' % (table,'%s'),[description])
-        if cur.rowcount==0:
+        description = description.lower()
+        cur.execute('SELECT id from %s WHERE description=%s LIMIT 1' % (table, '%s'), [description])
+        if cur.rowcount == 0:
             if not addifnone:
-                debug(2,"value %s not found in table %s" % (description,table))
+                debug(2, "value %s not found in table %s" % (description, table))
                 return -1
-            err,cid=AddItem(con,cur,table,description,allowreplicate=True,commit=commit)
+            err, cid = AddItem(con, cur, table, description, allowreplicate=True, commit=commit)
             if err:
-                debug(7,'error when adding term: %s' % err)
+                debug(7, 'error when adding term: %s' % err)
                 return -2
-            debug(2,'new term added to table. reported as found')
+            debug(2, 'new term added to table. reported as found')
             return cid
-        cid=cur.fetchone()[0]
-        debug(2,"value %s found in table %s id %d" % (description,table,cid))
+        cid = cur.fetchone()[0]
+        debug(2, "value %s found in table %s id %d" % (description, table, cid))
         return cid
     except psycopg2.DatabaseError as e:
-        debug(8,"error %s in GetIdFromValue" % e)
+        debug(8, "error %s in GetIdFromValue" % e)
         return -2
 
 
-def AddItem(con,cur,table,description,allowreplicate=False,commit=True):
+def AddItem(con, cur, table, description, allowreplicate=False, commit=True):
     """
     Add a id,description to table and return the id.
     If item already exists, behavior depends on allowreplicate:
@@ -75,26 +75,26 @@ def AddItem(con,cur,table,description,allowreplicate=False,commit=True):
         the id of the added item
     """
     try:
-        description=description.lower()
+        description = description.lower()
         if not allowreplicate:
             # search if exists
-            sid=GetIdFromDescription(con,cur,table,description)
-            if sid>=0:
-                debug(2,'AddItem - item %s already exists. id is %d' % (description,sid))
-                return '',sid
+            sid = GetIdFromDescription(con, cur, table, description)
+            if sid >= 0:
+                debug(2, 'AddItem - item %s already exists. id is %d' % (description, sid))
+                return '', sid
         # should create new item
-        cur.execute('INSERT INTO %s (description) VALUES (%s) RETURNING id' % (table,'%s'),[description])
-        sid=cur.fetchone()[0]
-        debug(2,'AddItem - added new item %s. id is %d' % (description,sid))
+        cur.execute('INSERT INTO %s (description) VALUES (%s) RETURNING id' % (table, '%s'), [description])
+        sid = cur.fetchone()[0]
+        debug(2, 'AddItem - added new item %s. id is %d' % (description, sid))
         if commit:
             con.commit()
-        return '',sid
+        return '', sid
     except psycopg2.DatabaseError as e:
-        debug(8,"error %s in AddItem" % e)
+        debug(8, "error %s in AddItem" % e)
         return 'Error %s in AddItem' % e, -2
 
 
-def GetDescriptionFromId(con,cur,table,cid):
+def GetDescriptionFromId(con, cur, table, cid):
     """
     Get the description for id cid in table
 
@@ -113,13 +113,13 @@ def GetDescriptionFromId(con,cur,table,cid):
         the description of the id
     """
     try:
-        cur.execute('SELECT description FROM %s WHERE id=%s LIMIT 1' % (table,'%s'),[cid])
-        if cur.rowcount==0:
-            debug(2,'id not found in table %s' % table)
-            return 'id not found in table %s' % table,''
-        description=cur.fetchone()[0]
-        debug(1,'found description %s for id %d in table %s' % (description,cid,table))
-        return '',description
+        cur.execute('SELECT description FROM %s WHERE id=%s LIMIT 1' % (table, '%s'), [cid])
+        if cur.rowcount == 0:
+            debug(2, 'id not found in table %s' % table)
+            return 'id not found in table %s' % table, ''
+        description = cur.fetchone()[0]
+        debug(1, 'found description %s for id %d in table %s' % (description, cid, table))
+        return '', description
     except psycopg2.DatabaseError as e:
-        debug(8,"error %s in GetDescriptionFromId" % e)
+        debug(8, "error %s in GetDescriptionFromId" % e)
         return 'Error %s in GetDescriptionFromId' % e, ''

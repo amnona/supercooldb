@@ -3,13 +3,13 @@ from flask import Blueprint, g, request
 from flask.ext.login import login_required
 from . import dbontology
 from .utils import getdoc, debug
+from .autodoc import auto
+
+Ontology_Flask_Obj = Blueprint('Ontology_Flask_Obj', __name__, template_folder='templates')
 
 
-Ontology_Flask_Obj = Blueprint('Ontology_Flask_Obj', __name__,template_folder='templates')
-
-
-
-@Ontology_Flask_Obj.route('/ontology/add',methods=['GET','POST'])
+@Ontology_Flask_Obj.route('/ontology/add', methods=['GET', 'POST'])
+@auto.doc()
 def ontology_add_term():
     """
     Title: Add new ontology term
@@ -51,28 +51,29 @@ def ontology_add_term():
             Get the ontologynameid from the OntologyNamesTable. Add (ontologyId = termid, ontologyParentId = parentif, ontologyNameId = ontologynameid)
             for each sysnonym, if not in OntologyTable add it, get the synonymid, add to OntologySynymTable (idOntology = termid, idSynonym = synonymid)
     """
-    cfunc=ontology_add_term
-    if request.method=='GET':
+    cfunc = ontology_add_term
+    if request.method == 'GET':
         return(getdoc(cfunc))
-    alldat=request.get_json()
-    term=alldat.get('term')
+    alldat = request.get_json()
+    term = alldat.get('term')
     if term is None:
-        return('term missing',400)
-    parent=alldat.get('parent')
+        return('term missing', 400)
+    parent = alldat.get('parent')
     if parent is None:
-        parent='na'
-    ontologyname=alldat.get('ontologyname')
+        parent = 'na'
+    ontologyname = alldat.get('ontologyname')
     if ontologyname is None:
-        ontologyname='scdb'
-    synonyms=alldat.get('synonyms')
-    err,termid=dbontology.AddTerm(g.con,g.cur,term,parent,ontologyname,synonyms)
+        ontologyname = 'scdb'
+    synonyms = alldat.get('synonyms')
+    err, termid = dbontology.AddTerm(g.con, g.cur, term, parent, ontologyname, synonyms)
     if err:
-        debug(2,'add_ontology_term error %s encountered' % err)
+        debug(2, 'add_ontology_term error %s encountered' % err)
         return(err)
-    return json.dumps({'termid':termid})
+    return json.dumps({'termid': termid})
 
 
-@Ontology_Flask_Obj.route('/ontology/get_parents',methods=['GET'])
+@Ontology_Flask_Obj.route('/ontology/get_parents', methods=['GET'])
+@auto.doc()
 def ontology_get_parents():
     """
     Title: Get all parents for a given ontology term
@@ -100,17 +101,18 @@ def ontology_get_parents():
         If it is a synonym for a term, get the original term first.
         Note that if the term is in more than one ontology, will return all parents
     """
-    term=request.args.get('term')
+    term = request.args.get('term')
     if term is None:
         # # TODO: retrun error
-        return('missing argument term',400)
-    err,parents=dbontology.GetParents(g.con,g.cur,term)
+        return('missing argument term', 400)
+    err, parents = dbontology.GetParents(g.con, g.cur, term)
     if err:
-        return(err,400)
-    return(json.dumps({'parents':parents}))
+        return(err, 400)
+    return(json.dumps({'parents': parents}))
 
 
-@Ontology_Flask_Obj.route('/ontology/get_term',methods=['GET'])
+@Ontology_Flask_Obj.route('/ontology/get_term', methods=['GET'])
+@auto.doc()
 def ontology_get_term():
     """
     Title: Query Ontology terms
@@ -135,14 +137,15 @@ def ontology_get_term():
             }
         }
     """
-    cid=request.args.get('startid')
+    cid = request.args.get('startid')
     if cid is None:
         return(getdoc(ontology_get_term))
-    jsonRetData = db_access.DB_ACCESS_FLASK_OntologyTable_GetRecsByStartId(cid,con=g.con,cur=g.cur)
+    jsonRetData = db_access.DB_ACCESS_FLASK_OntologyTable_GetRecsByStartId(cid, con=g.con, cur=g.cur)
     return json.dumps(jsonRetData, ensure_ascii=False)
 
 
-@Ontology_Flask_Obj.route('/ontology/get_synonym',methods=['GET'])
+@Ontology_Flask_Obj.route('/ontology/get_synonym', methods=['GET'])
+@auto.doc()
 def ontology_get_synonym():
     """
     Title: Query Ontology synonyms
@@ -169,15 +172,16 @@ def ontology_get_synonym():
             }
         }
     """
-    cid=request.args.get('startid')
+    cid = request.args.get('startid')
     if cid is None:
         return(getdoc(ontology_get_synonym))
-    jsonRetData = db_access.DB_ACCESS_FLASK_SynonymTable_GetRecsByStartId(cid,g.con,g.cur)
+    jsonRetData = db_access.DB_ACCESS_FLASK_SynonymTable_GetRecsByStartId(cid, g.con, g.cur)
     return json.dumps(jsonRetData, ensure_ascii=False)
 
 
 @login_required
 @Ontology_Flask_Obj.route('/ontology/get_annotations', methods=['GET'])
+@auto.doc()
 def get_ontology_annotations():
     """
     Title: get_annotations

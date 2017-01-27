@@ -34,6 +34,7 @@ login_manager.init_app(app)
 
 
 class User(UserMixin):
+
     def __init__(self, username, password, userId, isAdmin):
         self.name = username
         self.password = password

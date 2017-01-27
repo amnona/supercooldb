@@ -4,12 +4,13 @@ from flask.ext.login import login_required, current_user
 from . import dbsequences
 from . import dbannotations
 from .utils import debug, getdoc
-
+from .autodoc import auto
 
 Seq_Flask_Obj = Blueprint('Seq_Flask_Obj', __name__, template_folder='templates')
 
 
-@Seq_Flask_Obj.route('/sequences/add',methods=['POST','GET'])
+@Seq_Flask_Obj.route('/sequences/add', methods=['POST', 'GET'])
+@auto.doc()
 def add_sequences():
     """
     Title: Add new sequences (or return seqid for ones that exist)
@@ -39,27 +40,28 @@ def add_sequences():
         Action:
         Add all sequences that don't already exist in SequencesTable
     """
-    cfunc=add_sequences
-    if request.method=='GET':
+    cfunc = add_sequences
+    if request.method == 'GET':
         return(getdoc(cfunc))
-    alldat=request.get_json()
-    sequences=alldat.get('sequences')
+    alldat = request.get_json()
+    sequences = alldat.get('sequences')
     if sequences is None:
         return(getdoc(cfunc))
-    taxonomies=alldat.get('taxonomies')
-    ggids=alldat.get('ggids')
-    primer=alldat.get('primer')
+    taxonomies = alldat.get('taxonomies')
+    ggids = alldat.get('ggids')
+    primer = alldat.get('primer')
     if primer is None:
         return(getdoc(cfunc))
 
-    err,seqids=dbsequences.AddSequences(g.con,g.cur,sequences=sequences,taxonomies=taxonomies,ggids=ggids,primer=primer)
+    err, seqids = dbsequences.AddSequences(g.con, g.cur, sequences=sequences, taxonomies=taxonomies, ggids=ggids, primer=primer)
     if err:
-        return(err,400)
-    debug(2,'added/found %d sequences' % len(seqids))
-    return json.dumps({"seqIds":seqids})
+        return(err, 400)
+    debug(2, 'added/found %d sequences' % len(seqids))
+    return json.dumps({"seqIds": seqids})
 
 
-@Seq_Flask_Obj.route('/sequences/getid',methods=['GET'])
+@Seq_Flask_Obj.route('/sequences/getid', methods=['GET'])
+@auto.doc()
 def get_sequenceid():
     """
     Title: Get id for a given new sequences (or return -1 if does not exist)
@@ -82,21 +84,22 @@ def get_sequenceid():
         Validation:
         Action:
     """
-    cfunc=get_sequenceid
-    alldat=request.get_json()
-    sequence=alldat.get('sequence')
+    cfunc = get_sequenceid
+    alldat = request.get_json()
+    sequence = alldat.get('sequence')
     if sequence is None:
         return(getdoc(cfunc))
 
-    err,seqid=dbsequences.GetSequenceId(g.con,g.cur,sequence=sequence,)
+    err, seqid = dbsequences.GetSequenceId(g.con, g.cur, sequence=sequence,)
     if err:
-        return(err,400)
-    debug(2,'found sequences')
-    return json.dumps({"seqId":seqid})
+        return(err, 400)
+    debug(2, 'found sequences')
+    return json.dumps({"seqId": seqid})
 
 
 @login_required
-@Seq_Flask_Obj.route('/sequences/get_annotations',methods=['GET'])
+@Seq_Flask_Obj.route('/sequences/get_annotations', methods=['GET'])
+@auto.doc()
 def get_sequence_annotations():
     """
     Title: Query sequence:
@@ -162,22 +165,23 @@ def get_sequence_annotations():
             If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
             If annotation is not private, return it (no need for authentication)
     """
-    cfunc=get_sequence_annotations
-    alldat=request.get_json()
+    cfunc = get_sequence_annotations
+    alldat = request.get_json()
     if alldat is None:
         return(getdoc(cfunc))
-    sequence=alldat.get('sequence')
+    sequence = alldat.get('sequence')
     if sequence is None:
-        return('sequence parameter missing',400)
-    err,details=dbannotations.GetSequenceAnnotations(g.con,g.cur,sequence, userid=current_user.user_id)
+        return('sequence parameter missing', 400)
+    err, details = dbannotations.GetSequenceAnnotations(g.con, g.cur, sequence, userid=current_user.user_id)
     if err:
-        debug(6,err)
-        return ('Problem geting details. error=%s' % err,400)
-    return json.dumps({'annotations':details})
+        debug(6, err)
+        return ('Problem geting details. error=%s' % err, 400)
+    return json.dumps({'annotations': details})
 
 
 @login_required
-@Seq_Flask_Obj.route('/sequences/get_list_annotations',methods=['GET'])
+@Seq_Flask_Obj.route('/sequences/get_list_annotations', methods=['GET'])
+@auto.doc()
 def get_sequence_list_annotations():
     """
     Title: Query sequence:
@@ -244,44 +248,46 @@ def get_sequence_list_annotations():
             If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
             If annotation is not private, return it (no need for authentication)
     """
-    cfunc=get_sequence_list_annotations
-    alldat=request.get_json()
+    cfunc = get_sequence_list_annotations
+    alldat = request.get_json()
     if alldat is None:
         return(getdoc(cfunc))
-    sequences=alldat.get('sequences')
+    sequences = alldat.get('sequences')
     if sequences is None:
-        return('sequences parameter missing',400)
-    seqannotations=[]
+        return('sequences parameter missing', 400)
+    seqannotations = []
     for cseq in sequences:
-        err,details=dbannotations.GetSequenceAnnotations(g.con,g.cur,cseq,userid=current_user.user_id)
+        err, details = dbannotations.GetSequenceAnnotations(g.con, g.cur, cseq, userid=current_user.user_id)
         # if err:
         #   debug(6,err)
         #   return ('Problem geting details. error=%s' % err,400)
         seqannotations.append(details)
 
-    return json.dumps({'seqannotations':seqannotations})
+    return json.dumps({'seqannotations': seqannotations})
 
 
 # need to add conversion to nice string
 @login_required
-@Seq_Flask_Obj.route('/sequences/get_annotations_string',methods=['GET'])
+@Seq_Flask_Obj.route('/sequences/get_annotations_string', methods=['GET'])
+@auto.doc()
 def get_annotations_string():
-    cfunc=get_annotations_string
-    alldat=request.get_json()
+    cfunc = get_annotations_string
+    alldat = request.get_json()
     if alldat is None:
         return(getdoc(cfunc))
-    sequence=alldat.get('sequence')
+    sequence = alldat.get('sequence')
     if sequence is None:
-        return('sequence parameter missing',400)
-    err,details=dbannotations.GetSequenceAnnotations(g.con,g.cur,sequence,userid=current_user.user_id)
+        return('sequence parameter missing', 400)
+    err, details = dbannotations.GetSequenceAnnotations(g.con, g.cur, sequence, userid=current_user.user_id)
     if err:
-        debug(6,err)
-        return ('Problem geting details. error=%s' % err,400)
-    return json.dumps({'annotations':details})
+        debug(6, err)
+        return ('Problem geting details. error=%s' % err, 400)
+    return json.dumps({'annotations': details})
 
 
 @login_required
-@Seq_Flask_Obj.route('/sequences/get_fast_annotations',methods=['GET'])
+@Seq_Flask_Obj.route('/sequences/get_fast_annotations', methods=['GET'])
+@auto.doc()
 def get_fast_annotations():
     """
     Title: Get Fast Annotations
@@ -295,6 +301,8 @@ def get_fast_annotations():
                 the list of sequence strings to query the database (can be any length)
             region : int (optional)
                 the region id (default=1 which is V4 515F 806R)
+            get_term_info: bool (optional)
+                True (info) to return also information about each term, False not to return
     Success Response:
         Code : 200
         Content :
@@ -349,6 +357,14 @@ def get_fast_annotations():
                     annotationids : list of int
                             the annotationsid associated with this sequence
             }
+            term_info : dict of {term, dict}:
+            Information about each term which appears in the annotation parents. Key is the ontolgy term. the value dict is:
+            {
+                    'total_annotations' : int
+                        total number of annotations where this term appears (as a parent)
+                    'total_sequences' : int
+                        total number of sequences in annotations where this term appears (as a parent)
+            }
         }
     Details :
         Return a dict of details for all the annotations associated with at least one of the sequences used as input, and a list of seqpos and the associated annotationids describing it
@@ -365,16 +381,19 @@ def get_fast_annotations():
     if sequences is None:
         return('sequences parameter missing', 400)
     region = alldat.get('region')
-    err, annotations, seqannotations = dbannotations.GetFastAnnotations(g.con, g.cur, sequences, region=region, userid=current_user.user_id)
+    get_term_info = alldat.get('get_term_info', True)
+    err, annotations, seqannotations, term_info = dbannotations.GetFastAnnotations(g.con, g.cur, sequences, region=region, userid=current_user.user_id, get_term_info=get_term_info)
     if err:
         errmsg = 'error encountered while getting the fast annotations: %s' % err
         debug(6, errmsg)
         return(errmsg, 400)
-    return json.dumps({'annotations': annotations, 'seqannotations': seqannotations})
+    res = {'annotations': annotations, 'seqannotations': seqannotations, 'term_info': term_info}
+    return json.dumps(res)
 
 
 @login_required
 @Seq_Flask_Obj.route('/sequences/get_taxonomy_annotation_ids', methods=['GET'])
+@auto.doc()
 def get_taxonomy_annotation_ids():
     """
     Title: Get taxonomy annotation ids
@@ -417,6 +436,7 @@ def get_taxonomy_annotation_ids():
 
 @login_required
 @Seq_Flask_Obj.route('/sequences/get_taxonomy_annotations', methods=['GET'])
+@auto.doc()
 def get_taxonomy_annotations():
     """
     Title: Get taxonomy annotation ids
@@ -456,6 +476,7 @@ def get_taxonomy_annotations():
 
 
 @Seq_Flask_Obj.route('/sequences/get_info', methods=['GET'])
+@auto.doc()
 def get_sequence_info():
     """
     Title: Get sequences information
@@ -496,4 +517,3 @@ def get_sequence_info():
         debug(6, errmsg)
         return(errmsg, 400)
     return json.dumps({'sequences': sequences})
-

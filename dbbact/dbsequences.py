@@ -10,7 +10,7 @@ from . import dbannotations
 SEED_SEQ_LEN = 100
 
 
-def AddSequences(con,cur,sequences,taxonomies=None,ggids=None,primer='V4',commit=True):
+def AddSequences(con, cur, sequences, taxonomies=None, ggids=None, primer='V4', commit=True):
     """
     Add sequence entries to database if they do not exist yet
     input:
@@ -33,43 +33,43 @@ def AddSequences(con,cur,sequences,taxonomies=None,ggids=None,primer='V4',commit
         list of the new ids or None if error enountered
     """
     # get the primer region id
-    seqids=[]
-    numadded=0
-    idprimer = primers.GetIdFromName(con,cur,primer)
-    if idprimer<0:
-        debug(2,'primer %s not found' % primer)
-        return "primer %s not found" % primer,None
-    debug(1,'primerid %s' % idprimer)
+    seqids = []
+    numadded = 0
+    idprimer = primers.GetIdFromName(con, cur, primer)
+    if idprimer < 0:
+        debug(2, 'primer %s not found' % primer)
+        return "primer %s not found" % primer, None
+    debug(1, 'primerid %s' % idprimer)
     try:
-        for idx,cseq in enumerate(sequences):
-            if len(cseq)<SEED_SEQ_LEN:
-                errmsg='sequence too short (<%d) for sequence %s' % (SEED_SEQ_LEN, cseq)
-                debug(4,errmsg)
+        for idx, cseq in enumerate(sequences):
+            if len(cseq) < SEED_SEQ_LEN:
+                errmsg = 'sequence too short (<%d) for sequence %s' % (SEED_SEQ_LEN, cseq)
+                debug(4, errmsg)
                 return errmsg, None
             # test if already exists, skip it
-            err,cseqid=GetSequenceId(con,cur,sequence=cseq,idprimer=idprimer)
-            if cseqid<=0:
+            err, cseqid = GetSequenceId(con, cur, sequence=cseq, idprimer=idprimer)
+            if cseqid <= 0:
                 if taxonomies is None:
-                    ctax='na'
+                    ctax = 'na'
                 else:
-                    ctax=taxonomies[idx].lower()
+                    ctax = taxonomies[idx].lower()
                 if ggids is None:
-                    cggid=0
+                    cggid = 0
                 else:
-                    cggid=ggids[idx]
-                cseq=cseq.lower()
-                cseedseq=cseq[:SEED_SEQ_LEN]
-                cur.execute('INSERT INTO SequencesTable (idPrimer,sequence,length,taxonomy,ggid,seedsequence) VALUES (%s,%s,%s,%s,%s,%s) RETURNING id',[idprimer,cseq,len(cseq),ctax,cggid,cseedseq])
-                cseqid=cur.fetchone()[0]
-                numadded+=1
+                    cggid = ggids[idx]
+                cseq = cseq.lower()
+                cseedseq = cseq[:SEED_SEQ_LEN]
+                cur.execute('INSERT INTO SequencesTable (idPrimer,sequence,length,taxonomy,ggid,seedsequence) VALUES (%s,%s,%s,%s,%s,%s) RETURNING id', [idprimer, cseq, len(cseq), ctax, cggid, cseedseq])
+                cseqid = cur.fetchone()[0]
+                numadded += 1
             seqids.append(cseqid)
         if commit:
             con.commit()
-        debug(3,"Added %d sequences (out of %d)" % (numadded,len(sequences)))
-        return "",seqids
+        debug(3, "Added %d sequences (out of %d)" % (numadded, len(sequences)))
+        return "", seqids
     except psycopg2.DatabaseError as e:
-        debug(7,'database error %s' %e)
-        return "database error %s" % e,None
+        debug(7, 'database error %s' % e)
+        return "database error %s" % e, None
 
 
 def SeqFromID(con, cur, seqids):
@@ -104,7 +104,7 @@ def SeqFromID(con, cur, seqids):
     return '', sequences
 
 
-def GetSequencesId(con,cur,sequences):
+def GetSequencesId(con, cur, sequences):
     """
     Get sequence ids for a sequence or list of sequences
 
@@ -118,15 +118,15 @@ def GetSequencesId(con,cur,sequences):
     ids : ilist of int
         the list of ids for each sequence (-1 for sequences which were not found)
     """
-    if isinstance(sequences,str):
-        sequences=[sequences]
-    ids=[]
+    if isinstance(sequences, str):
+        sequences = [sequences]
+    ids = []
     for cseq in sequences:
-        err,cid=GetSequenceId(con,cur,cseq)
+        err, cid = GetSequenceId(con, cur, cseq)
         if err:
-            return err,None
+            return err, None
         ids.append(cid)
-    return "",ids
+    return "", ids
 
 
 def GetSequenceId(con, cur, sequence, idprimer=None, use_full_lengh=False):
@@ -225,7 +225,7 @@ def GetTaxonomyAnnotationIDs(con, cur, taxonomy, userid=None):
     '''
     taxonomy = taxonomy.lower()
     debug(1, 'GetTaxonomyAnnotationIDS for taxonomy %s' % taxonomy)
-    cur.execute('SELECT id from SequencesTable where taxonomy LIKE %s', ['%'+taxonomy+'%'])
+    cur.execute('SELECT id from SequencesTable where taxonomy LIKE %s', ['%' + taxonomy + '%'])
     res = cur.fetchall()
     seqids = []
     for cres in res:

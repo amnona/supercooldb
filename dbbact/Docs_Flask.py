@@ -15,12 +15,14 @@ def docs():
     output = '<html>\n<title>dbBact REST API Documentation</title><head>\n</head><body>'
     doclist = auto.generate()
     for cdoc in doclist:
+        if cdoc is None:
+            continue
         output += '<details>\n'
         output += '<summary>'
-        output += cdoc['rule']
+        output += str(cdoc.get('rule', 'na\n'))
         output += '</summary>\n'
         output += '<pre>\n'
-        output += cdoc.get('docstring', 'na\n')
+        output += str(cdoc.get('docstring', 'na\n'))
         output += '</pre>\n'
         output += '</details>\n'
     output += '</body>'
