@@ -23,6 +23,6 @@ def docs2():
     output = '<html>\n<title>dbBact REST API Documentation</title><head>\n</head><body>'
     doclist = auto.generate()
     for cdoc in doclist:
-        output += '<h2>cdoc' + cdoc['rule'] + '<\h2>'
+        output += '<h2>' + cdoc['rule'] + '</h2>'
     output += '</body>'
     return output
