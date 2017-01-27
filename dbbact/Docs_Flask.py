@@ -1,9 +1,7 @@
-from flask import Blueprint, g
+from flask import Blueprint
 # from flask.ext.login import current_user
-from flask.ext.login import login_required
 
 from .autodoc import auto
-from .utils import debug
 
 
 Docs_Flask_Obj = Blueprint('Docs_Flask_Obj', __name__, template_folder='templates')
@@ -15,5 +13,4 @@ def docs():
     '''
     The documentation for all the REST API using flask-autodoc
     '''
-    debug(1,g.amnon)
     return auto.html()
