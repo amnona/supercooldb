@@ -15,6 +15,8 @@ def docs():
     output = '<html>\n<title>dbBact REST API Documentation</title><head>\n</head><body>'
     doclist = auto.generate()
     for cdoc in doclist:
+        if cdoc is None:
+            continue
         output += '<details>\n'
         output += '<summary>'
         output += cdoc['rule']
