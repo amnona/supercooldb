@@ -18,7 +18,6 @@ def debug(level, msg):
 
     # if level>=debuglevel:
     if True:
-        print(msg, 'aa')
         print(msg, file=sys.stderr)
 
 
