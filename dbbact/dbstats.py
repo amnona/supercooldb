@@ -1,4 +1,4 @@
-from utils import debug
+from .utils import debug
 
 
 def GetStats(con, cur):

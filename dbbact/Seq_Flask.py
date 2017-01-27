@@ -1,12 +1,12 @@
-from flask import Blueprint,request,g
-from flask.ext.login import login_required
-from flask.ext.login import current_user
 import json
-import dbsequences
-import dbannotations
-from utils import debug,getdoc
+from flask import Blueprint, request, g
+from flask.ext.login import login_required, current_user
+import .dbsequences
+import .dbannotations
+from .utils import debug, getdoc
 
-Seq_Flask_Obj = Blueprint('Seq_Flask_Obj', __name__,template_folder='templates')
+
+Seq_Flask_Obj = Blueprint('Seq_Flask_Obj', __name__, template_folder='templates')
 
 
 @Seq_Flask_Obj.route('/sequences/add',methods=['POST','GET'])

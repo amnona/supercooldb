@@ -1,7 +1,7 @@
 import psycopg2
-from utils import debug
-import dbidval
-import dbannotations
+from .utils import debug
+import .dbidval
+import .dbannotations
 
 
 def AddTerm(con,cur,term,parent='na',ontologyname='scdb',synonyms=[],commit=True):

@@ -1,10 +1,10 @@
+import json
 from flask import Blueprint,request,g
 from flask.ext.login import login_required
 from flask.ext.login import current_user
-import dbannotations
-import json
-import dbuser
-from utils import debug,getdoc,send_email,random_str
+import .dbannotations
+import .dbuser
+from .utils import debug,getdoc,send_email,random_str
 
 Users_Flask_Obj = Blueprint('Users_Flask_Obj', __name__,template_folder='templates')
 

@@ -1,27 +1,27 @@
 import psycopg2
-from utils import debug
+from .utils import debug
 
 maxfailedattempt = 3
 
 def getUserId(con,cur,user,password):
     """
-	Get the user id after autontication
+    Get the user id after autontication
 
-	input:
-	con,cur : database connection and cursor
-	user : user name
+    input:
+    con,cur : database connection and cursor
+    user : user name
     pasword: user password
 
-	output:
-	errmsg : str
-		"" if ok, error msg if error encountered
-	id : int
+    output:
+    errmsg : str
+        "" if ok, error msg if error encountered
+    id : int
         -1 if the user doesnt exist
         -2 if the user exist but using wrong password
         -3 user is locked
         -4 exception
-		user id  >= 0 if the user exist
-	"""
+        user id  >= 0 if the user exist
+    """
     try:
         debug(1,'SELECT id,attemptscounter FROM userstable WHERE username=%s' % user)
         cur.execute('SELECT id,attemptscounter FROM userstable WHERE username=%s' ,[user])
@@ -61,20 +61,20 @@ def getUserId(con,cur,user,password):
 
 def isUserExist(con,cur,user):
     """
-	Check if user name is already in use
+    Check if user name is already in use
 
-	input:
-	con,cur : database connection and cursor
-	user : user name
+    input:
+    con,cur : database connection and cursor
+    user : user name
 
-	output:
-	errmsg : str
-		"" if ok, error msg if error encountered
-	id : int
+    output:
+    errmsg : str
+        "" if ok, error msg if error encountered
+    id : int
         1 user exist
         0 user doesnt exist
         -4 exception
-	"""
+    """
     try:
         debug(1,'SELECT id,attemptscounter FROM userstable WHERE username=%s' % user)
         cur.execute('SELECT id,attemptscounter FROM userstable WHERE username=%s' ,[user])
@@ -90,21 +90,21 @@ def isUserExist(con,cur,user):
 
 def isAdmin(con,cur,user):
     """
-	Check if user is admin
+    Check if user is admin
 
-	input:
-	con,cur : database connection and cursor
-	user : user name
+    input:
+    con,cur : database connection and cursor
+    user : user name
 
-	output:
-	errmsg : str
-		"" if ok, error msg if error encountered
-	id : int
+    output:
+    errmsg : str
+        "" if ok, error msg if error encountered
+    id : int
         1 user is admin
         0 user is not admin
         -1 user was not found
         -4 exception
-	"""
+    """
     try:
         debug(1,'SELECT isadmin FROM userstable WHERE username=%s' % user)
         cur.execute('SELECT isadmin FROM userstable WHERE username=%s' ,[user])
@@ -125,15 +125,15 @@ def isAdmin(con,cur,user):
 
 def setUserLoginAttempts(con,cur,usrid,val):
     """
-	Set user login attempt
+    Set user login attempt
 
-	input:
-	con,cur : database connection and cursor
-	user : user id
+    input:
+    con,cur : database connection and cursor
+    user : user id
     val: number of login attempt
 
-	output:
-	"""
+    output:
+    """
     returnVal = 0
     debug(3,'update userstable set attemptscounter=%s WHERE id=%s' % (val,usrid))
     cur.execute('update userstable set attemptscounter=%s WHERE id=%s',[val,usrid])
@@ -141,15 +141,15 @@ def setUserLoginAttempts(con,cur,usrid,val):
 
 def setUserLoginAttemptsByName(con,cur,username,val):
     """
-	Set user login attempt
+    Set user login attempt
 
-	input:
-	con,cur : database connection and cursor
-	username : user name
+    input:
+    con,cur : database connection and cursor
+    username : user name
     val: number of login attempt
 
-	output:
-	"""
+    output:
+    """
     returnVal = 0
     debug(3,'update userstable set attemptscounter=%s WHERE username=%s' % (val,username))
     cur.execute('update userstable set attemptscounter=%s WHERE username=%s',[val,username])
@@ -158,16 +158,16 @@ def setUserLoginAttemptsByName(con,cur,username,val):
     
 def getUserLoginAttempts(con,cur,usrid):
     """
-	Set user login attempt
+    Set user login attempt
 
-	input:
-	con,cur : database connection and cursor
-	user : user id
+    input:
+    con,cur : database connection and cursor
+    user : user id
 
-	output:
+    output:
     number of attempts : int
         return the number of failed attempts for a given user
-	"""
+    """
     returnVal = 0
     cur.execute('SELECT attemptscounter FROM userstable WHERE id=%s',[usrid])
     if cur.rowcount==0:
@@ -180,27 +180,27 @@ def getUserLoginAttempts(con,cur,usrid):
     
 def addUser(con,cur,user,pwd,name,description,mail,publish):
     """
-	Add new user
+    Add new user
 
-	input:
-	con,cur : database connection and cursor
-	user : user name
+    input:
+    con,cur : database connection and cursor
+    user : user name
     pwd: user password
     name: name
     description: description (optional)
     mail: user email
     publish: publish user mail ('y' or 'n')
 
-	output:
-	errmsg : str
-		"" if ok, error msg if error encountered
-	id : int
+    output:
+    errmsg : str
+        "" if ok, error msg if error encountered
+    id : int
         1 operaion ended succesfully
         -1 empty user
         -2 empty password
         -3 user already exist
         -4 exception
-	"""
+    """
     if user == "":
         return ("user can't be empty",-1)
     if pwd == "":
@@ -225,23 +225,23 @@ def addUser(con,cur,user,pwd,name,description,mail,publish):
 
 def updateNewPassword(con,cur,user,newpwd):
     """
-	Update password for user
+    Update password for user
 
-	input:
-	con,cur : database connection and cursor
-	user : user name
+    input:
+    con,cur : database connection and cursor
+    user : user name
     newpwd: update user password
 
-	output:
-	errmsg : str
-		"" if ok, error msg if error encountered
-	id : int
+    output:
+    errmsg : str
+        "" if ok, error msg if error encountered
+    id : int
         1 operaion ended succesfully
         -1 empty user
         -2 empty password
         -3 user doesnt exist
         -4 exception
-	"""
+    """
     if user == "":
         return ("user can't be empty",-1)
     if newpwd == "":
@@ -265,27 +265,27 @@ def updateNewPassword(con,cur,user,newpwd):
     
 def getMail(con,cur,user):
     """
-	Get mail
+    Get mail
 
-	input:
-	con,cur : database connection and cursor
-	user : user name
+    input:
+    con,cur : database connection and cursor
+    user : user name
 
-	output:
-	errmsg : str
-		empty ok, error msg if error encountered
+    output:
+    errmsg : str
+        empty ok, error msg if error encountered
     email : str
-		email address if ok, error msg if error encountered
+        email address if ok, error msg if error encountered
     password : str
-		email address if ok, error msg if error encountered    
-	id : int
+        email address if ok, error msg if error encountered    
+    id : int
         1 operaion ended succesfully
         -1 empty user
         -2 user doesnt exist
         -3 mail doesnt exist
         -4 exception
     
-	"""
+    """
     if user == "":
         return ("user can't be empty",-1)
     #If the user already exist, return error
@@ -312,23 +312,23 @@ def getMail(con,cur,user):
 
 def getUserInformation(con,cur,userid):
     """
-	Get the public information of user
+    Get the public information of user
 
-	input:
-	con,cur : database connection and cursor
-	user: id
+    input:
+    con,cur : database connection and cursor
+    user: id
 
-	output:
-	errmsg : str
-		empty ok, error msg if error encountered
+    output:
+    errmsg : str
+        empty ok, error msg if error encountered
     data: dict
         the user data. includes:
-		'id' : int
-		'username' : str
-		'name' : str
-		'description' : str
+        'id' : int
+        'username' : str
+        'name' : str
+        'description' : str
         'email' : str
-	"""
+    """
     if userid is not None and userid < 0:
         return ("user id can't be negative",None)
 
