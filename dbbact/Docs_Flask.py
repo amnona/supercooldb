@@ -30,6 +30,6 @@ def docs2():
         output += '<pre>\n'
         output += cdoc.get('doc', 'na')
         output += '</pre>\n'
-    output += '</details>\n'
+        output += '</details>\n'
     output += '</body>'
     return output
