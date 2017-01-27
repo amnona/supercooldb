@@ -7,11 +7,11 @@ from flask.ext.login import current_user
 from flask.ext.login import login_required
 
 
-Annotation_Flask_Obj = Blueprint('Annottion_Flask_Obj', __name__,template_folder='templates')
+Annotation_Flask_Obj = Blueprint('Annottion_Flask_Obj', __name__, template_folder='templates')
 
 
 @login_required
-@Annotation_Flask_Obj.route('/annotations/add',methods=['POST','GET'])
+@Annotation_Flask_Obj.route('/annotations/add', methods=['POST', 'GET'])
 def add_annotations():
     """
     Title: Add new annotation

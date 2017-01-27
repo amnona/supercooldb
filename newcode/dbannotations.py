@@ -8,7 +8,8 @@ import dbontology
 from dbontology import GetParents
 
 
-def AddSequenceAnnotations(con,cur,sequences,primer,expid,annotationtype,annotationdetails,method='',description='',agenttype='',private='n',userid=None,commit=True):
+def AddSequenceAnnotations(con, cur, sequences, primer, expid, annotationtype, annotationdetails, method='',
+                           description='', agenttype='', private='n', userid=None, commit=True):
     """
     Add an annotation to the annotation table
 
@@ -47,21 +48,23 @@ def AddSequenceAnnotations(con,cur,sequences,primer,expid,annotationtype,annotat
         annotationid if ok, -1 if error encouneted
     """
     # add the sequences
-    err,seqids=dbsequences.AddSequences(con,cur,sequences,primer=primer,commit=False)
+    err, seqids = dbsequences.AddSequences(con, cur, sequences, primer=primer, commit=False)
     if err:
-        return err,-1
-    err,annotationid=AddAnnotation(con,cur,expid,annotationtype,annotationdetails,method,description,agenttype,private,userid,commit=False)
+        return err, -1
+    err, annotationid = AddAnnotation(con, cur, expid, annotationtype, annotationdetails, method, description, agenttype, private, userid, commit=False, numseqs=len(seqids))
     if err:
-        return err,-1
+        return err, -1
     for cseqid in seqids:
-        cur.execute('INSERT INTO SequencesAnnotationTable (seqId,annotationId) VALUES (%s,%s)',[cseqid,annotationid])
-    debug(2,"Added %d sequence annotations" % len(seqids))
+        cur.execute('INSERT INTO SequencesAnnotationTable (seqId,annotationId) VALUES (%s,%s)', [cseqid, annotationid])
+    debug(2, "Added %d sequence annotations" % len(seqids))
     if commit:
         con.commit()
-    return '',annotationid
+    return '', annotationid
 
 
-def AddAnnotation(con,cur,expid,annotationtype,annotationdetails,method='',description='',agenttype='',private='n',userid=None,commit=True):
+def AddAnnotation(con, cur, expid, annotationtype, annotationdetails, method='',
+                  description='', agenttype='', private='n', userid=None,
+                  commit=True, numseqs=0):
     """
     Add an annotation to the annotation table
 
@@ -79,6 +82,8 @@ def AddAnnotation(con,cur,expid,annotationtype,annotationdetails,method='',descr
         username of the user creating this annotation or None (default) for anonymous user
     commit : bool (optional)
         True (default) to commit, False to wait with the commit
+    numseqs : int (optional)
+        The number of sequences in this annotation (used to update the seqCount in the ontologyTable)
 
     output:
     err : str
@@ -87,55 +92,55 @@ def AddAnnotation(con,cur,expid,annotationtype,annotationdetails,method='',descr
         the new curation identifier or <0 if failed
     """
     # test if experiment exists
-    if not dbexperiments.TestExpIdExists(con,cur,expid,userid):
-        debug(4,'expid %d does not exists' % expid)
-        return 'expid %d does not exist' % expid,-1
+    if not dbexperiments.TestExpIdExists(con, cur, expid, userid):
+        debug(4, 'expid %d does not exists' % expid)
+        return 'expid %d does not exist' % expid, -1
     # handle userid
     if userid is None:
-        userid=0
+        userid = 0
         # TODO: add user exists check
     # get annotationtypeid
-    annotationtypeid=dbidval.GetIdFromDescription(con,cur,'AnnotationTypesTable',annotationtype)
-    if annotationtypeid<0:
-        return 'annotation type %s unknown' % annotationtype,-1
+    annotationtypeid = dbidval.GetIdFromDescription(con, cur, 'AnnotationTypesTable', annotationtype)
+    if annotationtypeid < 0:
+        return 'annotation type %s unknown' % annotationtype, -1
     # get annotationtypeid
-    methodid=dbidval.GetIdFromDescription(con,cur,'MethodTypesTable',method,noneok=True)
-    if methodid<0:
-        return 'method %s unknown' % method,-1
+    methodid = dbidval.GetIdFromDescription(con, cur, 'MethodTypesTable', method, noneok=True)
+    if methodid < 0:
+        return 'method %s unknown' % method, -1
     # get annotationtypeid
-    agenttypeid=dbidval.GetIdFromDescription(con,cur,'AgentTypesTable',agenttype,noneok=True,addifnone=True,commit=False)
-    if agenttypeid<0:
-        return 'agenttype %s unknown' % agenttype,-1
+    agenttypeid = dbidval.GetIdFromDescription(con, cur, 'AgentTypesTable', agenttype, noneok=True, addifnone=True, commit=False)
+    if agenttypeid < 0:
+        return 'agenttype %s unknown' % agenttype, -1
     # get the current date
-    cdate=datetime.date.today().isoformat()
+    cdate = datetime.date.today().isoformat()
 
     if private is None:
-        private='n'
+        private = 'n'
     # lowercase the private
-    private=private.lower()
+    private = private.lower()
 
-    cur.execute('INSERT INTO AnnotationsTable (idExp,idUser,idAnnotationType,idMethod,description,idAgentType,isPrivate,addedDate) VALUES (%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id',[
-                expid,userid,annotationtypeid,methodid,description,agenttypeid,private,cdate])
-    cid=cur.fetchone()[0]
-    debug(2,"added annotation id is %d. adding %d annotationdetails" % (cid,len(annotationdetails)))
+    cur.execute('INSERT INTO AnnotationsTable (idExp,idUser,idAnnotationType,idMethod,description,idAgentType,isPrivate,addedDate) VALUES (%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id',
+                [expid, userid, annotationtypeid, methodid, description, agenttypeid, private, cdate])
+    cid = cur.fetchone()[0]
+    debug(2, "added annotation id is %d. adding %d annotationdetails" % (cid, len(annotationdetails)))
 
     # add the annotation details (which ontology term is higer/lower/all etc.)
-    err,numadded=AddAnnotationDetails(con,cur,cid,annotationdetails,commit=False)
+    err, numadded = AddAnnotationDetails(con, cur, cid, annotationdetails, commit=False)
     if err:
-        debug(3,"failed to add annotation details. aborting")
-        return err,-1
-    debug(2,"%d annotationdetails added" % numadded)
+        debug(3, "failed to add annotation details. aborting")
+        return err, -1
+    debug(2, "%d annotationdetails added" % numadded)
 
     # add the parents of each ontology term to the annotationparentstable
-    err,numadded=AddAnnotationParents(con,cur,cid,annotationdetails,commit=False)
+    err, numadded = AddAnnotationParents(con, cur, cid, annotationdetails, commit=False, numseqs=numseqs)
     if err:
-        debug(3,"failed to add annotation parents. aborting")
-        return err,-1
-    debug(2,"%d annotation parents added" % numadded)
+        debug(3, "failed to add annotation parents. aborting")
+        return err, -1
+    debug(2, "%d annotation parents added" % numadded)
 
     if commit:
         con.commit()
-    return '',cid
+    return '', cid
 
 
 def AddAnnotationDetails(con,cur,annotationid,annotationdetails,commit=True):
@@ -185,7 +190,7 @@ def AddAnnotationDetails(con,cur,annotationid,annotationdetails,commit=True):
         return e,-2
 
 
-def AddAnnotationParents(con,cur,annotationid,annotationdetails,commit=True):
+def AddAnnotationParents(con, cur, annotationid, annotationdetails, commit=True, numseqs=0):
     """
     Add all the parent terms of each annotation detail ontology to the annotationparentstable
 
@@ -206,36 +211,39 @@ def AddAnnotationParents(con,cur,annotationid,annotationdetails,commit=True):
         Number of annotations added to the AnnotationListTable or -1 if error
     """
     try:
-        numadded=0
-        parentsdict={}
-        for (cdetailtype,contologyterm) in annotationdetails:
-            err, parents=GetParents(con,cur,contologyterm)
+        numadded = 0
+        parentsdict = {}
+        for (cdetailtype, contologyterm) in annotationdetails:
+            err, parents = GetParents(con, cur, contologyterm)
             if err:
-                debug(6,'error getting parents for term %s: %s' % (contologyterm,err))
+                debug(6, 'error getting parents for term %s: %s' % (contologyterm, err))
                 continue
-            debug(2,'term %s parents %s' % (contologyterm, parents))
+            debug(2, 'term %s parents %s' % (contologyterm, parents))
             if cdetailtype not in parentsdict:
-                parentsdict[cdetailtype]=parents
+                parentsdict[cdetailtype] = parents
             else:
                 parentsdict[cdetailtype].extend(parents)
-        for cdetailtype,parents in parentsdict.items():
-            parents=list(set(parents))
+
+        for cdetailtype, parents in parentsdict.items():
+            parents = list(set(parents))
             for cpar in parents:
-                cpar=cpar.lower()
-                cdetailtype=cdetailtype.lower()
-                debug(2,'adding parent %s' % cpar)
-                cur.execute('INSERT INTO AnnotationParentsTable (idAnnotation,annotationDetail,ontology) VALUES (%s,%s,%s)',[annotationid,cdetailtype,cpar])
-                numadded+=1
-        debug(1,"Added %d annotationparents items" % numadded)
+                cpar = cpar.lower()
+                cdetailtype = cdetailtype.lower()
+                debug(2, 'adding parent %s' % cpar)
+                cur.execute('INSERT INTO AnnotationParentsTable (idAnnotation,annotationDetail,ontology) VALUES (%s,%s,%s)', [annotationid, cdetailtype, cpar])
+                numadded += 1
+                # add the number of sequences and one more annotation to all the terms in this annotation
+                cur.execute('UPDATE OntologyTable SET seqCount = seqCount+%s, annotationCount=annotationCount+1 WHERE description = %s', [numseqs, cpar])
+        debug(1, "Added %d annotationparents items" % numadded)
         if commit:
             con.commit()
-        return '',numadded
+        return '', numadded
     except psycopg2.DatabaseError as e:
-        debug(7,"error %s enountered in AddAnnotationParents" % e)
-        return e,-2
+        debug(7, "error %s enountered in AddAnnotationParents" % e)
+        return e, -2
 
 
-def GetAnnotationParents(con,cur,annotationid):
+def GetAnnotationParents(con, cur, annotationid):
     '''
     Get the ontology parents list for the annotation
 
