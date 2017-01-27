@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint, g
 # from flask.ext.login import current_user
 from flask.ext.login import login_required
 
