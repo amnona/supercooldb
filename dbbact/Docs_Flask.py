@@ -19,7 +19,6 @@ def docs():
 @Docs_Flask_Obj.route('/pita', methods=['POST', 'GET'])
 @auto.doc
 def pita():
+    '''pitapita
     '''
-    The documentation for all the REST API using flask-autodoc pitapita
-    '''
-    pass
+    return 'pita'
