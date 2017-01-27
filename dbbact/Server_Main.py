@@ -61,7 +61,10 @@ def teardown_request(exception):
 @login_manager.request_loader
 def load_user(request):
     debug(1, '>>>>>>>>>>>load_user login attempt')
-    debug(1,g.amnon)
+    try:
+        debug(1,g.amnon)
+    except:
+        return None
     user = None
     alldat = request.get_json()
     if (alldat is not None):
