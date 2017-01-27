@@ -14,3 +14,12 @@ def docs():
     The documentation for all the REST API using flask-autodoc
     '''
     return auto.html()
+
+
+@Docs_Flask_Obj.route('/pita', methods=['POST', 'GET'])
+@auto.doc
+def pita():
+    '''
+    The documentation for all the REST API using flask-autodoc pitapita
+    '''
+    pass
