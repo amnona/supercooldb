@@ -4,8 +4,7 @@ from flask import Blueprint, request, g
 from flask.ext.login import current_user
 from flask.ext.login import login_required
 
-import .dbannotations
-import .dbsequences
+from . import dbannotations
 from .utils import debug, getdoc
 
 

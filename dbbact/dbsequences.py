@@ -1,8 +1,9 @@
 from collections import defaultdict
 import psycopg2
-import .primers
+
+from . import primers
 from .utils import debug
-import .dbannotations
+from . import dbannotations
 
 # length for the seed sequence
 # used for fast searching of sub sequences

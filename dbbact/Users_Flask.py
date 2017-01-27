@@ -1,12 +1,12 @@
 import json
-from flask import Blueprint,request,g
-from flask.ext.login import login_required
-from flask.ext.login import current_user
-import .dbannotations
-import .dbuser
-from .utils import debug,getdoc,send_email,random_str
+from flask import Blueprint, request, g
+from flask.ext.login import login_required, current_user
+from . import dbannotations
+from . import dbuser
+from .utils import debug, getdoc, send_email, random_str
 
-Users_Flask_Obj = Blueprint('Users_Flask_Obj', __name__,template_folder='templates')
+
+Users_Flask_Obj = Blueprint('Users_Flask_Obj', __name__, template_folder='templates')
 
 
 @Users_Flask_Obj.route('/users/get_user_id',methods=['POST','GET'])

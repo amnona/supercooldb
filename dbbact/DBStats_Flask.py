@@ -1,7 +1,7 @@
 import json
 from flask import Blueprint, g
 from .utils import debug
-import .dbstats
+from . import dbstats
 
 
 DBStats_Flask_Obj = Blueprint('DBStats_Flask_Obj', __name__, template_folder='templates')

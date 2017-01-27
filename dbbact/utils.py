@@ -4,7 +4,7 @@ import random
 import string
 
 
-def debug(level,msg):
+def debug(level, msg):
     """
     print a debug message
 
@@ -18,13 +18,13 @@ def debug(level,msg):
 
     # if level>=debuglevel:
     if True:
-        print(msg,file=sys.stderr)
+        print(msg, file=sys.stderr)
 
 
 def SetDebugLevel(level):
     global debuglevel
 
-    debuglevel=level
+    debuglevel = level
 
 
 def getdoc(func):
@@ -40,10 +40,9 @@ def getdoc(func):
         the html of the doc of the function
     """
     print(func.__doc__)
-    s=func.__doc__
-    s="<pre>\n%s\n</pre>" % s
+    s = func.__doc__
+    s = "<pre>\n%s\n</pre>" % s
     return(s)
-
 
 
 def tolist(data):
@@ -86,11 +85,12 @@ def send_email(user, pwd, recipient, subject, body):
     except:
         return ('failed to send mail')
 
+
 def random_str(size=6, chars=string.ascii_uppercase + string.digits):
     """
     generate str which can be used as a password
 
     output:
-    random str : string of 6 characters 
+    random str : string of 6 characters
     """
     return ''.join(random.choice(chars) for _ in range(size))

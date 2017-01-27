@@ -1,8 +1,8 @@
 import json
 from flask import Blueprint, request, g
 from flask.ext.login import login_required, current_user
-import .dbsequences
-import .dbannotations
+from . import dbsequences
+from . import dbannotations
 from .utils import debug, getdoc
 
 

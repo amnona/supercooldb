@@ -6,7 +6,7 @@ import argparse
 import psycopg2
 import psycopg2.extras
 
-import dbbact.dbannotations
+from dbbact import dbannotations
 
 __version__ = "1.1"
 

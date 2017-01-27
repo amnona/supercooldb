@@ -1,12 +1,12 @@
 import datetime
 import psycopg2
 
-import .dbsequences
-import .dbexperiments
-import .dbidval
-from .utils import debug
-import .dbontology
+from . import dbsequences
+from . import dbexperiments
+from . import dbidval
+from . import dbontology
 from .dbontology import GetParents
+from .utils import debug
 
 
 def AddSequenceAnnotations(con, cur, sequences, primer, expid, annotationtype, annotationdetails, method='',

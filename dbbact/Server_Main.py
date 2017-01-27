@@ -10,8 +10,8 @@ from .DBStats_Flask import DBStats_Flask_Obj
 from .Annotation_Flask import Annotation_Flask_Obj
 from .Ontology_Flask import Ontology_Flask_Obj
 from .utils import debug, SetDebugLevel
-import .db_access
-import .dbuser
+from . import db_access
+from . import dbuser
 
 dbDefaultUser = "na"  # anonymos user in case the field is empty
 dbDefaultPwd = ""
