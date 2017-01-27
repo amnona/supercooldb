@@ -603,7 +603,7 @@ def GetFullSequencesFromAnnotationID(con, cur, annotationid, userid=0):
     return '', sequences
 
 
-def GetAnnotationUser(con,cur,annotationid):
+def GetAnnotationUser(con, cur, annotationid):
     """
     Get which user generated the annotation
 
@@ -618,16 +618,16 @@ def GetAnnotationUser(con,cur,annotationid):
     userid: int
         the userid which generated the annotation
     """
-    debug(1,'GetAnnotationUser, annotationid %d' % annotationid)
-    cur.execute('SELECT (idUser) FROM AnnotationsTable WHERE id=%s LIMIT 1',[annotationid])
-    if cur.rowcount==0:
-        debug(3,'annotationid %d not found' % annotationid)
-        return 'Annotationid %d not found',False
-    res=cur.fetchone()
-    return '',res[0]
+    debug(1, 'GetAnnotationUser, annotationid %d' % annotationid)
+    cur.execute('SELECT (idUser) FROM AnnotationsTable WHERE id=%s LIMIT 1', [annotationid])
+    if cur.rowcount == 0:
+        debug(3, 'annotationid %d not found' % annotationid)
+        return 'Annotationid %d not found', False
+    res = cur.fetchone()
+    return '', res[0]
 
 
-def DeleteAnnotation(con,cur,annotationid,userid=0,commit=True):
+def DeleteAnnotation(con, cur, annotationid, userid=0, commit=True):
     """
     Delete an annotation from the database
     Also deletes all the sequence annotations and annotationdetails associated with it
