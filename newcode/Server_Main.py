@@ -1,5 +1,5 @@
 from flask import Flask, g
-from flask.ext.login import LoginManager, UserMixin
+from flask.ext.login import LoginManager, UserMixin, login_required
 from Seq_Flask import Seq_Flask_Obj
 from Exp_Flask import Exp_Flask_Obj
 from Users_Flask import Users_Flask_Obj
@@ -33,7 +33,7 @@ login_manager.init_app(app)
 
 
 class User(UserMixin):
-    def __init__(self, username, password, userId,isAdmin):
+    def __init__(self, username, password, userId, isAdmin):
         self.name = username
         self.password = password
         self.user_id = userId
@@ -43,7 +43,7 @@ class User(UserMixin):
 # whenever a new request arrives, connect to the database and store in g.db
 @app.before_request
 def before_request():
-    con,cur=db_access.connect_db()
+    con, cur = db_access.connect_db()
     g.con = con
     g.cur = cur
 
@@ -57,16 +57,16 @@ def teardown_request(exception):
 # the following function will be called for every request autentication is required
 @login_manager.request_loader
 def load_user(request):
-    debug(1,'>>>>>>>>>>>load_user login attempt')
+    debug(1, '>>>>>>>>>>>load_user login attempt')
     user = None
-    alldat=request.get_json()
+    alldat = request.get_json()
     if (alldat is not None):
-        userName=alldat.get('user')
-        password=alldat.get('pwd')
+        userName = alldat.get('user')
+        password = alldat.get('pwd')
     else:
         userName = None
         password = None
-    debug(1,'username is %s' % userName)
+    debug(1, 'username is %s' % userName)
 
     # use default user name when it was not sent
     if(userName is None and password is None):
@@ -86,10 +86,10 @@ def load_user(request):
     #           recentLoginUsers.remove(tempUser)
 
     # user was not found in the cache memory
-    errorMes,userId = dbuser.getUserId(g.con,g.cur,userName,password)
+    errorMes, userId = dbuser.getUserId(g.con, g.cur, userName, password)
     if userId >= 0:
         debug(1, 'load_user login succeeded userid=%d' % userId)
-        errorMes,isadmin = dbuser.isAdmin(g.con,g.cur,userName)
+        errorMes, isadmin = dbuser.isAdmin(g.con, g.cur, userName)
         if isadmin != 1:
             isadmin = 0
         user = User(userName, password, userId, isadmin)
@@ -112,10 +112,5 @@ def load_user(request):
 
 if __name__ == '__main__':
     SetDebugLevel(0)
-    debug(2,'starting server')
-    # need to check for database in a nicer way
+    debug(2, 'starting server')
     app.run(debug=True)
-    # if db_access.PostGresConnect() == 0:
-    #   app.run(debug=True)
-    # else:
-    #   print("Failed to load DB")
