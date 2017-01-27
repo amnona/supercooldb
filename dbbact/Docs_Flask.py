@@ -17,7 +17,7 @@ def docs():
 
 
 @Docs_Flask_Obj.route('/pita', methods=['POST', 'GET'])
-@auto.doc
+@auto.doc()
 def pita():
     '''pitapita
     '''

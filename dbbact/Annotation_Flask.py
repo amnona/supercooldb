@@ -13,7 +13,7 @@ Annotation_Flask_Obj = Blueprint('Annottion_Flask_Obj', __name__, template_folde
 
 
 @login_required
-@auto.doc
+@auto.doc()
 @Annotation_Flask_Obj.route('/annotations/add', methods=['POST', 'GET'])
 def add_annotations():
     """
