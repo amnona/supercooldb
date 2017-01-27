@@ -11,7 +11,7 @@ import psycopg2.extras
 
 from dbbact import dbannotations
 
-__version__ = "1.1"
+__version__ = "0.9"
 
 
 def debug(level, msg):
@@ -74,9 +74,9 @@ def connect_db(servertype='main', schema='AnnotationSchemaTest'):
         return None
 
 
-def fill_parents(servertype='develop', overwrite=False):
+def fill_annotation_seqcount(servertype='develop', overwrite=False):
     '''
-    Fill the database AnnotationParentsTable
+    Fill the database AnnotationsTable seqCount field
 
     Parameters
     ----------
@@ -84,7 +84,7 @@ def fill_parents(servertype='develop', overwrite=False):
         database to connect to ('main' or 'develop' or 'local')
 
     overwrite : bool (optional)
-        False (default) to not overwrite existing annotation parents, True to delete all
+        False (default) to not overwrite existing (non-zero) seqCounts, True to delete all
     '''
     con, cur = connect_db(servertype=servertype)
     skipped = 0
@@ -94,30 +94,29 @@ def fill_parents(servertype='develop', overwrite=False):
     for cres in annotations:
         cid = cres[0]
         cseqcount = cres[1]
-        if cseqcount == 0:
-            print('WARNING: annotation %d has no sequences in AnnotationsTable' % cid)
-        # if not in overwrite mode, don't add parents to entries already in the table
         if not overwrite:
-            cur.execute('SELECT idAnnotation from AnnotationParentsTable WHERE idAnnotation=%s', [cid])
-            if cur.rowcount > 0:
+            if cseqcount == 0:
                 skipped += 1
                 continue
-        err, annotationdetails = dbannotations.GetAnnotationDetails(con, cur, cid)
+        err, annotationdetails = dbannotations.GetSequencesFromAnnotationID(con, cur, cid, userid=0)
         if err:
             print('error: %s' % err)
             continue
-        dbannotations.AddAnnotationParents(con, cur, cid, annotationdetails, commit=False)
+        numseqs = len(annotationdetails)
+        if numseqs != len(set(annotationdetails)):
+            debug(3, 'WARNING: duplicate seqids for annotation %d' % cid)
+        cur.execute('UPDATE AnnotationsTable SET seqCount = %s WHERE id = %s', [numseqs, cid])
         added += 1
     con.commit()
     print('added %d, skipped %d' % (added, skipped))
 
 
 def main(argv):
-    parser = argparse.ArgumentParser(description='Fill parents table in database. version ' + __version__)
+    parser = argparse.ArgumentParser(description='Fill seqCount field in AnnotationsTable. version ' + __version__)
     parser.add_argument('--db', help='name of database to connect to (main/develop/local)', default='develop')
-    parser.add_argument('--overwrite', help='delete current annotations', action='store_true')
+    parser.add_argument('--overwrite', help='delete current numbers', action='store_true')
     args = parser.parse_args(argv)
-    fill_parents(servertype=args.db, overwrite=args.overwrite)
+    fill_annotation_seqcount(servertype=args.db, overwrite=args.overwrite)
 
 if __name__ == "__main__":
     main(sys.argv[1:])

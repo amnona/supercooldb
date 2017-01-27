@@ -4,12 +4,13 @@ from flask.ext.login import login_required, current_user
 from . import dbsequences
 from . import dbannotations
 from .utils import debug, getdoc
-
+from .autodoc import auto
 
 Seq_Flask_Obj = Blueprint('Seq_Flask_Obj', __name__, template_folder='templates')
 
 
 @Seq_Flask_Obj.route('/sequences/add', methods=['POST', 'GET'])
+@auto.doc()
 def add_sequences():
     """
     Title: Add new sequences (or return seqid for ones that exist)
@@ -60,6 +61,7 @@ def add_sequences():
 
 
 @Seq_Flask_Obj.route('/sequences/getid', methods=['GET'])
+@auto.doc()
 def get_sequenceid():
     """
     Title: Get id for a given new sequences (or return -1 if does not exist)
@@ -97,6 +99,7 @@ def get_sequenceid():
 
 @login_required
 @Seq_Flask_Obj.route('/sequences/get_annotations', methods=['GET'])
+@auto.doc()
 def get_sequence_annotations():
     """
     Title: Query sequence:
@@ -178,6 +181,7 @@ def get_sequence_annotations():
 
 @login_required
 @Seq_Flask_Obj.route('/sequences/get_list_annotations', methods=['GET'])
+@auto.doc()
 def get_sequence_list_annotations():
     """
     Title: Query sequence:
@@ -265,6 +269,7 @@ def get_sequence_list_annotations():
 # need to add conversion to nice string
 @login_required
 @Seq_Flask_Obj.route('/sequences/get_annotations_string', methods=['GET'])
+@auto.doc()
 def get_annotations_string():
     cfunc = get_annotations_string
     alldat = request.get_json()
@@ -282,6 +287,7 @@ def get_annotations_string():
 
 @login_required
 @Seq_Flask_Obj.route('/sequences/get_fast_annotations', methods=['GET'])
+@auto.doc()
 def get_fast_annotations():
     """
     Title: Get Fast Annotations
@@ -375,6 +381,7 @@ def get_fast_annotations():
 
 @login_required
 @Seq_Flask_Obj.route('/sequences/get_taxonomy_annotation_ids', methods=['GET'])
+@auto.doc()
 def get_taxonomy_annotation_ids():
     """
     Title: Get taxonomy annotation ids
@@ -417,6 +424,7 @@ def get_taxonomy_annotation_ids():
 
 @login_required
 @Seq_Flask_Obj.route('/sequences/get_taxonomy_annotations', methods=['GET'])
+@auto.doc()
 def get_taxonomy_annotations():
     """
     Title: Get taxonomy annotation ids
@@ -456,6 +464,7 @@ def get_taxonomy_annotations():
 
 
 @Seq_Flask_Obj.route('/sequences/get_info', methods=['GET'])
+@auto.doc()
 def get_sequence_info():
     """
     Title: Get sequences information
