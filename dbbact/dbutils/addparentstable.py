@@ -106,7 +106,7 @@ def fill_parents(servertype='develop', overwrite=False):
         if err:
             print('error: %s' % err)
             continue
-        dbannotations.AddAnnotationParents(con, cur, cid, annotationdetails, commit=False)
+        dbannotations.AddAnnotationParents(con, cur, cid, annotationdetails, commit=False, numseqs=cseqcount)
         added += 1
     con.commit()
     print('added %d, skipped %d' % (added, skipped))
