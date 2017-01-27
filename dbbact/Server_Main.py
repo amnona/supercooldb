@@ -27,7 +27,7 @@ app.register_blueprint(DBStats_Flask_Obj)
 app.register_blueprint(Users_Flask_Obj)
 app.register_blueprint(Docs_Flask_Obj)
 
-auto.init_app(app)
+# auto.init_app(app)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
