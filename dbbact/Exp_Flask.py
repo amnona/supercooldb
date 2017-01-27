@@ -12,7 +12,6 @@ Exp_Flask_Obj = Blueprint('Exp_Flask_Obj', __name__)
 
 
 @Exp_Flask_Obj.route('/experiments/add_details', methods=['GET', 'POST'])
-@auto.doc
 def add_details():
     """
     Title: Add new experiment detail
