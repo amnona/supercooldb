@@ -28,7 +28,8 @@ def docs2():
         output += cdoc['rule']
         output += '</summary>\n'
         output += '<pre>\n'
-        output += cdoc.get('doc', 'na')
+        output += cdoc.get('doc', 'na\n')
+        output += '%s' % list(cdoc.keys())
         output += '</pre>\n'
         output += '</details>\n'
     output += '</body>'
