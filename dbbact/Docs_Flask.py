@@ -9,4 +9,5 @@ def docs():
     '''
     The documentation for all the REST API using flask-autodoc
     '''
+    return 'pitapita'
     return auto.html()
