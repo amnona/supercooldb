@@ -1,9 +1,13 @@
 from flask import Blueprint
 # from flask.ext.login import current_user
 from flask.ext.login import login_required
+
 from .autodoc import auto
+from .utils import debug
+
 
 Docs_Flask_Obj = Blueprint('Docs_Flask_Obj', __name__, template_folder='templates')
+
 
 # @login_required
 @Docs_Flask_Obj.route('/docs', methods=['POST', 'GET'])
