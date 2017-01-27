@@ -310,7 +310,7 @@ def GetAnnotationDetails(con, cur, annotationid):
     return '', details
 
 
-def GetAnnotationsFromID(con, cur, annotationid, userid=0):
+def GetAnnotationsFromID(con, cur, annotationid, userid=0, get_term_info=True):
     """
     get annotation details from an annotation id.
 
@@ -318,8 +318,10 @@ def GetAnnotationsFromID(con, cur, annotationid, userid=0):
     con,cur
     annotationid : int
         the annotationid to get
-    userid : int
+    userid : int (optional)
         used to check if to return a private annotation
+    get_term_info : bool (optional)
+        True (default) to get the information for each parent ontology term, False to return {} in term_info
 
 
     output:
@@ -337,6 +339,14 @@ def GetAnnotationsFromID(con, cur, annotationid, userid=0):
         'username' : string
         'date' : str
         'details' : list of (str,str) of type (i.e. 'higher in') and value (i.e. 'homo sapiens')
+        'term_info' : dict of {term: dict}
+            Information about the ontology terms which are predecessors to the terms of the annotation
+            key : str - the ontology term
+            value: dict of pairs:
+                'total_annotations' : the number of annotations with this term (int)
+                'total_sequences' : the number of sequences in annotations with this term (int)
+    get_term_info : bool (optional)
+        True (default) to get the information for each parent ontology term, False to return {} in term_info
     """
     debug(1, 'get annotation from id %d' % annotationid)
     cur.execute('SELECT AnnotationsTable.*,userstable.username FROM AnnotationsTable,userstable WHERE AnnotationsTable.iduser = userstable.id and AnnotationsTable.id=%s', [annotationid])
@@ -381,6 +391,15 @@ def GetAnnotationsFromID(con, cur, annotationid, userid=0):
     if err:
         return err, None
     data['details'] = details
+
+    if get_term_info:
+        terms = []
+        for cdetail in details:
+            terms.append(cdetail[1])
+        term_info = dbontology.GetTermCounts(con, cur, terms)
+    else:
+        term_info = {}
+    data['term_info'] = term_info
     return '', data
 
 
@@ -448,7 +467,7 @@ def GetUserAnnotations(con, cur, foruserid, userid=0):
     return '', details
 
 
-def GetSequenceAnnotations(con, cur, sequence, region=None, userid=0):
+def GetSequenceAnnotations(con, cur, sequence, region=None, userid=0, get_term_info=True):
     """
     Get all annotations for a sequence. Returns a list of annotations (empty list if sequence is not found)
 
@@ -460,7 +479,9 @@ def GetSequenceAnnotations(con, cur, sequence, region=None, userid=0):
     region : int (optional)
         None to not compare region, or the regionid the sequence is from
     userid : int (optional)
-        the id of the user requesting the annotations. Provate annotations with non-matching user will not be returned
+        the id of the user requesting the annotations. Private annotations with non-matching user will not be returned
+    get_term_info : bool (optional)
+        True (default) to get the information for each parent ontology term, False to return {} in term_info
 
     Returns
     -------
@@ -485,7 +506,7 @@ def GetSequenceAnnotations(con, cur, sequence, region=None, userid=0):
         return '', []
     res = cur.fetchall()
     for cres in res:
-        err, cdetails = GetAnnotationsFromID(con, cur, cres[0])
+        err, cdetails = GetAnnotationsFromID(con, cur, cres[0], get_term_info=get_term_info)
         if err:
             debug(6, err)
             return err, None
@@ -757,7 +778,8 @@ def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info
             cannotationid = cres[0]
             # if annotation not in annotations list - add it
             if cannotationid not in annotations:
-                err, cdetails = GetAnnotationsFromID(con, cur, cannotationid, userid=userid)
+                # we don't need the term info since we do it once for all terms
+                err, cdetails = GetAnnotationsFromID(con, cur, cannotationid, userid=userid, get_term_info=False)
                 # if we didn't get annotation details, probably they are private - just ignore
                 if cdetails is None:
                     continue
