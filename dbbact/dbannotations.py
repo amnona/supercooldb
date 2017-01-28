@@ -759,7 +759,7 @@ def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info
             # if annotation not in annotations list - add it
             if cannotationid not in annotations:
                 # we don't need the term info since we do it once for all terms
-                err, cdetails = GetAnnotationsFromID(con, cur, cannotationid, userid=userid, get_term_info=False)
+                err, cdetails = GetAnnotationsFromID(con, cur, cannotationid, userid=userid)
                 # if we didn't get annotation details, probably they are private - just ignore
                 if cdetails is None:
                     continue
