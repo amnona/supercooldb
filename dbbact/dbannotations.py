@@ -336,6 +336,8 @@ def GetAnnotationsFromID(con, cur, annotationid, userid=0):
         'userid' : int (the user who added this annotation)
         'username' : string
         'date' : str
+        'num_sequences' : int
+            number of sequences associated with this annotations
         'details' : list of (str,str) of type (i.e. 'higher in') and value (i.e. 'homo sapiens')
     """
     debug(1, 'get annotation from id %d' % annotationid)
@@ -371,6 +373,7 @@ def GetAnnotationsFromID(con, cur, annotationid, userid=0):
     data['username'] = res['username']
     data['date'] = res['addeddate'].isoformat()
     data['annotationid'] = annotationid
+    data['num_sequences'] = res['seqcount']
 
     if res['isprivate'] == 'y':
         if userid != data['userid']:
