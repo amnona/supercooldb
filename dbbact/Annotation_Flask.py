@@ -335,6 +335,8 @@ def get_annotation():
                 Free text describing this annotation (i.e. "lower in green tomatoes comapred to red ones")
             "private" : bool
                 True if the curation is private, False if not
+            "num_sequences" : int
+                The number of sequences associated with this annotation
             "CurationList" : list of
                 {
                     "detail" : str
