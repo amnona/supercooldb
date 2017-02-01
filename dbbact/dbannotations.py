@@ -120,8 +120,8 @@ def AddAnnotation(con, cur, expid, annotationtype, annotationdetails, method='',
     # lowercase the private
     private = private.lower()
 
-    cur.execute('INSERT INTO AnnotationsTable (idExp,idUser,idAnnotationType,idMethod,description,idAgentType,isPrivate,addedDate) VALUES (%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id',
-                [expid, userid, annotationtypeid, methodid, description, agenttypeid, private, cdate])
+    cur.execute('INSERT INTO AnnotationsTable (idExp,idUser,idAnnotationType,idMethod,description,idAgentType,isPrivate,addedDate,seqCount) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id',
+                [expid, userid, annotationtypeid, methodid, description, agenttypeid, private, cdate, numseqs])
     cid = cur.fetchone()[0]
     debug(2, "added annotation id is %d. adding %d annotationdetails" % (cid, len(annotationdetails)))
 
