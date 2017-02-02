@@ -259,14 +259,19 @@ def GetTermAnnotations(con, cur, term, use_synonyms=True):
         list of annotation details per annotation which contains the term
     '''
     term = term.lower()
+    debug(1, 'GetTermAnnotations for ontology term %s' % term)
     cur.execute('SELECT idannotation FROM AnnotationParentsTable WHERE ontology=%s', [term])
     if cur.rowcount == 0:
         if use_synonyms:
             err, term = GetSynonymTerm(con, cur, term)
             if err:
+                debug(3, 'no annotations or synonyms for term %s' % term)
+                return '', []
+            debug(1, 'found original ontology term %s' % term)
+            cur.execute('SELECT idannotation FROM AnnotationParentsTable WHERE ontology=%s', [term])
+        else:
                 debug(3, 'no annotations for term %s' % term)
                 return '', []
-    cur.execute('SELECT idannotation FROM AnnotationParentsTable WHERE ontology=%s', [term])
     res = cur.fetchall()
     annotations = []
     for cres in res:
