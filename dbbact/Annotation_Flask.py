@@ -322,8 +322,9 @@ def get_annotation():
                 the ID of the experiment from which this annotation originated
                 (uniqueId from ExperimentsTable)
                 (see Query Experiment)
-            "currType" : str
-                curration type (differential expression/contaminant/etc.)
+            "annotationtype" : str
+                annotation type (differential expression/contaminant/etc.)
+                (can be 'highfreq'/'common'/'diffexp'/'isa'/'contamination'/'other')
                 (description from CurationTypesTable)
             "method" : str
                 The method used to detect this behavior (i.e. observation/ranksum/clustering/etc")

@@ -190,7 +190,7 @@ def GetParents(con, cur, term):
 
 def GetSynonymTermId(con, cur, synonym):
     """
-    Get the term id for whic the synonym is
+    Get the term id for which the synonym is
 
     input:
     con,cur
@@ -217,7 +217,33 @@ def GetSynonymTermId(con, cur, synonym):
         return "error %s enountered in GetSynonymTermId" % e, -2
 
 
-def GetTermAnnotations(con, cur, term):
+def GetSynonymTerm(con, cur, synonym):
+    """
+    Get the term for which the synonym is
+
+    input:
+    con,cur
+    synonym : str
+        the synonym to search for
+
+    output:
+    err : str
+        Error message or empty string if ok
+    term : str
+        the term for the synonym is defined
+    """
+    err, termid = GetSynonymTermId(con, cur, synonym)
+    if err:
+        debug(2, 'ontology term %s is not a synonym' % synonym)
+        return err, str(termid)
+    err, term = dbidval.GetDescriptionFromId(con, cur, 'ontologyTable', termid)
+    if err:
+        debug(3, 'ontology term not found for termid %d (synonym %s)' % (termid, synonym))
+        return err, term
+    return '', term
+
+
+def GetTermAnnotations(con, cur, term, use_synonyms=True):
     '''
     Get details for all annotations which contain the ontology term "term" as a parent of (or exact) annotation detail
 
@@ -225,6 +251,8 @@ def GetTermAnnotations(con, cur, term):
     con, cur
     term : str
         the ontology term to search
+    use_synonyms : bool (optional)
+        True (default) to look in synonyms table if term is not found. False to look only for exact term
 
     output:
     annotations : list of dict
@@ -233,8 +261,12 @@ def GetTermAnnotations(con, cur, term):
     term = term.lower()
     cur.execute('SELECT idannotation FROM AnnotationParentsTable WHERE ontology=%s', [term])
     if cur.rowcount == 0:
-        debug(3, 'no annotations for term %s' % term)
-        return '', []
+        if use_synonyms:
+            err, term = GetSynonymTerm(con, cur, term)
+            if err:
+                debug(3, 'no annotations for term %s' % term)
+                return '', []
+    cur.execute('SELECT idannotation FROM AnnotationParentsTable WHERE ontology=%s', [term])
     res = cur.fetchall()
     annotations = []
     for cres in res:
