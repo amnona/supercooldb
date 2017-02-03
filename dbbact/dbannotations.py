@@ -814,3 +814,34 @@ def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info
         term_info = {}
     debug(1, 'found %d annotations, %d annotated sequences' % (len(annotations), len(seqannotations)))
     return '', annotations, seqannotations, term_info
+
+
+def GetAllAnnotations(con, cur, userid=0):
+    '''Get list of all annotations in dbBact
+
+    Parameters
+    ----------
+    con,cur
+    userid : int (optional)
+        the userid from who the request is or 0 (default) for anonymous
+
+    Returns
+    -------
+    annotations : list of dict
+        list of all annotations (see GetAnnotationsFromID)
+    '''
+    debug(1, 'GetAllAnnotations for user %d' % userid)
+
+    annotations = []
+    cur.execute('SELECT id from AnnotationsTable')
+    res = cur.fetchall()
+    debug(1, 'Found %d annotations in dbBact' % len(res))
+    for cres in res:
+        cannotationid = cres[0]
+        err, cannotation = GetAnnotationsFromID(con, cur, cannotationid, userid=userid)
+        if err:
+            debug(2, 'error for annotationid %d: %s' % (cannotationid, err))
+            continue
+        annotations.append(cannotation)
+    debug(1, 'Got details for %d annotations' % len(annotations))
+    return annotations
