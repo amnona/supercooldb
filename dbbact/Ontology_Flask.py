@@ -244,12 +244,10 @@ def get_ontology_annotations():
             If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
             If annotation is not private, return it (no need for authentication)
     """
-    debug(1,'get ontology term annotations')
     cfunc = get_ontology_annotations
     ontology_term = request.args.get('term')
     if ontology_term is None:
         return(getdoc(cfunc))
-    debug(1,'term is %s' % ontology_term)
     err, annotations = dbontology.GetTermAnnotations(g.con, g.cur, ontology_term)
     if err:
         debug(6, err)
