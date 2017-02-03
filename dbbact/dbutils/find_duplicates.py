@@ -116,10 +116,30 @@ def find_empty_annotations(con, cur):
     cur.execute('SELECT id FROM AnnotationsTable')
     res = cur.fetchall()
     for cres in res:
-        print(cres[0])
         cur.execute('SELECT * from SequencesAnnotationTable WHERE annotationID=%s', [cres[0]])
         if cur.rowcount == 0:
             print('Annotation %s has no sequences' % cres)
+    print('done')
+
+
+def find_duplicate_seqs(con, cur):
+    '''
+    Find duplicate sequences in same annotation
+    '''
+    print('looking for duplicate sequences in same annotations')
+    cur.execute('SELECT id FROM AnnotationsTable')
+    res = cur.fetchall()
+    for cres in res:
+        cur.execute('SELECT seqID from SequencesAnnotationTable WHERE annotationID=%s', [cres[0]])
+        if cur.rowcount == 0:
+            print('Annotation %s has no sequences' % cres)
+        seqs = cur.fetchall()
+        all_seqs = set()
+        for cseq in seqs:
+            cseq = cseq[0]
+            if cseq in all_seqs:
+                print('sequence %d appears twice in annotation %d' % (cseq, cres[0]))
+            all_seqs.add(cseq)
     print('done')
 
 
@@ -136,6 +156,7 @@ def find_duplicates(servertype='main'):
 
     find_duplicate_annotations(con, cur)
     find_empty_annotations(con, cur)
+    find_duplicate_seqs(con, cur)
 
 
 def main(argv):
