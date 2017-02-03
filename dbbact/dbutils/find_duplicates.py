@@ -116,6 +116,7 @@ def find_empty_annotations(con, cur):
     cur.execute('SELECT id FROM AnnotationsTable')
     res = cur.fetchall()
     for cres in res:
+        print(cres[0])
         cur.execute('SELECT * from SequencesAnnotationTable WHERE annotationID=%s' % [cres[0]])
         if cur.rowcount == 0:
             print('Annotation %s has no sequences' % cres)
