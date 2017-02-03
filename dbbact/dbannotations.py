@@ -662,6 +662,21 @@ def DeleteAnnotation(con, cur, annotationid, userid=0, commit=True):
             debug(6, 'cannot delete. annotation %d was created by user %d but delete request was from user %d' % (annotationid, origuser, userid))
             return 'Cannot delete. Annotation was created by a different user'
 
+    # find how many sequences are in the annotations
+    cur.execute('SELECT seqCount FROM AnnotationsTable WHERE id=%s', [annotationid])
+    res = cur.fetchone()
+    num_seqs = res[0]
+
+    # update the ontology term sequence counts
+    err, parents = GetAnnotationParents(con, cur, annotationid)
+    if err:
+        msg = 'Could not find ontology parents. Delete aborted'
+        debug(3, msg)
+        return msg
+    for cterm in parents:
+        cur.execute('UPDATE OntologyTable SET seqCount = seqCount-%s, annotationCount=annotationCount-1 WHERE description = %s', [num_seqs, cterm])
+    debug(3, 'fixed ontologytable counts')
+
     cur.execute('DELETE FROM AnnotationsTable WHERE id=%s', [annotationid])
     debug(1, 'deleted from annotationstable')
     cur.execute('DELETE FROM AnnotationListTable WHERE idannotation=%s', [annotationid])
@@ -703,10 +718,28 @@ def DeleteSequenceFromAnnotation(con, cur, sequences, annotationid, userid=0, co
             debug(6, 'cannot delete. annotation %d was created by user %d but delete request was from user %d' % (annotationid, origuser, userid))
             return 'Cannot delete. Annotation was created by a different user'
 
+    # remove duplicate sequences for the delete
+    sequences = list(set(sequences))
     seqids = dbsequences.GetSequencesId(con, cur, sequences)
     for cseqid in seqids:
         cur.execute('DELETE FROM SequencesAnnotationTable WHERE annotationid=%s AND seqId=%s', (annotationid, cseqid))
     debug(3, 'deleted %d sequences from from sequencesannotationtable annotationid=%d' % (len(sequences), annotationid))
+
+    # remove the count of these sequences for the annotation
+    numseqs = len(sequences)
+    cur.execute('UPDATE AnnotationsTable SET seqCount = seqCount-%s', [numseqs])
+    debug(3, 'removed %d from the annotationstable seq count' % numseqs)
+
+    # update the ontology term sequence counts
+    err, parents = GetAnnotationParents(con, cur, annotationid)
+    if err:
+        msg = 'Could not find ontology parents. Delete aborted'
+        debug(3, msg)
+        return msg
+    for cterm in parents:
+        cur.execute('UPDATE OntologyTable SET seqCount = seqCount-%s WHERE description = %s', [numseqs, cterm])
+    debug(3, 'fixed ontologytable counts')
+
     if commit:
         con.commit()
     return('')
