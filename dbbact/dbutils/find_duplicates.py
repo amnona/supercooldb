@@ -78,7 +78,7 @@ def find_duplicate_annotations(con, cur):
     '''Find annotations with same details in database
     '''
     print('looking for identical annotations')
-    cur.execute('SELECT (id, idExp, idAnnotationType, idMethod) FROM AnnotationsTable')
+    cur.execute('SELECT id, idExp, idAnnotationType, idMethod FROM AnnotationsTable')
     res = cur.fetchall()
     all_annotations = defaultdict(list)
     for cres in res:
@@ -92,7 +92,7 @@ def find_duplicate_annotations(con, cur):
         if len(cids) < 2:
             continue
         for id1 in cids:
-            cur.execute('SELECT (idAnnotationDetail, idOntology) from AnnotationListTable WHERE idAnnotation=%s', [id1])
+            cur.execute('SELECT idAnnotationDetail, idOntology from AnnotationListTable WHERE idAnnotation=%s', [id1])
             details1 = set()
             res = cur.fetchall()
             for cres in res:
@@ -100,7 +100,7 @@ def find_duplicate_annotations(con, cur):
             for id2 in cids:
                 if id1 == id2:
                     continue
-                cur.execute('SELECT (idAnnotationDetail, idOntology) from AnnotationListTable WHERE idAnnotation=%s', [id2])
+                cur.execute('SELECT idAnnotationDetail, idOntology from AnnotationListTable WHERE idAnnotation=%s', [id2])
                 details2 = set()
                 res = cur.fetchall()
                 for cres in res:
