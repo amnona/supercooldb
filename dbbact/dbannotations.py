@@ -827,6 +827,8 @@ def GetAllAnnotations(con, cur, userid=0):
 
     Returns
     -------
+    err : str
+        empty of ok, otherwise the error encountered
     annotations : list of dict
         list of all annotations (see GetAnnotationsFromID)
     '''
@@ -844,4 +846,4 @@ def GetAllAnnotations(con, cur, userid=0):
             continue
         annotations.append(cannotation)
     debug(1, 'Got details for %d annotations' % len(annotations))
-    return annotations
+    return '', annotations
