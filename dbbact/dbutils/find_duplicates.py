@@ -82,7 +82,6 @@ def find_duplicate_annotations(con, cur):
     res = cur.fetchall()
     all_annotations = defaultdict(list)
     for cres in res:
-        print(cres)
         cid = cres[0]
         annotation_str = '%s;%s;%s' % (cres[1], cres[2], cres[3])
         all_annotations[annotation_str].append(cid)
