@@ -109,6 +109,19 @@ def find_duplicate_annotations(con, cur):
     print('done')
 
 
+def find_empty_annotations(con, cur):
+    '''Find annotations with no sequences associated
+    '''
+    print('looking for empty annotations')
+    cur.execute('SELECT id FROM AnnotationsTable')
+    res = cur.fetchall()
+    for cres in res:
+        cur.execute('SELECT * from SequencesAnnotationTable WHERE annotationID=%s' % [cres])
+        if cur.rowcount == 0:
+            print('Annotation %s has no sequences' % cres)
+    print('done')
+
+
 def find_duplicates(servertype='main'):
     '''
     Find duplcates in the dbBact database
@@ -116,10 +129,12 @@ def find_duplicates(servertype='main'):
     Looks for the following duplicates:
     1. annotations with similar details
     2. sequences present twice in same annotation
+    3. empty annotations
     '''
     con, cur = connect_db(servertype=servertype)
 
     find_duplicate_annotations(con, cur)
+    find_empty_annotations(con, cur)
 
 
 def main(argv):
