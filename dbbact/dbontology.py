@@ -190,7 +190,7 @@ def GetParents(con, cur, term):
 
 def GetSynonymTermId(con, cur, synonym):
     """
-    Get the term id for whic the synonym is
+    Get the term id for which the synonym is
 
     input:
     con,cur
@@ -217,7 +217,33 @@ def GetSynonymTermId(con, cur, synonym):
         return "error %s enountered in GetSynonymTermId" % e, -2
 
 
-def GetTermAnnotations(con, cur, term):
+def GetSynonymTerm(con, cur, synonym):
+    """
+    Get the term for which the synonym is
+
+    input:
+    con,cur
+    synonym : str
+        the synonym to search for
+
+    output:
+    err : str
+        Error message or empty string if ok
+    term : str
+        the term for the synonym is defined
+    """
+    err, termid = GetSynonymTermId(con, cur, synonym)
+    if err:
+        debug(2, 'ontology term %s is not a synonym' % synonym)
+        return err, str(termid)
+    err, term = dbidval.GetDescriptionFromId(con, cur, 'ontologyTable', termid)
+    if err:
+        debug(3, 'ontology term not found for termid %d (synonym %s)' % (termid, synonym))
+        return err, term
+    return '', term
+
+
+def GetTermAnnotations(con, cur, term, use_synonyms=True):
     '''
     Get details for all annotations which contain the ontology term "term" as a parent of (or exact) annotation detail
 
@@ -225,16 +251,27 @@ def GetTermAnnotations(con, cur, term):
     con, cur
     term : str
         the ontology term to search
+    use_synonyms : bool (optional)
+        True (default) to look in synonyms table if term is not found. False to look only for exact term
 
     output:
     annotations : list of dict
         list of annotation details per annotation which contains the term
     '''
     term = term.lower()
+    debug(1, 'GetTermAnnotations for ontology term %s' % term)
     cur.execute('SELECT idannotation FROM AnnotationParentsTable WHERE ontology=%s', [term])
     if cur.rowcount == 0:
-        debug(3, 'no annotations for term %s' % term)
-        return '', []
+        if use_synonyms:
+            err, term = GetSynonymTerm(con, cur, term)
+            if err:
+                debug(3, 'no annotations or synonyms for term %s' % term)
+                return '', []
+            debug(1, 'found original ontology term %s' % term)
+            cur.execute('SELECT idannotation FROM AnnotationParentsTable WHERE ontology=%s', [term])
+        else:
+                debug(3, 'no annotations for term %s' % term)
+                return '', []
     res = cur.fetchall()
     annotations = []
     for cres in res:
@@ -282,3 +319,31 @@ def GetTermCounts(con, cur, terms):
         term_info[cterm]['total_annotations'] = res[1]
     debug(1, 'found info for %d terms' % len(term_info))
     return term_info
+
+
+def get_annotations_term_counts(con, cur, annotations):
+    '''
+    Get information about all ontology terms in annotations
+
+    Parameters
+    ----------
+    con, cur
+    annotations : list of annotations
+        The list of annotations to get the terms for (see dbannotations.GetAnnotationsFromID() )
+
+    Returns
+    -------
+    term_info : dict of {str: dict}:
+        Key is the ontology term.
+        Value is a dict of pairs:
+            'total_annotations' : int
+                The total number of annotations where this ontology term is a predecessor
+            'total_squences' : int
+                The total number of sequences in annotations where this ontology term is a predecessor
+    '''
+    debug(1, 'get_annotations_term_counts for %d annotations' % len(annotations))
+    terms = []
+    for cannotation in annotations:
+        for cdetail in cannotation['details']:
+            terms.append(cdetail[1])
+    return GetTermCounts(con, cur, terms)

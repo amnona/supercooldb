@@ -3,6 +3,7 @@ from flask import Blueprint, request, g
 from flask.ext.login import login_required, current_user
 from . import dbsequences
 from . import dbannotations
+from . import dbontology
 from .utils import debug, getdoc
 from .autodoc import auto
 
@@ -109,10 +110,12 @@ def get_sequence_annotations():
     URL Params:
     Data Params: JSON
         {
-            sequence : str ('ACGT')
-                the sequence string to query the database (can be any length)
+            sequence : str
+                the DNA sequence string to query the database (can be any length)
             region : int (optional)
                 the region id (default=1 which is V4 515F 806R)
+            get_term_info : bool (optional)
+                True (default) to get information about all ontology predecessors of terms of all annotations of the sequence.
     Success Response:
         Code : 200
         Content :
@@ -159,6 +162,12 @@ def get_sequence_annotations():
                                 (description from OntologyTable)
                         }
                 }
+            term_info : dict of {term: dict}
+            Information about all ontology terms associated with any of the annotations (including predecessors)
+                key: term (str)
+                value: dict of pairs:
+                    'total_annotations' : number of annotations having this term in the database (int)
+                    'total_sequences' : number of sequences in annotations having this term in the database (int)
         }
     Details :
         Validation:
@@ -172,11 +181,17 @@ def get_sequence_annotations():
     sequence = alldat.get('sequence')
     if sequence is None:
         return('sequence parameter missing', 400)
+    get_term_info = alldat.get('get_term_info', True)
+
     err, details = dbannotations.GetSequenceAnnotations(g.con, g.cur, sequence, userid=current_user.user_id)
     if err:
         debug(6, err)
         return ('Problem geting details. error=%s' % err, 400)
-    return json.dumps({'annotations': details})
+    if get_term_info:
+        term_info = dbontology.get_annotations_term_counts(g.con, g.cur, details)
+    else:
+        term_info = {}
+    return json.dumps({'annotations': details, 'term_info': term_info})
 
 
 @login_required

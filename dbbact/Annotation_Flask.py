@@ -315,27 +315,30 @@ def get_annotation():
             "user" : str
                 name of the user who added this annotation
                 (userName from UsersTable)
-            "addedDate" : str (DD-MM-YYYY HH:MM:SS)
+            "date" : str (DD-MM-YYYY HH:MM:SS)
                 date when the annotation was added
                 (addedDate from CurationsTable)
             "expid" : int
                 the ID of the experiment from which this annotation originated
                 (uniqueId from ExperimentsTable)
                 (see Query Experiment)
-            "currType" : str
-                curration type (differential expression/contaminant/etc.)
+            "annotationtype" : str
+                annotation type (differential expression/contaminant/etc.)
+                (can be 'highfreq'/'common'/'diffexp'/'isa'/'contamination'/'other')
                 (description from CurationTypesTable)
             "method" : str
                 The method used to detect this behavior (i.e. observation/ranksum/clustering/etc")
                 (description from MethodTypesTable)
-            "agentType" : str
+            "agent" : str
                 Name of the program which submitted this annotation (i.e. heatsequer)
                 (description from AgentTypesTable)
             "description" : str
                 Free text describing this annotation (i.e. "lower in green tomatoes comapred to red ones")
             "private" : bool
                 True if the curation is private, False if not
-            "CurationList" : list of
+            "num_sequences" : int
+                The number of sequences associated with this annotation
+            "details" : list of
                 {
                     "detail" : str
                         the type of detail (i.e. ALL/HIGH/LOW)
@@ -406,3 +409,35 @@ def get_annotation_ontology_parents():
         debug(6, err)
         return ('Problem geting details. error=%s' % err, 400)
     return json.dumps({'parents': parents})
+
+
+@login_required
+@auto.doc()
+@Annotation_Flask_Obj.route('/annotations/get_all_annotations', methods=['GET'])
+def get_all_annotations():
+    """
+    Title: get_all_annotations
+    Description : Get list of all annotations in dbBact
+    URL: annotations/get_all_annotations
+    Method: GET
+    URL Params:
+    Data Params: JSON
+        {
+        }
+    Success Response:
+        Code : 200
+        Content :
+        {
+            annotations : list of annotation
+            See annotations/get_annotation() for details
+        }
+    Details :
+        Validation:
+            If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
+            If annotation is not private, return it (no need for authentication)
+    """
+    err, annotations = dbannotations.GetAllAnnotations(g.con, g.cur, userid=current_user.user_id)
+    if err:
+        debug(6, err)
+        return ('Problem geting all annotations list. error=%s' % err, 400)
+    return json.dumps({'annotations': annotations})
