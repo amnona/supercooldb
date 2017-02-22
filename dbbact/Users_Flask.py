@@ -9,6 +9,7 @@ from .autodoc import auto
 
 Users_Flask_Obj = Blueprint('Users_Flask_Obj', __name__, template_folder='templates')
 
+MAX_RECOVERY_ATTEMPTS = 10
 
 @Users_Flask_Obj.route('/users/get_user_id', methods=['POST', 'GET'])
 @auto.doc()
@@ -159,23 +160,76 @@ def forgot_password():
     email = err
     # generate and update new password
     newpassword = random_str()
+    err, retval = dbuser.updateNewTempcode(g.con, g.cur, user, newpassword)
+    if retval <= 0:
+        return(err, 400)
+
+    guser = "bactdb@gmail.com"
+    gpassword = "databaseforbacteria"
+    recipient = email
+    subject = "Password reset"
+    body = "Your password recovery code is: " + newpassword
+    debug(2, 'Sent mail to %s' % email)
+    send_email(guser, gpassword, recipient, subject, body)
+    debug(2, 'New password sent')
+    return json.dumps({"status": 1})
+
+@Users_Flask_Obj.route('/users/recover_password', methods=['POST', 'GET'])
+@auto.doc()
+def recover_password():
+    """
+    Title: send passowrd via mail
+    URL: /users/recover_password
+    Method: POST
+    URL Params:
+    Data Params: JSON
+        {
+            'user' : str
+                user name
+        }
+    Success Response:
+        Code : 201
+        Content :
+        {
+            "status" : 1
+        }
+    Details:
+        Validation:
+        Action:
+    """
+    cfunc = recover_password
+    alldat = request.get_json()
+    if alldat is None:
+        return(getdoc(cfunc))
+    
+    user = alldat.get('user')
+    recoverycode = alldat.get('recoverycode')
+    newpassword = alldat.get('newpassword')
+    
+    #Get the old recovery counter
+    count = dbuser.getUserRecoveryAttemptsByName(g.con, g.cur,user)
+    if count < 0 :
+        return('failed to get recovery counter', 400)
+    
+    if count >= MAX_RECOVERY_ATTEMPTS:
+        return('User is locked', 400)
+    
+    err, userid = dbuser.getUserIdRecover(g.con, g.cur, user, recoverycode)
+    if err:
+        count = count + 1
+        dbuser.setUserRecoveryAttemptsByName(g.con, g.cur, user, count)
+        return(err, 400)
+    
+    # generate and update new password
     err, retval = dbuser.updateNewPassword(g.con, g.cur, user, newpassword)
     if retval <= 0:
         return(err, 400)
 
     # reset the login attempts
     dbuser.setUserLoginAttemptsByName(g.con, g.cur, user, 0)
+    dbuser.setUserRecoveryAttemptsByName(g.con, g.cur, user, 0)
 
-    guser = "bactdb@gmail.com"
-    gpassword = "databaseforbacteria"
-    recipient = email
-    subject = "Password reset"
-    body = "Your new passowrd is: " + newpassword
-    debug(2, 'Sent mail to %s' % email)
-    send_email(guser, gpassword, recipient, subject, body)
-    debug(2, 'New password sent')
     return json.dumps({"status": 1})
-
 
 @Users_Flask_Obj.route('/users/get_user_annotations', methods=['GET'])
 @auto.doc()
