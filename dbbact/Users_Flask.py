@@ -11,13 +11,29 @@ Users_Flask_Obj = Blueprint('Users_Flask_Obj', __name__, template_folder='templa
 
 MAX_RECOVERY_ATTEMPTS = 10
 
+
 @Users_Flask_Obj.route('/users/get_user_id', methods=['POST', 'GET'])
 @auto.doc()
 def get_user_id():
     """
-    Title: Get user id
-    URL: users/test_user_login
+    Title: Get user id from user/password
+    URL: users/get_user_id
     Method: POST
+    URL Params:
+    Data Params: JSON
+        {
+            user : str
+                user name
+            pwd : str
+                password
+        }
+    Success Response:
+        Code : 200
+        Content :
+        {
+            user : int
+                the userid (0 for anonymous if user and pwd are empty)
+        }
     """
 
     cfunc = get_user_id
@@ -63,7 +79,7 @@ def test_user_login():
     """
     Title: test user login
     URL: users/test_user_login
-    Method: POST
+    Method: POST/GET
     """
 
     debug(6, 'login succeed. id=%s' % current_user.user_id)
