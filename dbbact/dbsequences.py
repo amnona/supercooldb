@@ -47,7 +47,7 @@ def AddSequences(con, cur, sequences, taxonomies=None, ggids=None, primer='V4', 
                 debug(4, errmsg)
                 return errmsg, None
             # test if already exists, skip it
-            err, cseqid = GetSequenceId(con, cur, sequence=cseq, idprimer=idprimer, use_full_length=True)
+            err, cseqid = GetSequenceId(con, cur, sequence=cseq, idprimer=idprimer, no_shorter=True, no_longer=True)
             if cseqid <= 0:
                 if taxonomies is None:
                     ctax = 'na'
@@ -104,15 +104,17 @@ def SeqFromID(con, cur, seqids):
     return '', sequences
 
 
-def GetSequencesId(con, cur, sequences, use_full_length=False):
+def GetSequencesId(con, cur, sequences, no_shorter=False, no_longer=False):
     """
     Get sequence ids for a sequence or list of sequences
 
     input:
     con,cur : database connection and cursor
     sequences : list of str (ACGT sequences)
-    use_full_length : bool (optional)
-        False (default) to enable shorter db sequences matching sequence, True to require match on all of sequence length
+    no_shorter : bool (optional)
+        False (default) to enable shorter db sequences matching sequence, True to require at least length of query sequence
+    no_longer : bool (optional)
+        False (default) to enable longer db sequences matching sequence, True to require at least length of database sequence
 
     output:
     errmsg : str
@@ -124,14 +126,14 @@ def GetSequencesId(con, cur, sequences, use_full_length=False):
         sequences = [sequences]
     ids = []
     for cseq in sequences:
-        err, cid = GetSequenceId(con, cur, cseq, se_full_length=use_full_length)
+        err, cid = GetSequenceId(con, cur, cseq, no_shorter=no_shorter, no_longer=no_longer)
         if err:
             return err, None
         ids.append(cid)
     return "", ids
 
 
-def GetSequenceId(con, cur, sequence, idprimer=None, use_full_length=False):
+def GetSequenceId(con, cur, sequence, idprimer=None, no_shorter=False, no_longer=False):
     """
     Get sequence ids for a sequence
 
@@ -140,8 +142,10 @@ def GetSequenceId(con, cur, sequence, idprimer=None, use_full_length=False):
     sequence : str (ACGT sequences)
     idprimer : int (optional)
         if supplied, verify the sequence is from this idPrimer
-    use_full_length : bool (optional)
-        False (default) to enable shorter db sequences matching sequence, True to require match on all of sequence length
+    no_shorter : bool (optional)
+        False (default) to enable shorter db sequences matching sequence, True to require at least length of query sequence
+    no_longer : bool (optional)
+        False (default) to enable longer db sequences matching sequence, True to require at least length of database sequence
 
     output:
     errmsg : str
@@ -169,12 +173,15 @@ def GetSequenceId(con, cur, sequence, idprimer=None, use_full_length=False):
     for cres in res:
         resid = cres[0]
         resseq = cres[1]
-        if use_full_length:
+        if no_shorter:
             if len(resseq) < cseqlen:
                 continue
             comparelen = cseqlen
         else:
             comparelen = min(len(resseq), cseqlen)
+        if no_longer:
+            if len(resseq) > cseqlen:
+                continue
         if cseq[:comparelen] == resseq[:comparelen]:
             if idprimer is None:
                 return '', resid
