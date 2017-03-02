@@ -476,14 +476,14 @@ def GetSequenceAnnotations(con, cur, sequence, region=None, userid=0):
     details = []
     debug(1, 'GetSequenceAnnotations sequence %s' % sequence)
     err, sid = dbsequences.GetSequenceId(con, cur, sequence, region)
-    if sid == -1:
+    if len(sid) == 0:
         debug(2, 'Sequence %s not found for GetSequenceAnnotations.' % sequence)
         return '', []
     if err:
         debug(6, 'Sequence %s not found for GetSequenceAnnotations. error : %s' % (sequence, err))
         return err, None
-    debug(1, 'sequenceid=%d' % sid)
-    cur.execute('SELECT annotationId FROM SequencesAnnotationTable WHERE seqId=%s', [sid])
+    debug(1, 'sequenceid=%s' % sid)
+    cur.execute('SELECT annotationId FROM SequencesAnnotationTable WHERE seqId IN %s', [tuple(sid)])
     if cur.rowcount == 0:
         debug(3, 'no annotations for sequenceid %s' % sid)
         return '', []
@@ -785,10 +785,10 @@ def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info
     for cseqpos, cseq in enumerate(sequences):
         cseqannotationids = []
         err, sid = dbsequences.GetSequenceId(con, cur, cseq, region)
-        if sid == -1:
+        if len(sid) == 0:
             continue
         # get annotations for the sequence
-        cur.execute('SELECT annotationid FROM SequencesAnnotationTable WHERE seqid=%s', [sid])
+        cur.execute('SELECT annotationid FROM SequencesAnnotationTable WHERE seqid IN %s', [tuple(sid)])
         res = cur.fetchall()
         for cres in res:
             cannotationid = cres[0]

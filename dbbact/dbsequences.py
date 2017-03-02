@@ -48,7 +48,8 @@ def AddSequences(con, cur, sequences, taxonomies=None, ggids=None, primer='V4', 
                 return errmsg, None
             # test if already exists, skip it
             err, cseqid = GetSequenceId(con, cur, sequence=cseq, idprimer=idprimer, no_shorter=True, no_longer=True)
-            if cseqid <= 0:
+            if len(cseqid) == 0:
+                # not found, so need to add this sequence
                 if taxonomies is None:
                     ctax = 'na'
                 else:
@@ -60,9 +61,11 @@ def AddSequences(con, cur, sequences, taxonomies=None, ggids=None, primer='V4', 
                 cseq = cseq.lower()
                 cseedseq = cseq[:SEED_SEQ_LEN]
                 cur.execute('INSERT INTO SequencesTable (idPrimer,sequence,length,taxonomy,ggid,seedsequence) VALUES (%s,%s,%s,%s,%s,%s) RETURNING id', [idprimer, cseq, len(cseq), ctax, cggid, cseedseq])
-                cseqid = cur.fetchone()[0]
+                cseqid = cur.fetchone()
                 numadded += 1
-            seqids.append(cseqid)
+            if len(cseqid) > 1:
+                debug(8, 'AddSequences - Same sequence appears twice in database: %s' % cseq)
+            seqids.append(cseqid[0])
         if commit:
             con.commit()
         debug(3, "Added %d sequences (out of %d)" % (numadded, len(sequences)))
@@ -128,8 +131,9 @@ def GetSequencesId(con, cur, sequences, no_shorter=False, no_longer=False):
     for cseq in sequences:
         err, cid = GetSequenceId(con, cur, cseq, no_shorter=no_shorter, no_longer=no_longer)
         if err:
-            return err, None
-        ids.append(cid)
+            # skip - or should we abort and return an error?
+            continue
+        ids.extend(cid)
     return "", ids
 
 
@@ -150,20 +154,21 @@ def GetSequenceId(con, cur, sequence, idprimer=None, no_shorter=False, no_longer
     output:
     errmsg : str
         "" if ok, error msg if error encountered
-    sid : int
-        the id of the sequence (-1 if not found)
+    sid : list of int
+        the ids of the matching sequences (empty tuple if not found)
+        Note: can be more than one as we also look for short subsequences / long supersequences
     """
+    sid = []
     cseq = sequence.lower()
     if len(cseq) < SEED_SEQ_LEN:
         errmsg = 'sequence too short (<%d) for sequence %s' % (SEED_SEQ_LEN, cseq)
         debug(4, errmsg)
-        return errmsg, -1
+        return errmsg, sid
 
     # look for all sequences matching the seed
     cseedseq = cseq[:SEED_SEQ_LEN]
     cur.execute('SELECT id,sequence FROM SequencesTable WHERE seedsequence=%s', [cseedseq])
     if cur.rowcount == 0:
-        sid = -1
         errmsg = 'sequence %s not found' % sequence
         debug(1, errmsg)
         return errmsg, sid
@@ -184,15 +189,16 @@ def GetSequenceId(con, cur, sequence, idprimer=None, no_shorter=False, no_longer
                 continue
         if cseq[:comparelen] == resseq[:comparelen]:
             if idprimer is None:
-                return '', resid
+                sid.append(resid)
             cur.execute('SELECT idPrimer FROM SequencesTable WHERE id=%s LIMIT 1', [resid])
             res = cur.fetchone()
             if res[0] == idprimer:
-                return '', resid
-    # reached here so sequence was not found
-    errmsg = 'sequence %s not found' % sequence
-    debug(1, errmsg)
-    return errmsg, -1
+                sid.append(resid)
+    if len(sid) == 0:
+        errmsg = 'sequence %s not found' % sequence
+        debug(1, errmsg)
+        return errmsg, sid
+    return '', sid
 
     # # if no regionid specified, fetch only 1 (faster)
     # if idprimer is None:
