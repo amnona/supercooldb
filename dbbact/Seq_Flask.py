@@ -73,13 +73,20 @@ def get_sequenceid():
         {
             "sequence" : str
                 the sequence to get data about
+            "no_shorter" : bool (optional)
+                False (default) to get also shorter sequences from DB if matching.
+                True to get only sequences at least as long as the query
+            "no_longer" : bool (optional)
+                False (default) to get also longer sequences from DB if matching on query length.
+                True to get only sequences not longer than the query
         }
     Success Response:
         Code : 201
         Content :
         {
-            "seqId" : int
-                the sequence id, or -1 if doesn't exists
+            "seqId" : list of int
+                the sequence ids, or []] if doesn't exists
+                Note: can be more than 1 id since we are looking for
         }
     Details:
         Validation:
@@ -88,10 +95,12 @@ def get_sequenceid():
     cfunc = get_sequenceid
     alldat = request.get_json()
     sequence = alldat.get('sequence')
+    no_shorter = alldat.get('no_shorter', False)
+    no_longer = alldat.get('no_longer', False)
     if sequence is None:
         return(getdoc(cfunc))
 
-    err, seqid = dbsequences.GetSequenceId(g.con, g.cur, sequence=sequence,)
+    err, seqid = dbsequences.GetSequenceId(g.con, g.cur, sequence=sequence, no_shorter=no_shorter, no_longer=no_longer)
     if err:
         return(err, 400)
     debug(2, 'found sequences')
