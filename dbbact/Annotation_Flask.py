@@ -4,9 +4,9 @@ from flask import Blueprint, request, g
 from flask.ext.login import current_user
 from flask.ext.login import login_required
 
-from . import dbannotations
-from .utils import debug, getdoc
-from .autodoc import auto
+import dbannotations
+from utils import debug, getdoc
+from autodoc import auto
 
 
 Annotation_Flask_Obj = Blueprint('Annottion_Flask_Obj', __name__, template_folder='templates')

@@ -1,11 +1,11 @@
 import json
 from flask import Blueprint, request, g
 from flask.ext.login import login_required, current_user
-from . import dbsequences
-from . import dbannotations
-from . import dbontology
-from .utils import debug, getdoc
-from .autodoc import auto
+import dbsequences
+import dbannotations
+import dbontology
+from utils import debug, getdoc
+from autodoc import auto
 
 Seq_Flask_Obj = Blueprint('Seq_Flask_Obj', __name__, template_folder='templates')
 

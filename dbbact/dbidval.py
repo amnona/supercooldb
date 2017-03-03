@@ -1,5 +1,5 @@
 import psycopg2
-from .utils import debug
+from utils import debug
 
 
 def GetIdFromDescription(con, cur, table, description, noneok=False, addifnone=False, commit=True):
