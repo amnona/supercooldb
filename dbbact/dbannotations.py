@@ -63,6 +63,124 @@ def AddSequenceAnnotations(con, cur, sequences, primer, expid, annotationtype, a
     return '', annotationid
 
 
+def UpdateAnnotation(con, cur, annotationid, annotationtype=None, annotationdetails=None, method=None,
+                     description=None, agenttype=None, private=None, userid=None,
+                     commit=True, numseqs=None):
+    '''Update an existing annotation in the database
+
+    Parameters
+    ----------
+    con,cur : database connection and cursor
+    annotationid : int
+        the annotation to update (validated if ok to update with userid)
+    annotationtype : str or None (optional)
+        the annotation type (i.e. "isa","differential")
+        None (default) to not update
+    method : str or None (optional)
+        the method (i.e. "differential abundance" etc.)
+        None (default) to not update
+    description : str or None (optional)
+        free text description of the annotation
+        None (default) to not update
+    annotationdetails : list of tuples (detailtype,ontologyterm) of str or None (optional)
+        detailtype is ("higher","lower","all")
+        ontologyterm is string which should match the ontologytable terms
+        None (default) to not update
+    user : str or None (optional)
+        username of the user wanting to update this annotation or None (default) for anonymous user.
+        NOTE: an non-annonymous annotation can only be updated by the user who created it
+        an annonymous annotation can be updated by anyone.
+    commit : bool (optional)
+        True (default) to commit, False to wait with the commit
+    numseqs : int or None (optional)
+        The number of sequences in this annotation (used to update the seqCount in the ontologyTable)
+        None (default) to not change the number of sequences
+
+    output:
+    err : str
+        the error encountered or '' if ok
+    cid : int
+        the annotationid or <0 if failed
+    '''
+    debug(1, 'UpdateAnnotation for annotationID %d' % annotationid)
+
+    # verify the user can update the annotation
+    err, origuser = GetAnnotationUser(con, cur, annotationid)
+    if err:
+        return err
+    if origuser != 0:
+        if userid == 0:
+            debug(6, 'cannot update non-anonymous annotation (userid=%d) with default userid=0' % origuser)
+            return('Cannot update non-anonymous annotation with default user. Please log in first')
+        if origuser != userid:
+            debug(6, 'cannot update. annotation %d was created by user %d but delete request was from user %d' % (annotationid, origuser, userid))
+            return 'Cannot update. Annotation was created by a different user'
+
+    # update annotationtypeid
+    if annotationtype is not None:
+        annotationtypeid = dbidval.GetIdFromDescription(con, cur, 'AnnotationTypesTable', annotationtype)
+        if annotationtypeid < 0:
+            return 'annotation type %s unknown' % annotationtype, -1
+        cur.execute('UPDATE AnnotationsTable SET idAnnotationType = %s WHERE annotationid = %s', [annotationtypeid, annotationid])
+        debug(1, 'updated annotation type to %d' % annotationtypeid)
+
+    # update methodid
+    if method is not None:
+        methodid = dbidval.GetIdFromDescription(con, cur, 'MethodTypesTable', method, noneok=True)
+        if methodid < 0:
+            return 'method %s unknown' % method, -1
+        cur.execute('UPDATE AnnotationsTable SET idMethod = %s WHERE annotationid = %s', [methodid, annotationid])
+        debug(1, 'updated method to %d' % methodid)
+
+    # update agenttypeid
+    if agenttype is not None:
+        agenttypeid = dbidval.GetIdFromDescription(con, cur, 'AgentTypesTable', agenttype, noneok=True, addifnone=True, commit=False)
+        if agenttypeid < 0:
+            return 'agenttype %s unknown' % agenttype, -1
+        cur.execute('UPDATE AnnotationsTable SET idAgentType = %s WHERE annotationid = %s', [agenttypeid, annotationid])
+        debug(1, 'updated agenttypeid to %d' % agenttypeid)
+
+    # update private
+    if private is not None:
+        private = private.lower()
+        cur.execute('UPDATE AnnotationsTable SET isPrivate = %s WHERE annotationid = %s', [private, annotationid])
+        debug(1, 'updated private to %s' % private)
+
+    # update description
+    if description is not None:
+        cur.execute('UPDATE AnnotationsTable SET description = %s WHERE annotationid = %s', [description, annotationid])
+        debug(1, 'updated description to %s' % description)
+
+    debug(2, "updated annotation id %d." % (annotationid))
+
+    # update the annotation details if needed
+    if annotationdetails is not None:
+        debug(1, 'Updating %d annotation details' % len(annotationdetails))
+        # to update the annotaiton details, we delete and then create the new ones
+        cur.execute('DELETE FROM AnnotationListTable WHERE idannotation=%s', [annotationid])
+        debug(1, 'deleted from annotationliststable')
+        # add the annotation details (which ontology term is higer/lower/all etc.)
+        err, numadded = AddAnnotationDetails(con, cur, annotationid, annotationdetails, commit=False)
+        if err:
+            debug(3, "failed to add annotation details. aborting")
+            return err, -1
+        debug(2, "%d annotationdetails added" % numadded)
+        # and update the annotationParentsTable (ontology terms per annotation)
+        # delete the old entry
+        cur.execute('DELETE FROM AnnotationParentsTable WHERE idAnnotation=%s', [annotationid])
+        debug(1, 'deleted from annotationParentsTable')
+        # add the parents of each ontology term to the annotationparentstable
+        err, numadded = AddAnnotationParents(con, cur, annotationid, annotationdetails, commit=False, numseqs=numseqs)
+        if err:
+            debug(3, "failed to add annotation parents. aborting")
+            return err, -1
+        debug(2, "%d annotation parents added" % numadded)
+
+    if commit:
+        con.commit()
+    return '', annotationid
+
+
 def AddAnnotation(con, cur, expid, annotationtype, annotationdetails, method='',
                   description='', agenttype='', private='n', userid=None,
                   commit=True, numseqs=0):
@@ -683,6 +801,10 @@ def DeleteAnnotation(con, cur, annotationid, userid=0, commit=True):
     debug(1, 'deleted from annotationliststable')
     cur.execute('DELETE FROM SequencesAnnotationTable WHERE annotationid=%s', [annotationid])
     debug(1, 'deleted from sequencesannotationtable')
+    # delete the annotation parents entries
+    cur.execute('DELETE FROM AnnotationParentsTable WHERE idAnnotation=%s', [annotationid])
+    debug(1, 'deleted from annotationParentsTable')
+
     if commit:
         con.commit()
     return('')

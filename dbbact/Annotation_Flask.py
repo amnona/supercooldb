@@ -45,7 +45,7 @@ def add_annotations():
                 default=False
                 is this annotation private
                 private from AnnotationsTable
-            "AnnotationList" : list of
+            "annotationList" : list of
                 {
                     "detail" : str
                         the type of detail (i.e. ALL/HIGH/LOW)
@@ -103,6 +103,89 @@ def add_annotations():
     err, annotationid = dbannotations.AddSequenceAnnotations(g.con, g.cur, sequences, primer, expid, annotationtype, annotationlist, method, description, agenttype, private, userid=userid, commit=True)
     if not err:
         debug(2, 'added sequece annotations')
+        return json.dumps({"annotationId": annotationid})
+    debug(6, "error encountered %s" % err)
+    return ("error enountered %s" % err, 400)
+
+
+@login_required
+@auto.doc()
+@Annotation_Flask_Obj.route('/annotations/update', methods=['POST', 'GET'])
+def update_annotations():
+    """
+    Title: Update existing annotation
+    URL: /annotations/update
+    Method: POST
+    URL Params:
+    Data Params: JSON
+        {
+            "annotationId" : int
+                (annotationID from AnnotationsTable)
+            "annotationType" : str (optional)
+                annotation type (differential expression/contaminant/etc.)
+                (description from AnnotationTypesTable).
+                or None to not update.
+            "method" : str (optional)
+                The method used to detect this behavior (i.e. observation/ranksum/clustering/etc")
+                (description from MethodTypesTable)
+                or None to not update.
+            "agentType" : str (optional)
+                Name of the program which submitted this annotation (i.e. heatsequer)
+                (description from AgentTypesTable)
+                or None to not update.
+            "description" : str (optional)
+                Free text describing this annotation (i.e. "lower in green tomatoes comapred to red ones")
+                or None to not update.
+            "private" : bool (optional)
+                default=False
+                is this annotation private
+                private from AnnotationsTable
+                or None to not update.
+            "annotationList" : (optional) list of
+                {
+                    "detail" : str
+                        the type of detail (i.e. ALL/HIGH/LOW)
+                        (description from AnnotationDetailsTypeTable)
+                    "term" : str
+                        the ontology term for this detail (i.e. feces/ibd/homo sapiens)
+                        (description from OntologyTable)
+                }
+                or None to not update.
+        }
+    Success Response:
+        Code : 201
+        Content :
+        {
+            "annotationId" : int
+            the id from AnnotationsTable for the updated annotation
+        }
+    Details:
+        Validation:
+            annotationID exists in annotations
+            User is allowed to modify the annotation (if annotation is annonymous, anyone can update,
+            otherwise only the user that created the annotation can update it).
+        Action:
+            Update all the non-None (supplied) fields in the existing annotation.
+    """
+    cfunc = add_annotations
+    if request.method == 'GET':
+        return(getdoc(cfunc), 400)
+    alldat = request.get_json()
+    annotationid = alldat.get('annotationId')
+    if annotationid is None:
+        return(getdoc(cfunc), 400)
+    annotationtype = alldat.get('annotationType')
+    method = alldat.get('method')
+    agenttype = alldat.get('agentType')
+    description = alldat.get('description')
+    private = alldat.get('private')
+    userid = current_user.user_id
+    annotationlist = alldat.get('annotationList')
+    err, annotationid = dbannotations.UpdateAnnotation(g.con, g.cur, annotationid=annotationid, annotationtype=annotationtype, annotationdetails=annotationlist, method=method,
+                                                       description=description, agenttype=agenttype, private=private, userid=userid,
+                                                       commit=True)
+    if not err:
+        debug(2, 'Updated annotation')
         return json.dumps({"annotationId": annotationid})
     debug(6, "error encountered %s" % err)
     return ("error enountered %s" % err, 400)
