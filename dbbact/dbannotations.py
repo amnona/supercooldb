@@ -153,6 +153,15 @@ def UpdateAnnotation(con, cur, annotationid, annotationtype=None, annotationdeta
 
     debug(2, "updated annotation id %d." % (annotationid))
 
+    if numseqs is None:
+        cur.execute('SELECT seqCount FROM AnnotationsTable WHERE id = %s LIMIT 1', [annotationid])
+        if cur.rowcount == 0:
+            debug(3, 'seqCount for annotationid %d not found' % annotationid)
+            numseqs = 0
+        else:
+            res = cur.fetchone()
+            numseqs = res[0]
+
     # update the annotation details if needed
     if annotationdetails is not None:
         debug(1, 'Updating %d annotation details' % len(annotationdetails))
