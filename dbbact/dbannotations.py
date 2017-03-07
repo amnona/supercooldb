@@ -121,7 +121,7 @@ def UpdateAnnotation(con, cur, annotationid, annotationtype=None, annotationdeta
         annotationtypeid = dbidval.GetIdFromDescription(con, cur, 'AnnotationTypesTable', annotationtype)
         if annotationtypeid < 0:
             return 'annotation type %s unknown' % annotationtype, -1
-        cur.execute('UPDATE AnnotationsTable SET idAnnotationType = %s WHERE annotationid = %s', [annotationtypeid, annotationid])
+        cur.execute('UPDATE AnnotationsTable SET idAnnotationType = %s WHERE idAnnotation = %s', [annotationtypeid, annotationid])
         debug(1, 'updated annotation type to %d' % annotationtypeid)
 
     # update methodid
@@ -129,7 +129,7 @@ def UpdateAnnotation(con, cur, annotationid, annotationtype=None, annotationdeta
         methodid = dbidval.GetIdFromDescription(con, cur, 'MethodTypesTable', method, noneok=True)
         if methodid < 0:
             return 'method %s unknown' % method, -1
-        cur.execute('UPDATE AnnotationsTable SET idMethod = %s WHERE annotationid = %s', [methodid, annotationid])
+        cur.execute('UPDATE AnnotationsTable SET idMethod = %s WHERE idAnnotation = %s', [methodid, annotationid])
         debug(1, 'updated method to %d' % methodid)
 
     # update agenttypeid
@@ -137,18 +137,18 @@ def UpdateAnnotation(con, cur, annotationid, annotationtype=None, annotationdeta
         agenttypeid = dbidval.GetIdFromDescription(con, cur, 'AgentTypesTable', agenttype, noneok=True, addifnone=True, commit=False)
         if agenttypeid < 0:
             return 'agenttype %s unknown' % agenttype, -1
-        cur.execute('UPDATE AnnotationsTable SET idAgentType = %s WHERE annotationid = %s', [agenttypeid, annotationid])
+        cur.execute('UPDATE AnnotationsTable SET idAgentType = %s WHERE idAnnotation = %s', [agenttypeid, annotationid])
         debug(1, 'updated agenttypeid to %d' % agenttypeid)
 
     # update private
     if private is not None:
         private = private.lower()
-        cur.execute('UPDATE AnnotationsTable SET isPrivate = %s WHERE annotationid = %s', [private, annotationid])
+        cur.execute('UPDATE AnnotationsTable SET isPrivate = %s WHERE idAnnotation = %s', [private, annotationid])
         debug(1, 'updated private to %s' % private)
 
     # update description
     if description is not None:
-        cur.execute('UPDATE AnnotationsTable SET description = %s WHERE annotationid = %s', [description, annotationid])
+        cur.execute('UPDATE AnnotationsTable SET description = %s WHERE idAnnotation = %s', [description, annotationid])
         debug(1, 'updated description to %s' % description)
 
     debug(2, "updated annotation id %d." % (annotationid))
