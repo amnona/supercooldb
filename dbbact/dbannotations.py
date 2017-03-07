@@ -114,7 +114,7 @@ def UpdateAnnotation(con, cur, annotationid, annotationtype=None, annotationdeta
             return('Cannot update non-anonymous annotation with default user. Please log in first')
         if origuser != userid:
             debug(6, 'cannot update. annotation %d was created by user %d but delete request was from user %d' % (annotationid, origuser, userid))
-            return 'Cannot update. Annotation was created by a different user'
+            return 'Cannot update. Annotation was created by a different user', -1
 
     # update annotationtypeid
     if annotationtype is not None:
