@@ -76,9 +76,8 @@ def get_num_annotations_per_sequence(con, cur, outdir):
     cur.execute('SELECT * FROM SequencesTable')
     all_seqs = cur.fetchall()
     for cseq_data in all_seqs:
-        print(cseq_data)
         cur2 = con.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cur2.execute('SELECT * FROM SequencesAnnotationTable WHERE seqId=%s', [cseq_data['Id']])
+        cur2.execute('SELECT * FROM SequencesAnnotationTable WHERE seqId=%s', [cseq_data['id']])
         num_annotations = cur2.rowcount
         hist[num_annotations] += 1
     with open(path.join(outdir, 'annotations_per_seq.txt'), 'w') as fl:
