@@ -74,8 +74,7 @@ def connect_db(servertype='main', schema='AnnotationSchemaTest'):
 def get_num_annotations_per_sequence(con, cur, outdir):
     hist = defaultdict(int)
     cur.execute('SELECT * FROM SequencesTable')
-    all_seqs_data = cur.fetchall()
-    for cseq_data in all_seqs_data:
+    for cseq_data in cur:
         cur2 = con.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cur2.execute('SELECT * FROM SequencesAnnotationTable WHERE seqId=%s', [cseq_data['Id']])
         num_annotations = cur2.rowcount
