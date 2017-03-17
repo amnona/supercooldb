@@ -61,7 +61,7 @@ def connect_db(servertype='main', schema='AnnotationSchemaTest'):
             print('unknown server type %s' % servertype)
         debug(1, 'connecting host=%s, database=%s, user=%s, port=%d' % (host, database, user, port))
         con = psycopg2.connect(host=host, database=database, user=user, password=password, port=port)
-        cur = con.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur = con.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cur.execute('SET search_path to %s' % schema)
         debug(1, 'connected to database')
         return (con, cur)
@@ -74,7 +74,8 @@ def connect_db(servertype='main', schema='AnnotationSchemaTest'):
 def get_num_annotations_per_sequence(con, cur, outdir):
     hist = defaultdict(int)
     cur.execute('SELECT * FROM SequencesTable')
-    for cseq_data in cur:
+    all_seqs = cur.fetchall()
+    for cseq_data in all_seqs:
         print(cseq_data)
         cur2 = con.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cur2.execute('SELECT * FROM SequencesAnnotationTable WHERE seqId=%s', [cseq_data['Id']])
