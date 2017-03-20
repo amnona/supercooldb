@@ -978,3 +978,91 @@ def GetAllAnnotations(con, cur, userid=0):
         annotations.append(cannotation)
     debug(1, 'Got details for %d annotations' % len(annotations))
     return '', annotations
+
+
+def GetSequenceStringAnnotations(con, cur, sequence, region=None, userid=0):
+    """
+    Get summary strings for all annotations for a sequence. Returns a list of annotation summary strings (empty list if sequence is not found)
+
+    Parameters
+    ----------
+    con,cur :
+    sequence : str ('ACGT')
+        the sequence to search for in the database
+    region : int (optional)
+        None to not compare region, or the regionid the sequence is from
+    userid : int (optional)
+        the id of the user requesting the annotations. Private annotations with non-matching user will not be returned
+
+    Returns
+    -------
+    err : str
+        The error encountered or '' if ok
+    details: list of dict
+        a list of summary string and information about each annotations. contains:
+            'annotationid' : int
+                the annotation id in the database (can be used to find the link to the annotation page)
+            'annotation_string' : str
+                string summarizing the annotation (i.e. 'higher in ibd compared to control in human, feces')
+    """
+    res = []
+    err, annotations = GetSequenceAnnotations(con, cur, sequence, region=region, userid=userid)
+    if err:
+        return err, res
+    for cannotation in annotations:
+        cres = {}
+        cres['annotationid'] = cannotation['annotationid']
+        cres['annotation_string'] = _get_annotation_string(cannotation)
+    return '', res
+
+
+def _get_annotation_string(cann):
+    '''Get nice string summaries of annotation
+
+    Parameters
+    ----------
+    cann : dict
+        items of the output of get_seq_annotations()
+
+    Returns
+    -------
+    desc : str
+        a short summary of the annotation
+    '''
+    cdesc = ''
+    if cann['description']:
+        cdesc += cann['description'] + ' ('
+    if cann['annotationtype'] == 'diffexp':
+        chigh = []
+        clow = []
+        call = []
+        for cdet in cann['details']:
+            if cdet[0] == 'all':
+                call.append(cdet[1])
+                continue
+            if cdet[0] == 'low':
+                clow.append(cdet[1])
+                continue
+            if cdet[0] == 'high':
+                chigh.append(cdet[1])
+                continue
+        cdesc += ' high in '
+        for cval in chigh:
+            cdesc += cval + ' '
+        cdesc += ' compared to '
+        for cval in clow:
+            cdesc += cval + ' '
+        cdesc += ' in '
+        for cval in call:
+            cdesc += cval + ' '
+    elif cann['annotationtype'] == 'isa':
+        cdesc += ' is a '
+        for cdet in cann['details']:
+            cdesc += 'cdet,'
+    elif cann['annotationtype'] == 'contamination':
+        cdesc += 'contamination'
+    else:
+        cdesc += cann['annotationtype'] + ' '
+        for cdet in cann['details']:
+            cdesc = cdesc + ' ' + cdet[1] + ','
+    return cdesc
