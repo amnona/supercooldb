@@ -1015,6 +1015,7 @@ def GetSequenceStringAnnotations(con, cur, sequence, region=None, userid=0):
         cres = {}
         cres['annotationid'] = cannotation['annotationid']
         cres['annotation_string'] = _get_annotation_string(cannotation)
+        res.append(cres)
     return '', res
 
 
