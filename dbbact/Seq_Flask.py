@@ -547,7 +547,7 @@ def get_sequence_info():
 
 @login_required
 @Seq_Flask_Obj.route('/sequences/get_string_annotations', methods=['GET', 'POST', 'OPTIONS'])
-# @crossdomain(origin='*')
+@crossdomain(origin='*')
 @auto.doc()
 def get_sequence_string_annotations():
     """
