@@ -292,23 +292,23 @@ def get_sequence_list_annotations():
     return json.dumps({'seqannotations': seqannotations})
 
 
-# need to add conversion to nice string
-@login_required
-@Seq_Flask_Obj.route('/sequences/get_annotations_string', methods=['GET'])
-@auto.doc()
-def get_annotations_string():
-    cfunc = get_annotations_string
-    alldat = request.get_json()
-    if alldat is None:
-        return(getdoc(cfunc))
-    sequence = alldat.get('sequence')
-    if sequence is None:
-        return('sequence parameter missing', 400)
-    err, details = dbannotations.GetSequenceAnnotations(g.con, g.cur, sequence, userid=current_user.user_id)
-    if err:
-        debug(6, err)
-        return ('Problem geting details. error=%s' % err, 400)
-    return json.dumps({'annotations': details})
+# # need to add conversion to nice string
+# @login_required
+# @Seq_Flask_Obj.route('/sequences/get_annotations_string', methods=['GET'])
+# @auto.doc()
+# def get_annotations_string():
+#     cfunc = get_annotations_string
+#     alldat = request.get_json()
+#     if alldat is None:
+#         return(getdoc(cfunc))
+#     sequence = alldat.get('sequence')
+#     if sequence is None:
+#         return('sequence parameter missing', 400)
+#     err, details = dbannotations.GetSequenceAnnotations(g.con, g.cur, sequence, userid=current_user.user_id)
+#     if err:
+#         debug(6, err)
+#         return ('Problem geting details. error=%s' % err, 400)
+#     return json.dumps({'annotations': details})
 
 
 @login_required
@@ -547,7 +547,7 @@ def get_sequence_info():
 
 @login_required
 @Seq_Flask_Obj.route('/sequences/get_string_annotations', methods=['GET', 'POST', 'OPTIONS'])
-@crossdomain(origin='*')
+# @crossdomain(origin='*')
 @auto.doc()
 def get_sequence_string_annotations():
     """
