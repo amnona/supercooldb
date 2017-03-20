@@ -1006,9 +1006,11 @@ def GetSequenceStringAnnotations(con, cur, sequence, region=None, userid=0):
                 string summarizing the annotation (i.e. 'higher in ibd compared to control in human, feces')
     """
     res = []
+    debug(1, 'GetSequenceStringAnnotations for sequence %s' % sequence)
     err, annotations = GetSequenceAnnotations(con, cur, sequence, region=region, userid=userid)
     if err:
         return err, res
+    debug(1, 'Got %s annotations' % len(annotations))
     for cannotation in annotations:
         cres = {}
         cres['annotationid'] = cannotation['annotationid']
