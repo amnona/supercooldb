@@ -6,10 +6,11 @@ from . import dbannotations
 from . import dbontology
 from .utils import debug, getdoc
 from .autodoc import auto
-from .flask_cors import crossdomain
-
+# from .flask_cors import crossdomain
+from flask_cors import CORS
 
 Seq_Flask_Obj = Blueprint('Seq_Flask_Obj', __name__, template_folder='templates')
+CORS(Seq_Flask_Obj)
 
 
 @Seq_Flask_Obj.route('/sequences/add', methods=['POST', 'GET'])
@@ -547,7 +548,7 @@ def get_sequence_info():
 
 @login_required
 @Seq_Flask_Obj.route('/sequences/get_string_annotations', methods=['GET', 'POST', 'OPTIONS'])
-@crossdomain(origin='*')
+# @crossdomain(origin='*')
 @auto.doc()
 def get_sequence_string_annotations():
     """
