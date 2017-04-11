@@ -1,13 +1,16 @@
 import json
 from flask import Blueprint, request, g
 from flask.ext.login import login_required, current_user
-import dbsequences
-import dbannotations
-import dbontology
-from utils import debug, getdoc
-from autodoc import auto
+from . import dbsequences
+from . import dbannotations
+from . import dbontology
+from .utils import debug, getdoc
+from .autodoc import auto
+# from .flask_cors import crossdomain
+from flask_cors import CORS
 
 Seq_Flask_Obj = Blueprint('Seq_Flask_Obj', __name__, template_folder='templates')
+CORS(Seq_Flask_Obj)
 
 
 @Seq_Flask_Obj.route('/sequences/add', methods=['POST', 'GET'])
@@ -290,23 +293,23 @@ def get_sequence_list_annotations():
     return json.dumps({'seqannotations': seqannotations})
 
 
-# need to add conversion to nice string
-@login_required
-@Seq_Flask_Obj.route('/sequences/get_annotations_string', methods=['GET'])
-@auto.doc()
-def get_annotations_string():
-    cfunc = get_annotations_string
-    alldat = request.get_json()
-    if alldat is None:
-        return(getdoc(cfunc))
-    sequence = alldat.get('sequence')
-    if sequence is None:
-        return('sequence parameter missing', 400)
-    err, details = dbannotations.GetSequenceAnnotations(g.con, g.cur, sequence, userid=current_user.user_id)
-    if err:
-        debug(6, err)
-        return ('Problem geting details. error=%s' % err, 400)
-    return json.dumps({'annotations': details})
+# # need to add conversion to nice string
+# @login_required
+# @Seq_Flask_Obj.route('/sequences/get_annotations_string', methods=['GET'])
+# @auto.doc()
+# def get_annotations_string():
+#     cfunc = get_annotations_string
+#     alldat = request.get_json()
+#     if alldat is None:
+#         return(getdoc(cfunc))
+#     sequence = alldat.get('sequence')
+#     if sequence is None:
+#         return('sequence parameter missing', 400)
+#     err, details = dbannotations.GetSequenceAnnotations(g.con, g.cur, sequence, userid=current_user.user_id)
+#     if err:
+#         debug(6, err)
+#         return ('Problem geting details. error=%s' % err, 400)
+#     return json.dumps({'annotations': details})
 
 
 @login_required
@@ -541,3 +544,52 @@ def get_sequence_info():
         debug(6, errmsg)
         return(errmsg, 400)
     return json.dumps({'sequences': sequences})
+
+
+@login_required
+@Seq_Flask_Obj.route('/sequences/get_string_annotations', methods=['GET', 'POST', 'OPTIONS'])
+# @crossdomain(origin='*')
+@auto.doc()
+def get_sequence_string_annotations():
+    """
+    Title: Get sequence string annotations
+    Description : Get description (string) and html link for all annotations of a given sequence
+    URL: /sequences/get_string_annotations
+    Method: GET, POST
+    URL Params:
+    Data Params: JSON
+        {
+            sequence : str
+                the DNA sequence string to query the database (can be any length)
+            region : int (optional)
+                the region id (default=1 which is V4 515F 806R)
+    Success Response:
+        Code : 200
+        Content :
+        {
+            "annotations" : list of
+                {
+                    "annotationid" : int
+                        the id of the annotation
+                    "annotation_summary" : str
+                        String summarizing the annotation (i.e. 'higher in feces compared to saliva in homo spiens')
+                }
+        }
+    Details :
+        Validation:
+            If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
+            If annotation is not private, return it (no need for authentication)
+    """
+    cfunc = get_sequence_string_annotations
+    alldat = request.get_json()
+    if alldat is None:
+        return(getdoc(cfunc))
+    sequence = alldat.get('sequence')
+    if sequence is None:
+        return('sequence parameter missing', 400)
+
+    err, details = dbannotations.GetSequenceStringAnnotations(g.con, g.cur, sequence, userid=current_user.user_id)
+    if err:
+        debug(6, err)
+        return ('Problem geting details. error=%s' % err, 400)
+    return json.dumps({'annotations': details})

@@ -63,6 +63,133 @@ def AddSequenceAnnotations(con, cur, sequences, primer, expid, annotationtype, a
     return '', annotationid
 
 
+def UpdateAnnotation(con, cur, annotationid, annotationtype=None, annotationdetails=None, method=None,
+                     description=None, agenttype=None, private=None, userid=None,
+                     commit=True, numseqs=None):
+    '''Update an existing annotation in the database
+
+    Parameters
+    ----------
+    con,cur : database connection and cursor
+    annotationid : int
+        the annotation to update (validated if ok to update with userid)
+    annotationtype : str or None (optional)
+        the annotation type (i.e. "isa","differential")
+        None (default) to not update
+    method : str or None (optional)
+        the method (i.e. "differential abundance" etc.)
+        None (default) to not update
+    description : str or None (optional)
+        free text description of the annotation
+        None (default) to not update
+    annotationdetails : list of tuples (detailtype,ontologyterm) of str or None (optional)
+        detailtype is ("higher","lower","all")
+        ontologyterm is string which should match the ontologytable terms
+        None (default) to not update
+    user : str or None (optional)
+        username of the user wanting to update this annotation or None (default) for anonymous user.
+        NOTE: an non-annonymous annotation can only be updated by the user who created it
+        an annonymous annotation can be updated by anyone.
+    commit : bool (optional)
+        True (default) to commit, False to wait with the commit
+    numseqs : int or None (optional)
+        The number of sequences in this annotation (used to update the seqCount in the ontologyTable)
+        None (default) to not change the number of sequences
+
+    output:
+    err : str
+        the error encountered or '' if ok
+    cid : int
+        the annotationid or <0 if failed
+    '''
+    debug(1, 'UpdateAnnotation for annotationID %d' % annotationid)
+
+    # verify the user can update the annotation
+    err, origuser = GetAnnotationUser(con, cur, annotationid)
+    if err:
+        return err
+    if origuser != 0:
+        if userid == 0:
+            debug(6, 'cannot update non-anonymous annotation (userid=%d) with default userid=0' % origuser)
+            return('Cannot update non-anonymous annotation with default user. Please log in first')
+        if origuser != userid:
+            debug(6, 'cannot update. annotation %d was created by user %d but delete request was from user %d' % (annotationid, origuser, userid))
+            return 'Cannot update. Annotation was created by a different user', -1
+
+    # update annotationtypeid
+    if annotationtype is not None:
+        annotationtypeid = dbidval.GetIdFromDescription(con, cur, 'AnnotationTypesTable', annotationtype)
+        if annotationtypeid < 0:
+            return 'annotation type %s unknown' % annotationtype, -1
+        cur.execute('UPDATE AnnotationsTable SET idAnnotationType = %s WHERE id = %s', [annotationtypeid, annotationid])
+        debug(1, 'updated annotation type to %d' % annotationtypeid)
+
+    # update methodid
+    if method is not None:
+        methodid = dbidval.GetIdFromDescription(con, cur, 'MethodTypesTable', method, noneok=True)
+        if methodid < 0:
+            return 'method %s unknown' % method, -1
+        cur.execute('UPDATE AnnotationsTable SET idMethod = %s WHERE id = %s', [methodid, annotationid])
+        debug(1, 'updated method to %d' % methodid)
+
+    # update agenttypeid
+    if agenttype is not None:
+        agenttypeid = dbidval.GetIdFromDescription(con, cur, 'AgentTypesTable', agenttype, noneok=True, addifnone=True, commit=False)
+        if agenttypeid < 0:
+            return 'agenttype %s unknown' % agenttype, -1
+        cur.execute('UPDATE AnnotationsTable SET idAgentType = %s WHERE id = %s', [agenttypeid, annotationid])
+        debug(1, 'updated agenttypeid to %d' % agenttypeid)
+
+    # update private
+    if private is not None:
+        private = private.lower()
+        cur.execute('UPDATE AnnotationsTable SET isPrivate = %s WHERE id = %s', [private, annotationid])
+        debug(1, 'updated private to %s' % private)
+
+    # update description
+    if description is not None:
+        cur.execute('UPDATE AnnotationsTable SET description = %s WHERE id = %s', [description, annotationid])
+        debug(1, 'updated description to %s' % description)
+
+    debug(2, "updated annotation id %d." % (annotationid))
+
+    if numseqs is None:
+        cur.execute('SELECT seqCount FROM AnnotationsTable WHERE id = %s LIMIT 1', [annotationid])
+        if cur.rowcount == 0:
+            debug(3, 'seqCount for annotationid %d not found' % annotationid)
+            numseqs = 0
+        else:
+            res = cur.fetchone()
+            numseqs = res[0]
+
+    # update the annotation details if needed
+    if annotationdetails is not None:
+        debug(1, 'Updating %d annotation details' % len(annotationdetails))
+        # to update the annotaiton details, we delete and then create the new ones
+        cur.execute('DELETE FROM AnnotationListTable WHERE idannotation=%s', [annotationid])
+        debug(1, 'deleted from annotationliststable')
+        # add the annotation details (which ontology term is higer/lower/all etc.)
+        err, numadded = AddAnnotationDetails(con, cur, annotationid, annotationdetails, commit=False)
+        if err:
+            debug(3, "failed to add annotation details. aborting")
+            return err, -1
+        debug(2, "%d annotationdetails added" % numadded)
+        # and update the annotationParentsTable (ontology terms per annotation)
+        # delete the old entry
+        cur.execute('DELETE FROM AnnotationParentsTable WHERE idAnnotation=%s', [annotationid])
+        debug(1, 'deleted from annotationParentsTable')
+        # add the parents of each ontology term to the annotationparentstable
+        err, numadded = AddAnnotationParents(con, cur, annotationid, annotationdetails, commit=False, numseqs=numseqs)
+        if err:
+            debug(3, "failed to add annotation parents. aborting")
+            return err, -1
+        debug(2, "%d annotation parents added" % numadded)
+
+    if commit:
+        con.commit()
+    return '', annotationid
+
+
 def AddAnnotation(con, cur, expid, annotationtype, annotationdetails, method='',
                   description='', agenttype='', private='n', userid=None,
                   commit=True, numseqs=0):
@@ -683,6 +810,10 @@ def DeleteAnnotation(con, cur, annotationid, userid=0, commit=True):
     debug(1, 'deleted from annotationliststable')
     cur.execute('DELETE FROM SequencesAnnotationTable WHERE annotationid=%s', [annotationid])
     debug(1, 'deleted from sequencesannotationtable')
+    # delete the annotation parents entries
+    cur.execute('DELETE FROM AnnotationParentsTable WHERE idAnnotation=%s', [annotationid])
+    debug(1, 'deleted from annotationParentsTable')
+
     if commit:
         con.commit()
     return('')
@@ -847,3 +978,94 @@ def GetAllAnnotations(con, cur, userid=0):
         annotations.append(cannotation)
     debug(1, 'Got details for %d annotations' % len(annotations))
     return '', annotations
+
+
+def GetSequenceStringAnnotations(con, cur, sequence, region=None, userid=0):
+    """
+    Get summary strings for all annotations for a sequence. Returns a list of annotation summary strings (empty list if sequence is not found)
+
+    Parameters
+    ----------
+    con,cur :
+    sequence : str ('ACGT')
+        the sequence to search for in the database
+    region : int (optional)
+        None to not compare region, or the regionid the sequence is from
+    userid : int (optional)
+        the id of the user requesting the annotations. Private annotations with non-matching user will not be returned
+
+    Returns
+    -------
+    err : str
+        The error encountered or '' if ok
+    details: list of dict
+        a list of summary string and information about each annotations. contains:
+            'annotationid' : int
+                the annotation id in the database (can be used to find the link to the annotation page)
+            'annotation_string' : str
+                string summarizing the annotation (i.e. 'higher in ibd compared to control in human, feces')
+    """
+    res = []
+    debug(1, 'GetSequenceStringAnnotations for sequence %s' % sequence)
+    err, annotations = GetSequenceAnnotations(con, cur, sequence, region=region, userid=userid)
+    if err:
+        return err, res
+    debug(1, 'Got %s annotations' % len(annotations))
+    for cannotation in annotations:
+        cres = {}
+        cres['annotationid'] = cannotation['annotationid']
+        cres['annotation_string'] = _get_annotation_string(cannotation)
+        res.append(cres)
+    return '', res
+
+
+def _get_annotation_string(cann):
+    '''Get nice string summaries of annotation
+
+    Parameters
+    ----------
+    cann : dict
+        items of the output of get_seq_annotations()
+
+    Returns
+    -------
+    desc : str
+        a short summary of the annotation
+    '''
+    cdesc = ''
+    if cann['description']:
+        cdesc += cann['description'] + ' ('
+    if cann['annotationtype'] == 'diffexp':
+        chigh = []
+        clow = []
+        call = []
+        for cdet in cann['details']:
+            if cdet[0] == 'all':
+                call.append(cdet[1])
+                continue
+            if cdet[0] == 'low':
+                clow.append(cdet[1])
+                continue
+            if cdet[0] == 'high':
+                chigh.append(cdet[1])
+                continue
+        cdesc += ' high in '
+        for cval in chigh:
+            cdesc += cval + ' '
+        cdesc += ' compared to '
+        for cval in clow:
+            cdesc += cval + ' '
+        cdesc += ' in '
+        for cval in call:
+            cdesc += cval + ' '
+    elif cann['annotationtype'] == 'isa':
+        cdesc += ' is a '
+        for cdet in cann['details']:
+            cdesc += 'cdet,'
+    elif cann['annotationtype'] == 'contamination':
+        cdesc += 'contamination'
+    else:
+        cdesc += cann['annotationtype'] + ' '
+        for cdet in cann['details']:
+            cdesc = cdesc + ' ' + cdet[1] + ','
+    return cdesc
