@@ -2,7 +2,7 @@ from collections import defaultdict
 import datetime
 import psycopg2
 
-from .utils import debug
+from utils import debug
 
 
 def GetExperimentId(con, cur, details, userid=None):

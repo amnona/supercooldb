@@ -1,9 +1,9 @@
 import json
 from flask import Blueprint, g, request
 from flask.ext.login import login_required
-from . import dbontology
-from .utils import getdoc, debug
-from .autodoc import auto
+import dbontology
+from utils import getdoc, debug
+from autodoc import auto
 
 Ontology_Flask_Obj = Blueprint('Ontology_Flask_Obj', __name__, template_folder='templates')
 
