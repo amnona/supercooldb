@@ -12,6 +12,7 @@ from Ontology_Flask import Ontology_Flask_Obj
 from utils import debug, SetDebugLevel
 import db_access
 import dbuser
+import os
 
 dbDefaultUser = "na"  # anonymos user in case the field is empty
 dbDefaultPwd = ""
@@ -119,4 +120,7 @@ def load_user(request):
 if __name__ == '__main__':
     SetDebugLevel(0)
     debug(2, 'starting server')
-    app.run(debug=True)
+    if 'OPENU_FLAG' in os.environ:
+        app.run(debug=True,host='0.0.0.0',port=5001)
+    else:
+        app.run(debug=True)
