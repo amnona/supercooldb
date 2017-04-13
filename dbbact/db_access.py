@@ -26,7 +26,14 @@ def connect_db(schema='AnnotationSchemaTest'):
         password = 'admin123'
         port = 5432
         host = 'localhost'
-        if 'SCDB_SERVER_TYPE' in os.environ:
+        if 'OPENU_FLAG' in os.environ:
+            debug(1, 'servertype is openu')
+            database = 'scdb'
+            user = 'postgres'
+            password = 'magNiv'
+            #password = 'admin123'
+            port = 5432            
+        elif 'SCDB_SERVER_TYPE' in os.environ:
             servertype = os.environ['SCDB_SERVER_TYPE'].lower()
             debug(1, 'SCDB_SERVER_TYPE is %s' % servertype)
             if servertype == 'main':
@@ -54,7 +61,10 @@ def connect_db(schema='AnnotationSchemaTest'):
             debug(6, 'server type not set (SCDB_SERVER_TYPE)')
             print('SCDB_SERVER_TYPE not set')
         debug(1, 'connecting host=%s, database=%s, user=%s, port=%d' % (host, database, user, port))
-        con = psycopg2.connect(host=host, database=database, user=user, password=password, port=port)
+        if 'OPENU_FLAG' in os.environ:
+            con = psycopg2.connect(database=database, user=user, password=password, port=port)
+        else:
+            con = psycopg2.connect(host=host,database=database, user=user, password=password, port=port)
         cur = con.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cur.execute('SET search_path to %s' % schema)
         debug(1, 'connected to database')
