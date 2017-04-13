@@ -7,10 +7,10 @@ from . import dbontology
 from .utils import debug, getdoc
 from .autodoc import auto
 # from .flask_cors import crossdomain
-from flask_cors import CORS
+# from flask_cors import CORS
 
 Seq_Flask_Obj = Blueprint('Seq_Flask_Obj', __name__, template_folder='templates')
-CORS(Seq_Flask_Obj)
+# CORS(Seq_Flask_Obj)
 
 
 @Seq_Flask_Obj.route('/sequences/add', methods=['POST', 'GET'])
