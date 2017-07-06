@@ -5,7 +5,7 @@ import psycopg2
 from utils import debug
 
 
-def GetExperimentId(con, cur, details, userid=None):
+def GetExperimentId(con, cur, details, userid=None, logic='any'):
     """
     Get the id of an experiment matching the details
 
@@ -14,6 +14,9 @@ def GetExperimentId(con, cur, details, userid=None):
         the details specific to the experiment (i.e. ("MD5Exp","0x445A2"))
     userid : int (optional)
         the userid asking the query (for private studies)
+    logic : str (optional)
+        'any' (default) to find matching any of details (union)
+        'all' to find matching all details (intersect)
     output:
     errmsg : str
         "" if ok, error msg if error encountered
@@ -38,7 +41,10 @@ def GetExperimentId(con, cur, details, userid=None):
             if expids is None:
                 expids = cids
             else:
-                expids = expids.intersection(cids)
+                if logic=='all':
+                    expids = expids.intersection(cids)
+                else:
+                    expids = expids.union(cids)
             if len(expids) == 0:
                 debug(2, "No experiments found matching all details")
                 return 'No experiment match found for details', []
