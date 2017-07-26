@@ -62,8 +62,15 @@ def tolist(data):
 
 
 def send_email(user, pwd, recipient, subject, body):
+    
+    import os
+    if 'OPENU_FLAG' in os.environ:
+        debug(1, 'Sending mail using openu server')
+        openu_str = "echo '%s' | mail -s '%s' -r %s %s" % (body,subject,'dbbact@openu.ac.il',recipient)
+        os.system(openu_str)
+        return
+    
     import smtplib
-
     gmail_user = user
     gmail_pwd = pwd
     FROM = user
