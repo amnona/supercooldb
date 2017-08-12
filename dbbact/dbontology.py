@@ -347,3 +347,33 @@ def get_annotations_term_counts(con, cur, annotations):
         for cdetail in cannotation['details']:
             terms.append(cdetail[1])
     return GetTermCounts(con, cur, terms)
+
+
+
+def GetListOfOntologies(con,cur):
+    '''
+    Get list of ontologies
+
+    Parameters
+    ----------
+    con, cur
+    
+    Returns
+    -------
+    terms : list of str
+        The full list of ontologies
+    '''
+    # get rid of duplicate terms
+    debug(1, 'GetListOfOntologies')
+    all_ontologies = []
+    cur.execute('SELECT description from ontologyTable')
+    if cur.rowcount == 0:
+        debug(1, 'Ontologies list is empty')
+        return
+    
+    res = cur.fetchall()
+    annotations = []
+    for cres in res:
+        all_ontologies.append(cres[0])
+    return all_ontologies	
+    

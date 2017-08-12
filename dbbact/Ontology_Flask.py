@@ -253,3 +253,25 @@ def get_ontology_annotations():
         debug(6, err)
         return ('Problem geting details. error=%s' % err, 400)
     return json.dumps({'annotations': annotations})
+
+@Ontology_Flask_Obj.route('/ontology/get_all_descriptions', methods=['GET'])
+@auto.doc()
+def get_all_descriptions():
+    """
+    Title: Query Ontology synonyms
+    Description : Get all ontology descriptions
+    Method: GET
+    Success Response:
+        Code : 200
+        Content :
+        {
+            "ontology" : list of
+            {
+                "description" : str
+                    the ontology terms
+            }
+        }
+    """
+    jsonRetData = dbontology.GetListOfOntologies(g.con, g.cur)
+    return json.dumps(jsonRetData, ensure_ascii=False)
+
