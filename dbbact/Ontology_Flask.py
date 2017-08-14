@@ -258,7 +258,7 @@ def get_ontology_annotations():
 @auto.doc()
 def get_all_descriptions():
     """
-    Title: Query Ontology synonyms
+    Title: Query Ontology
     Description : Get all ontology descriptions
     Method: GET
     Success Response:
@@ -275,3 +275,23 @@ def get_all_descriptions():
     jsonRetData = dbontology.GetListOfOntologies(g.con, g.cur)
     return json.dumps(jsonRetData, ensure_ascii=False)
 
+@Ontology_Flask_Obj.route('/ontology/get_all_synonyms', methods=['GET'])
+@auto.doc()
+def get_all_synonyms():
+    """
+    Title: Query synonyms
+    Description : Get all synonym descriptions
+    Method: GET
+    Success Response:
+        Code : 200
+        Content :
+        {
+            "synonym" : list of
+            {
+                "description" : str
+                    the synonym terms
+            }
+        }
+    """
+    jsonRetData = dbontology.GetListOfSynonym(g.con, g.cur)
+    return json.dumps(jsonRetData, ensure_ascii=False)

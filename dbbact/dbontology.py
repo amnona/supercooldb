@@ -365,15 +365,40 @@ def GetListOfOntologies(con,cur):
     '''
     # get rid of duplicate terms
     debug(1, 'GetListOfOntologies')
-    all_ontologies = []
     cur.execute('SELECT description from ontologyTable')
     if cur.rowcount == 0:
         debug(1, 'Ontologies list is empty')
         return
     
     res = cur.fetchall()
-    annotations = []
+    all_ontologies = []
     for cres in res:
         all_ontologies.append(cres[0])
     return all_ontologies	
     
+def GetListOfSynonym(con,cur):
+    '''
+    Get list of synonym
+
+    Parameters
+    ----------
+    con, cur
+    
+    Returns
+    -------
+    terms : list of str
+        The full list of synonym
+    '''
+    # get rid of duplicate terms
+    debug(1, 'GetListOfSynonym')
+    all_synonym = []
+    cur.execute('SELECT distinct synonym from ontologysynonymtable')
+    if cur.rowcount == 0:
+        debug(1, 'ontologysynonymtable list is empty')
+        return
+    
+    res = cur.fetchall()
+    all_synonym = []
+    for cres in res:
+        all_synonym.append(cres[0])
+    return all_synonym	
