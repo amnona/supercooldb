@@ -74,7 +74,7 @@ if __name__ == '__main__':
     count = 1
     tax_log = ""
     rdp_exe_location = "rdp_classifier_2.12/"
-    sleep_time = 10
+    sleep_time = 86400
         
     while isFileExist("stop") == False:
         removeFile("%sinput" %  rdp_exe_location)
@@ -112,23 +112,44 @@ if __name__ == '__main__':
         prev = ""
         has_failure = False
         
-        for x in data:
-            has_failure = False
-            for y in rank_list:
-                if x == y:
-                    # Add to DB
-                    tax_log += x + " = " +  prev 
-                    if dbsequences.AddSequenceTax(con, cur, seq_id, "tax" + x, prev) == True:
-                        tax_log += " SUCCESS" + "\n"
-                        count_seq_success = count_seq_success + 1
-                    else:
-                        tax_log += " FAILED" + "\n"
-                        count_seq_failure = count_seq_failure + 1
-                        has_failure = True
-            # keep the previous value    
-            prev = x
-            prev = prev.replace("\"", "")
+        size_of_list = len(data)
         
+        list_index = 0
+        while list_index < size_of_list:
+            has_failure = False
+            curr_val = data[list_index]
+            curr_val = curr_val.replace("\"", "")
+            curr_val = curr_val.replace("\n", "")
+            
+            for y in rank_list:
+                if curr_val == y:
+                    tax_log += curr_val + " = " +  prev 
+                    if list_index > 0 & list_index < (size_of_list - 1):
+                        # keep the next and previous value    
+                        prev_val = data[list_index - 1]
+                        next_val = data[list_index + 1]
+                        #remove unnecesary characters
+                        prev_val = prev_val.replace("\"", "")
+                        prev_val = prev_val.replace("\n", "")
+                        next_val = next_val.replace("\"", "")
+                        next_val = next_val.replace("\n", "")
+                        
+                        if( float(next_val) >= 0.9 ):
+                            # Add to DB
+                            if dbsequences.AddSequenceTax(con, cur, seq_id, "tax" + curr_val, prev_val) == True:
+                                tax_log += " SUCCESS" + "\n"
+                                count_seq_success = count_seq_success + 1
+                            else:
+                                tax_log += " FAILED" + "\n"
+                                count_seq_failure = count_seq_failure + 1
+                                has_failure = True
+                        else:
+                            tax_log += " FAILED (low probablility)" + "\n"
+                    else:
+                        tax_log += " FAILED (bad index)" + "\n"
+                        
+            list_index = list_index + 1
+            
         if has_failure == True:
             count_failure = count_failure + 1
         else:
