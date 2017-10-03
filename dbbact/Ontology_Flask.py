@@ -331,7 +331,6 @@ def get_ontology_term_stats():
     alldat = request.get_json()
     ontology_terms = alldat.get('terms')
     if ontology_terms is None:
-        print(request.args)
         return(getdoc(cfunc))
     term_info = dbontology.GetTermCounts(g.con, g.cur, ontology_terms)
     # if err:
