@@ -370,13 +370,14 @@ def GetListOfOntologies(con,cur):
     if cur.rowcount == 0:
         debug(1, 'Ontologies list is empty')
         return
-    
+
     res = cur.fetchall()
     all_ontologies = []
     for cres in res:
         all_ontologies.append(cres[0])
-    return all_ontologies	
-    
+    return all_ontologies
+
+
 def GetListOfSynonym(con,cur):
     '''
     Get list of synonym
@@ -384,7 +385,7 @@ def GetListOfSynonym(con,cur):
     Parameters
     ----------
     con, cur
-    
+
     Returns
     -------
     terms : list of str
@@ -397,9 +398,9 @@ def GetListOfSynonym(con,cur):
     if cur.rowcount == 0:
         debug(1, 'ontologysynonymtable list is empty')
         return
-    
+
     res = cur.fetchall()
     all_synonym = []
     for cres in res:
         all_synonym.append(cres[0])
-    return all_synonym	
+    return all_synonym
