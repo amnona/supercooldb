@@ -298,3 +298,78 @@ def GetTaxonomyAnnotations(con, cur, taxonomy, userid=None):
         annotations.append((cdetails, ccount))
     debug(1, 'got %d details' % len(annotations))
     return '', annotations
+
+def GetSequenceWithNoTaxonomyID(con, cur):
+    '''
+    Get sequence with no taxonomy (if any)
+
+    Parameters
+    ----------
+    con,cur
+
+    Returns
+    -------
+    sequence id : return the sequence id
+    '''
+    debug(1, 'GetSequenceWithNoTaxonomy')
+    
+    cur.execute("select id from annotationschematest.sequencestable where (COALESCE(taxrootrank,'')='' AND COALESCE(taxdomain,'')='' AND COALESCE(taxphylum,'')='' AND COALESCE(taxclass,'')='' AND COALESCE(taxfamily,'')='' AND COALESCE(taxgenus,'')='' AND COALESCE(taxorder,'')='') limit 1")
+    if cur.rowcount == 0:
+        errmsg = 'no missing taxonomy'
+        debug(1, errmsg)
+        return errmsg, -1
+    res = cur.fetchone()
+    return_id = res[0]
+    
+    return '', return_id
+
+
+def GetSequenceStrByID(con, cur, seq_id):
+    '''
+    Get sequence with no taxonomy (if any)
+
+    Parameters
+    ----------
+    con,cur
+    seq_id
+    
+    Returns
+    -------
+    sequence str : return the sequence str
+    '''
+    debug(1, 'GetSequenceStrByID')
+    
+    cur.execute("select sequence from annotationschematest.sequencestable where id=%s" % seq_id)
+    if cur.rowcount == 0:
+        errmsg = 'no missing taxonomy'
+        debug(1, errmsg)
+        return errmsg, seq_id
+    res = cur.fetchone()
+    return_id = res[0]
+    
+    return '', return_id
+
+def AddSequenceTax(con, cur, seq_id, col, value):
+    '''
+    update taxonomy record value
+
+    Parameters
+    ----------
+    con,cur
+    seq_id
+    col - taxonomyrank coloumn name
+    value - taxonomyrank value
+    
+    Returns
+    -------
+    true or false
+    '''
+    debug(1, 'GetSequenceStrByID')
+    
+    try:
+        cur.execute("update annotationschematest.sequencestable set %s='%s' where id=%s" % (col,value,seq_id))
+        con.commit()
+        return True
+    except:
+        return False
+    

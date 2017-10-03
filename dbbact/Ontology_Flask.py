@@ -255,6 +255,49 @@ def get_ontology_annotations():
     return json.dumps({'annotations': annotations})
 
 
+@Ontology_Flask_Obj.route('/ontology/get_all_descriptions', methods=['GET'])
+@auto.doc()
+def get_all_descriptions():
+    """
+    Title: Query Ontology
+    Description : Get all ontology descriptions
+    Method: GET
+    Success Response:
+        Code : 200
+        Content :
+        {
+            "ontology" : list of
+            {
+                "description" : str
+                    the ontology terms
+            }
+        }
+    """
+    jsonRetData = dbontology.GetListOfOntologies(g.con, g.cur)
+    return json.dumps(jsonRetData, ensure_ascii=False)
+
+
+@Ontology_Flask_Obj.route('/ontology/get_all_synonyms', methods=['GET'])
+@auto.doc()
+def get_all_synonyms():
+    """
+    Title: Query synonyms
+    Description : Get all synonym descriptions
+    Method: GET
+    Success Response:
+        Code : 200
+        Content :
+            "synonym" : list of
+            {
+                "description" : str
+                    the synonym terms
+            }
+        }
+    """
+    jsonRetData = dbontology.GetListOfSynonym(g.con, g.cur)
+    return json.dumps(jsonRetData, ensure_ascii=False)
+
+
 @login_required
 @Ontology_Flask_Obj.route('/ontology/get_term_stats', methods=['GET'])
 @auto.doc()
