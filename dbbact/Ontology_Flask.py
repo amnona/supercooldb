@@ -330,6 +330,7 @@ def get_ontology_term_stats():
     cfunc = get_ontology_term_stats
     ontology_terms = request.args.get('terms')
     if ontology_terms is None:
+        print(request.args)
         return(getdoc(cfunc))
     term_info = dbontology.GetTermCounts(g.con, g.cur, ontology_terms)
     # if err:
