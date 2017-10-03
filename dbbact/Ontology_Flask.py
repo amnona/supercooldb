@@ -331,8 +331,8 @@ def get_ontology_term_stats():
     ontology_terms = request.args.get('terms')
     if ontology_terms is None:
         return(getdoc(cfunc))
-    err, term_info = dbontology.GetTermCounts(g.con, g.cur, ontology_terms)
-    if err:
-        debug(6, err)
-        return ('Problem geting term stats. error=%s' % err, 400)
+    term_info = dbontology.GetTermCounts(g.con, g.cur, ontology_terms)
+    # if err:
+    #     debug(6, err)
+    #     return ('Problem geting term stats. error=%s' % err, 400)
     return json.dumps({'term_info': term_info})

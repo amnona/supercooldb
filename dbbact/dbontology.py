@@ -346,6 +346,7 @@ def get_annotations_term_counts(con, cur, annotations):
     for cannotation in annotations:
         for cdetail in cannotation['details']:
             terms.append(cdetail[1])
+    terms = list(set(terms))
     return GetTermCounts(con, cur, terms)
 
 
@@ -357,7 +358,7 @@ def GetListOfOntologies(con,cur):
     Parameters
     ----------
     con, cur
-    
+
     Returns
     -------
     terms : list of str
