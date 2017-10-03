@@ -328,7 +328,8 @@ def get_ontology_term_stats():
         Validation:
     """
     cfunc = get_ontology_term_stats
-    ontology_terms = request.args.get('terms')
+    alldat = request.get_json()
+    ontology_terms = alldat.get('terms')
     if ontology_terms is None:
         print(request.args)
         return(getdoc(cfunc))
