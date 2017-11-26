@@ -403,7 +403,6 @@ def GetListOfSynonym(con,cur):
     all_synonym = []
     for cres in res:
         all_synonym.append(cres[0])
-<<<<<<< HEAD
     return all_synonym	
 
 
@@ -444,7 +443,3 @@ def GetIDs(con, cur, ontList):
     except psycopg2.DatabaseError as e:
         debug(7, 'database error %s' % e)
         return "database error %s" % e, None
-
-=======
-    return all_synonym
->>>>>>> origin/master

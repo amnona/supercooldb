@@ -298,7 +298,6 @@ def get_all_synonyms():
     return json.dumps(jsonRetData, ensure_ascii=False)
 
 
-<<<<<<< HEAD
 @Ontology_Flask_Obj.route('/ontology/get', methods=['POST'])
 @auto.doc()
 def get_ontology():
@@ -342,7 +341,7 @@ def get_ontology():
     debug(2, 'added/found %d sequences' % len(ontids))
     return json.dumps({"ontIds": ontids})
 
-=======
+
 @login_required
 @Ontology_Flask_Obj.route('/ontology/get_term_stats', methods=['GET'])
 @auto.doc()
@@ -382,4 +381,4 @@ def get_ontology_term_stats():
     #     debug(6, err)
     #     return ('Problem geting term stats. error=%s' % err, 400)
     return json.dumps({'term_info': term_info})
->>>>>>> origin/master
+
