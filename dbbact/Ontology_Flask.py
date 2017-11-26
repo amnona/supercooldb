@@ -254,6 +254,7 @@ def get_ontology_annotations():
         return ('Problem geting details. error=%s' % err, 400)
     return json.dumps({'annotations': annotations})
 
+
 @Ontology_Flask_Obj.route('/ontology/get_all_descriptions', methods=['GET'])
 @auto.doc()
 def get_all_descriptions():
@@ -275,6 +276,7 @@ def get_all_descriptions():
     jsonRetData = dbontology.GetListOfOntologies(g.con, g.cur)
     return json.dumps(jsonRetData, ensure_ascii=False)
 
+
 @Ontology_Flask_Obj.route('/ontology/get_all_synonyms', methods=['GET'])
 @auto.doc()
 def get_all_synonyms():
@@ -285,7 +287,6 @@ def get_all_synonyms():
     Success Response:
         Code : 200
         Content :
-        {
             "synonym" : list of
             {
                 "description" : str
@@ -297,6 +298,7 @@ def get_all_synonyms():
     return json.dumps(jsonRetData, ensure_ascii=False)
 
 
+<<<<<<< HEAD
 @Ontology_Flask_Obj.route('/ontology/get', methods=['POST'])
 @auto.doc()
 def get_ontology():
@@ -340,3 +342,44 @@ def get_ontology():
     debug(2, 'added/found %d sequences' % len(ontids))
     return json.dumps({"ontIds": ontids})
 
+=======
+@login_required
+@Ontology_Flask_Obj.route('/ontology/get_term_stats', methods=['GET'])
+@auto.doc()
+def get_ontology_term_stats():
+    """
+    Title: get_tern_stats
+    Description : Get statistics about ontology terms (in how many annotations it appears)
+    URL: ontology/get_term_stats
+    Method: GET
+    URL Params:
+    Data Params: JSON
+        {
+            terms : list of str
+                list of ontology terms to get the statistics for
+        }
+    Success Response:
+        Code : 200
+        Content :
+        {
+            term_info : dict of {term, dict}
+            Information about each term which appears in the annotation parents. Key is the ontolgy term. the value dict is:
+            'total_annotations' : int
+                total number of annotations where this term appears (as a parent)
+            'total_sequences' : int
+                total number of sequences in annotations where this term appears (as a parent)
+        }
+    Details :
+        Validation:
+    """
+    cfunc = get_ontology_term_stats
+    alldat = request.get_json()
+    ontology_terms = alldat.get('terms')
+    if ontology_terms is None:
+        return(getdoc(cfunc))
+    term_info = dbontology.GetTermCounts(g.con, g.cur, ontology_terms)
+    # if err:
+    #     debug(6, err)
+    #     return ('Problem geting term stats. error=%s' % err, 400)
+    return json.dumps({'term_info': term_info})
+>>>>>>> origin/master

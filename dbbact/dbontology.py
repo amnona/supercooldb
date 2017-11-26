@@ -346,6 +346,7 @@ def get_annotations_term_counts(con, cur, annotations):
     for cannotation in annotations:
         for cdetail in cannotation['details']:
             terms.append(cdetail[1])
+    terms = list(set(terms))
     return GetTermCounts(con, cur, terms)
 
 
@@ -357,7 +358,7 @@ def GetListOfOntologies(con,cur):
     Parameters
     ----------
     con, cur
-    
+
     Returns
     -------
     terms : list of str
@@ -369,13 +370,14 @@ def GetListOfOntologies(con,cur):
     if cur.rowcount == 0:
         debug(1, 'Ontologies list is empty')
         return
-    
+
     res = cur.fetchall()
     all_ontologies = []
     for cres in res:
         all_ontologies.append(cres[0])
-    return all_ontologies	
-    
+    return all_ontologies
+
+
 def GetListOfSynonym(con,cur):
     '''
     Get list of synonym
@@ -383,7 +385,7 @@ def GetListOfSynonym(con,cur):
     Parameters
     ----------
     con, cur
-    
+
     Returns
     -------
     terms : list of str
@@ -396,11 +398,12 @@ def GetListOfSynonym(con,cur):
     if cur.rowcount == 0:
         debug(1, 'ontologysynonymtable list is empty')
         return
-    
+
     res = cur.fetchall()
     all_synonym = []
     for cres in res:
         all_synonym.append(cres[0])
+<<<<<<< HEAD
     return all_synonym	
 
 
@@ -442,3 +445,6 @@ def GetIDs(con, cur, ontList):
         debug(7, 'database error %s' % e)
         return "database error %s" % e, None
 
+=======
+    return all_synonym
+>>>>>>> origin/master
