@@ -295,3 +295,48 @@ def get_all_synonyms():
     """
     jsonRetData = dbontology.GetListOfSynonym(g.con, g.cur)
     return json.dumps(jsonRetData, ensure_ascii=False)
+
+
+@Ontology_Flask_Obj.route('/ontology/get', methods=['POST'])
+@auto.doc()
+def get_ontology():
+    """
+    Title: Return ontology id for ones that exist
+    URL: /ontology/get
+    Method: POST
+    URL Params:
+    Data Params: JSON
+        {
+            "ontology" : list of str
+                the sequences to add (acgt)
+        }
+    Success Response:
+        Code : 201
+        Content :
+        {
+            "ontIds" : list of int
+                id of ontologies
+        }
+    Details:
+        Validation:
+        Action:
+        Get ids for list of ontologies
+    """
+    
+    cfunc = get_ontology
+    if request.method == 'GET':
+        return(getdoc(cfunc))
+    
+    alldat = request.get_json()
+    ontologies = alldat.get('ontologies')
+    if ontologies is None:
+        return(getdoc(cfunc))
+
+    
+    err, ontids = dbontology.GetIDs(g.con, g.cur, ontList=ontologies)
+    
+    if err:
+        return(err, 400)
+    debug(2, 'added/found %d sequences' % len(ontids))
+    return json.dumps({"ontIds": ontids})
+

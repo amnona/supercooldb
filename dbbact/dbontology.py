@@ -402,3 +402,43 @@ def GetListOfSynonym(con,cur):
     for cres in res:
         all_synonym.append(cres[0])
     return all_synonym	
+
+
+def GetIDs(con, cur, ontList):
+    """
+    Get ids of list of ontologies
+    input:
+    con,cur : database connection and cursor
+    ontList: list of str
+        the ontolgies
+        
+    output:
+    errmsg : str
+        "" if ok, error msg if error encountered
+    seqids : list of int or None
+        list of the new ids or None if error enountered
+    """
+    ontids = []
+    try:
+        sqlStr = "SELECT id from ontologyTable WHERE (description='%s')" % ontList[0]
+        idx = 0 
+        while idx < len(ontList):
+            sqlStr += " OR (description='%s')" % ontList[idx]
+            idx = idx + 1
+        
+        print(sqlStr)
+        cur.execute(sqlStr)
+        if cur.rowcount == 0:
+            debug(2, 'Failed to get list of terms')
+        else:    
+            res = cur.fetchall()
+            for cres in res:
+                ontids.append(res[0])
+
+        debug(3, "Number of ontology ids (out of %d)" % (len(ontids)))
+        return "", ontids
+    
+    except psycopg2.DatabaseError as e:
+        debug(7, 'database error %s' % e)
+        return "database error %s" % e, None
+
