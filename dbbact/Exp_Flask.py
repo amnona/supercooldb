@@ -67,7 +67,7 @@ def add_details():
     private = alldat.get('private')
     if private is None:
         private = 'n'
-    if expid == 0:
+    if expid == -1:
         expid = None 
     # TODO: get userid
     userid = 0
