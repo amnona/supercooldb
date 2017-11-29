@@ -234,7 +234,12 @@ def AddAnnotation(con, cur, expid, annotationtype, annotationdetails, method='',
     # get annotationtypeid
     methodid = dbidval.GetIdFromDescription(con, cur, 'MethodTypesTable', method, noneok=True)
     if methodid < 0:
-        return 'method %s unknown' % method, -1
+        err, methodid = dbidval.AddItem(con, cur, 'MethodTypesTable', method)
+        if err:
+            #return 'method %s unknown' % method, -1
+            debug(3, "failed to add method. aborting")
+            return err, -1
+    
     # get annotationtypeid
     agenttypeid = dbidval.GetIdFromDescription(con, cur, 'AgentTypesTable', agenttype, noneok=True, addifnone=True, commit=False)
     if agenttypeid < 0:
