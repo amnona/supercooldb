@@ -625,7 +625,7 @@ def GetSequenceAnnotations(con, cur, sequence, region=None, userid=0):
     return '', details
 
 
-def GetAnnotationsFromExpId(con, cur, expid, userid):
+def GetAnnotationsFromExpId(con, cur, expid, userid=0):
     """
     Get annotations about an experiment
 
@@ -876,7 +876,7 @@ def DeleteSequenceFromAnnotation(con, cur, sequences, annotationid, userid=0, co
     return('')
 
 
-def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info=True):
+def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info=True, get_all_exp_annotations=True):
     """
     Get annotations for a list of sequences in a compact form
 
@@ -890,6 +890,10 @@ def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info
         the id of the user requesting the annotations. Provate annotations with non-matching user will not be returned
     get_term_info : bool (optional)
         True (default) to get the information about each term, False to skip this step
+    get_all_exp_annotations: bool (optional)
+        True (default) to get all annotations for each experiment which the sequence appear in at least one annotation.
+        False to get just the annotations where the sequence appears
+
     output:
     err : str
         The error encountered or '' if ok
@@ -913,31 +917,59 @@ def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info
     seqannotations = []
     all_terms = set()
     term_info = {}
+
+    # set of experients we already processed (so no need to re-look at the annotations from the experiment
+    # in case get_all_exp_annotations=True)
+    experiments_added = set()
+
     for cseqpos, cseq in enumerate(sequences):
         cseqannotationids = []
+        # get the sequenceid
         err, sid = dbsequences.GetSequenceId(con, cur, cseq, region)
+        # if not in database - no annotations
         if len(sid) == 0:
             continue
         # get annotations for the sequence
         cur.execute('SELECT annotationid FROM SequencesAnnotationTable WHERE seqid IN %s', [tuple(sid)])
         res = cur.fetchall()
         for cres in res:
-            cannotationid = cres[0]
-            # if annotation not in annotations list - add it
-            if cannotationid not in annotations:
-                # we don't need the term info since we do it once for all terms
-                err, cdetails = GetAnnotationsFromID(con, cur, cannotationid, userid=userid)
-                # if we didn't get annotation details, probably they are private - just ignore
-                if cdetails is None:
-                    continue
-                err, parents = GetAnnotationParents(con, cur, cannotationid)
-                cdetails['parents'] = parents
-                # add to the set of all terms to get the info for
-                for ctype, cterms in parents.items():
-                    for cterm in cterms:
-                        all_terms.add(cterm)
-                annotations[cannotationid] = cdetails
-            cseqannotationids.append(cannotationid)
+            current_annotation = cres[0]
+            # if annotation is already in list - move to next
+            if current_annotation in annotations:
+                continue
+
+            # we don't need the term info since we do it once for all terms
+            err, cdetails = GetAnnotationsFromID(con, cur, current_annotation, userid=userid)
+            # if we didn't get annotation details, probably they are private - just ignore
+            if cdetails is None:
+                continue
+            annotations_to_process = [cdetails]
+            if get_all_exp_annotations:
+                if 'expid' in cdetails:
+                    expid = cdetails['expid']
+                    # if we already added this experiment - finished
+                    if expid in experiments_added:
+                        continue
+                    err, annotations_to_process = GetAnnotationsFromExpId(con, cur, expid, userid=userid)
+                    experiments_added.add(expid)
+
+            for cdetails in annotations_to_process:
+                cannotationid = cdetails['annotationid']
+                # if annotation not in annotations list - add it
+                if cannotationid not in annotations:
+                    # if we didn't get annotation details, probably they are private - just ignore
+                    if cdetails is None:
+                        continue
+                    err, parents = GetAnnotationParents(con, cur, cannotationid)
+                    cdetails['parents'] = parents
+                    # add to the set of all terms to get the info for
+                    for ctype, cterms in parents.items():
+                        for cterm in cterms:
+                            all_terms.add(cterm)
+                    # and add the annotation
+                    annotations[cannotationid] = cdetails
+            # add the sequence annotation link
+            cseqannotationids.append(current_annotation)
         seqannotations.append((cseqpos, cseqannotationids))
     if get_term_info:
         term_info = dbontology.GetTermCounts(con, cur, all_terms)
