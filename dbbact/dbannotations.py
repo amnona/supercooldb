@@ -943,6 +943,10 @@ def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info
             # if we didn't get annotation details, probably they are private - just ignore
             if cdetails is None:
                 continue
+
+            # add the sequence annotation link
+            cseqannotationids.append(current_annotation)
+
             annotations_to_process = [cdetails]
             if get_all_exp_annotations:
                 if 'expid' in cdetails:
@@ -968,8 +972,7 @@ def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info
                             all_terms.add(cterm)
                     # and add the annotation
                     annotations[cannotationid] = cdetails
-            # add the sequence annotation link
-            cseqannotationids.append(current_annotation)
+
         seqannotations.append((cseqpos, cseqannotationids))
     if get_term_info:
         term_info = dbontology.GetTermCounts(con, cur, all_terms)
