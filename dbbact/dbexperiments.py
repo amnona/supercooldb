@@ -111,7 +111,8 @@ def GetExperimentId(con, cur, details, userid=None, logic='any'):
                     expids = expids.union(cids)
         if len(expids) == 0:
             debug(2, "No experiments found matching all details")
-            return 'No experiment match found for details', []
+            return '', []
+            # return 'No experiment match found for details', []
         if len(expids) > 1:
             debug(2, "Found %d experiments matching details" % len(expids))
         return '', list(expids)
