@@ -114,16 +114,16 @@ def get_id_by_list():
     alldat = request.get_json()
     nameArr = alldat.get('nameStrArr')
     valueArr = alldat.get('valueStrArr')
-                          
+
     if (nameArr is None) or (valueArr is None):
         return('no details')
     # TODO: get userid
     userid = 0
     err, expId = dbexperiments.GetExperimentIdByVals(g.con, g.cur, nameArr, valueArr, userid)
     if not err:
-        return json.dumps({'expId': expId , 'errorCode' : 0 , 'errorText' : ''})
+        return json.dumps({'expId': expId, 'errorCode': 0, 'errorText': ''})
     else:
-        return json.dumps({'expId': expId , 'errorCode' : expId , 'errorText' : err})
+        return json.dumps({'expId': expId, 'errorCode': expId, 'errorText': err})
 
 
 @Exp_Flask_Obj.route('/experiments/get_id', methods=['GET'])
