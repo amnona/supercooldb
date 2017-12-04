@@ -5,6 +5,70 @@ import psycopg2
 from utils import debug
 
 
+def GetExperimentIdByVals(con, cur, arrName, arrValue, userid=None, logic='any'):
+    """
+    Searching for id of an experiment matching the details
+
+    input:
+    details : list of 'Name' and list of 'Value'
+        the details specific to the experiment (i.e. ("MD5Exp","0x445A2"))
+    userid : int (optional)
+        the userid asking the query (for private studies)
+    logic : str (optional)
+        'any' (default) to find matching any of details (union)
+        'all' to find matching all details (intersect)
+    output:
+    errmsg : str
+        "" if ok, error msg if error encountered
+    expid : int
+        experiment id of matching experiments
+        -1 - couldn't find
+        -2 - more than one exp was find
+        None if error encountered
+    """
+    try:
+        expids = None
+        
+        if len(arrName) == 0:
+            debug(7, "GetExperimentID failed 1")
+            return 'Number of search fields can\'t be 0', None
+        
+        if len(arrName) != len(arrValue):
+            debug(7, "GetExperimentID failed")
+            return 'Number of fields in Name and Value arrays can\'t be different', None
+        
+        sqlQuery = "SELECT distinct expId from ExperimentsTable where "
+        for index in range(len(arrName)):
+            dtype = arrName[index].lower()
+            value = arrValue[index].lower()
+            if index > 0 :
+                if logic=='all':
+                    sqlQuery = sqlQuery + " AND "
+                else:
+                    sqlQuery = sqlQuery + " OR "
+            sqlQuery = sqlQuery + ('(type = \'%s\' AND value = \'%s\')' % (dtype, value))
+        print(sqlQuery)
+        
+        #Run the query
+        cur.execute(sqlQuery)
+        
+        #If number of rows is bigger than 1, return 0
+        data = cur.fetchall()
+        if len(data) == 0:
+            debug(7, "Can't find experiment")
+            return 'Can\'t find experiment', -1
+        elif len(data) > 1:
+            debug(7, "more than one experiment was found")
+            return 'More than one experiment was found', -2
+        
+        #Only one was found
+        return '', data[0][0]
+    
+    except psycopg2.DatabaseError as e:
+        debug(7, "GetExperimentID failed 2")
+        return '%s' % e, None
+
+
 def GetExperimentId(con, cur, details, userid=None, logic='any'):
     """
     Get the id of an experiment matching the details

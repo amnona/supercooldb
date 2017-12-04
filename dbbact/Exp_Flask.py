@@ -67,6 +67,8 @@ def add_details():
     private = alldat.get('private')
     if private is None:
         private = 'n'
+    if expid == -1:
+        expid = None 
     # TODO: get userid
     userid = 0
     res = dbexperiments.AddExperimentDetails(g.con, g.cur, expid=expid, details=details, userid=userid, private=private, commit=True)
@@ -75,6 +77,53 @@ def add_details():
     if res == -1:
         return('expId %d does not exist' % expid, 400)
     return("AddExperimentDetails failed", 400)
+
+
+@Exp_Flask_Obj.route('/experiments/get_id_by_list', methods=['GET'])
+@auto.doc()
+def get_id_by_list():
+    """
+    Title: Query experiment based on list of type/value:
+    Description: Get IDs of all experiments matching one of the fields in field/value pairs (i.e. "Pubmedid","111222")
+    URL: /experimets/get_id_by_list
+    Method: GET
+    URL Params: JSON
+        {
+            details : list of tuples [type,value] of str where:
+                type : str
+                    the detail type (i.e. "pubmedid"/"author"/etc.)
+                    (type from ExperimentsTable)
+                value : str
+                    the detail value (i.e. "john smith"/"pmid003344"/etc.)
+        }
+    Success Response:
+        Code : 200
+        Content :
+        {
+            "experiment" : id
+            {
+                expId : int
+                    the expId for an experiment matching the query
+            }
+        }
+    Details :
+        Validation:
+            If study is private, return only if user is authenticated and created the study. If user not authenticated, do not return it in the list
+            If study is not private, return it (no need for authentication)
+    """
+    alldat = request.get_json()
+    nameArr = alldat.get('nameStrArr')
+    valueArr = alldat.get('valueStrArr')
+                          
+    if (nameArr is None) or (valueArr is None):
+        return('no details')
+    # TODO: get userid
+    userid = 0
+    err, expId = dbexperiments.GetExperimentIdByVals(g.con, g.cur, nameArr, valueArr, userid)
+    if not err:
+        return json.dumps({'expId': expId , 'errorCode' : 0 , 'errorText' : ''})
+    else:
+        return json.dumps({'expId': expId , 'errorCode' : expId , 'errorText' : err})
 
 
 @Exp_Flask_Obj.route('/experiments/get_id', methods=['GET'])

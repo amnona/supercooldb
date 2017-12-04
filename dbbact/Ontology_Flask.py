@@ -298,6 +298,50 @@ def get_all_synonyms():
     return json.dumps(jsonRetData, ensure_ascii=False)
 
 
+@Ontology_Flask_Obj.route('/ontology/get', methods=['POST'])
+@auto.doc()
+def get_ontology():
+    """
+    Title: Return ontology id for ones that exist
+    URL: /ontology/get
+    Method: POST
+    URL Params:
+    Data Params: JSON
+        {
+            "ontology" : list of str
+                the sequences to add (acgt)
+        }
+    Success Response:
+        Code : 201
+        Content :
+        {
+            "ontIds" : list of int
+                id of ontologies
+        }
+    Details:
+        Validation:
+        Action:
+        Get ids for list of ontologies
+    """
+    
+    cfunc = get_ontology
+    if request.method == 'GET':
+        return(getdoc(cfunc))
+    
+    alldat = request.get_json()
+    ontologies = alldat.get('ontologies')
+    if ontologies is None:
+        return(getdoc(cfunc))
+
+    
+    err, ontids = dbontology.GetIDs(g.con, g.cur, ontList=ontologies)
+    
+    if err:
+        return(err, 400)
+    debug(2, 'added/found %d sequences' % len(ontids))
+    return json.dumps({"ontIds": ontids})
+
+
 @login_required
 @Ontology_Flask_Obj.route('/ontology/get_term_stats', methods=['GET'])
 @auto.doc()
@@ -337,3 +381,4 @@ def get_ontology_term_stats():
     #     debug(6, err)
     #     return ('Problem geting term stats. error=%s' % err, 400)
     return json.dumps({'term_info': term_info})
+
