@@ -157,6 +157,7 @@ def GetSequenceIdFromGG(con, cur, ggid):
     '''
     sid = []
 
+    debug(1,'get id for ggid %d' % ggid)
     cur.execute('SELECT id FROM SequencesTable WHERE ggid=%d', [ggid])
     if cur.rowcount == 0:
         errmsg = 'ggid %s not found in database' % ggid
@@ -168,6 +169,7 @@ def GetSequenceIdFromGG(con, cur, ggid):
         resid = cres[0]
         sid.append(resid)
 
+    debug(1,'found %d sequences for ggid %d' % (len(sid),ggid))
     return '', sid
 
 
@@ -194,6 +196,7 @@ def GetSequenceId(con, cur, sequence, idprimer=None, no_shorter=False, no_longer
     """
     # check if the sequence is made only of digits assume it is a greengenes id
     if sequence.isdigit():
+        debug('getting id for ggid %s' % sequence)
         return GetSequenceIdFromGG(con, cur, int(sequence))
 
     sid = []
