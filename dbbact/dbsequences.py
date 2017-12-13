@@ -158,7 +158,7 @@ def GetSequenceIdFromGG(con, cur, ggid):
     sid = []
 
     debug(1, 'get id for ggid %d' % ggid)
-    cur.execute('SELECT id FROM SequencesTable WHERE ggid=%d', [ggid])
+    cur.execute('SELECT id FROM SequencesTable WHERE ggid=%s', [ggid])
     if cur.rowcount == 0:
         errmsg = 'ggid %s not found in database' % ggid
         debug(1, errmsg)
