@@ -6,7 +6,8 @@ import dbannotations
 import dbontology
 from utils import debug, getdoc
 from autodoc import auto
-from flask_cors import crossdomain, cross_origin
+# from flask_cors import crossdomain, cross_origin
+from flask_cors import cross_origin
 # from flask_cors import CORS
 
 Seq_Flask_Obj = Blueprint('Seq_Flask_Obj', __name__, template_folder='templates')
