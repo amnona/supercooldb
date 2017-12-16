@@ -1,5 +1,5 @@
 import json
-from flask import Blueprint, request, g
+from flask import Blueprint, request, g, make_response
 from flask.ext.login import login_required, current_user
 import dbsequences
 import dbannotations
@@ -592,4 +592,8 @@ def get_sequence_string_annotations():
     if err:
         debug(6, err)
         return ('Problem geting details. error=%s' % err, 400)
-    return json.dumps({'annotations': details})
+    res = json.dumps({'annotations': details})
+    response = make_response(res)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response
+    # return res
