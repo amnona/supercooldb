@@ -593,5 +593,4 @@ def get_sequence_string_annotations():
         debug(6, err)
         return ('Problem geting details. error=%s' % err, 400)
     res = json.dumps({'annotations': details})
-    # return Response(res, content_type='text/xml; charset=utf-8')
     return res
