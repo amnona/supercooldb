@@ -6,8 +6,8 @@ import dbannotations
 import dbontology
 from utils import debug, getdoc
 from autodoc import auto
-# from .flask_cors import crossdomain
-# from flask_cors import CORS
+# NOTE: local flask_cors module, not pip installed!
+from flask_cors import crossdomain
 
 Seq_Flask_Obj = Blueprint('Seq_Flask_Obj', __name__, template_folder='templates')
 # CORS(Seq_Flask_Obj)
@@ -548,7 +548,7 @@ def get_sequence_info():
 
 @login_required
 @Seq_Flask_Obj.route('/sequences/get_string_annotations', methods=['GET', 'POST', 'OPTIONS'])
-# @crossdomain(origin='*')
+@crossdomain(origin='*', headers=['Content-Type'])
 @auto.doc()
 def get_sequence_string_annotations():
     """
@@ -592,4 +592,5 @@ def get_sequence_string_annotations():
     if err:
         debug(6, err)
         return ('Problem geting details. error=%s' % err, 400)
-    return json.dumps({'annotations': details})
+    res = json.dumps({'annotations': details})
+    return res

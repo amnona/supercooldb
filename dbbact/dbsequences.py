@@ -137,6 +137,42 @@ def GetSequencesId(con, cur, sequences, no_shorter=False, no_longer=False):
     return "", ids
 
 
+def GetSequenceIdFromGG(con, cur, ggid):
+    '''
+    Get the sequence id for a given greengenes id (from rep. set 97%)
+
+    Parameters
+    ----------
+    con,cur : database connection and cursor
+    ggid : int
+        The greengenes (rep_set 97%) identifier of the sequence
+
+    Returns
+    -------
+    errmsg : str
+        "" if ok, error msg if error encountered
+    sid : list of int
+        the ids of the matching sequences (empty tuple if not found)
+        Note: can be more than one as several dbbact sequences can map to same ggid
+    '''
+    sid = []
+
+    debug(1, 'get id for ggid %d' % ggid)
+    cur.execute('SELECT id FROM SequencesTable WHERE ggid=%s', [ggid])
+    if cur.rowcount == 0:
+        errmsg = 'ggid %s not found in database' % ggid
+        debug(1, errmsg)
+        return errmsg, sid
+
+    res = cur.fetchall()
+    for cres in res:
+        resid = cres[0]
+        sid.append(resid)
+
+    debug(1, 'found %d sequences for ggid %d' % (len(sid),ggid))
+    return '', sid
+
+
 def GetSequenceId(con, cur, sequence, idprimer=None, no_shorter=False, no_longer=False):
     """
     Get sequence ids for a sequence
@@ -158,6 +194,11 @@ def GetSequenceId(con, cur, sequence, idprimer=None, no_shorter=False, no_longer
         the ids of the matching sequences (empty tuple if not found)
         Note: can be more than one as we also look for short subsequences / long supersequences
     """
+    # check if the sequence is made only of digits assume it is a greengenes id
+    if sequence.isdigit():
+        debug(1, 'getting id for ggid %s' % sequence)
+        return GetSequenceIdFromGG(con, cur, int(sequence))
+
     sid = []
     cseq = sequence.lower()
     if len(cseq) < SEED_SEQ_LEN:
@@ -299,6 +340,7 @@ def GetTaxonomyAnnotations(con, cur, taxonomy, userid=None):
     debug(1, 'got %d details' % len(annotations))
     return '', annotations
 
+
 def GetSequenceWithNoTaxonomyID(con, cur):
     '''
     Get sequence with no taxonomy (if any)
@@ -348,6 +390,7 @@ def GetSequenceStrByID(con, cur, seq_id):
     return_id = res[0]
     
     return '', return_id
+
 
 def AddSequenceTax(con, cur, seq_id, col, value):
     '''

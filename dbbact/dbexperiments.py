@@ -60,10 +60,10 @@ def GetExperimentIdByVals(con, cur, arrName, arrValue, userid=None, logic='any')
         elif len(data) > 1:
             debug(7, "more than one experiment was found")
             return 'More than one experiment was found', -2
-        
-        #Only one was found
+
+        # Only one was found
         return '', data[0][0]
-    
+
     except psycopg2.DatabaseError as e:
         debug(7, "GetExperimentID failed 2")
         return '%s' % e, None
@@ -109,9 +109,10 @@ def GetExperimentId(con, cur, details, userid=None, logic='any'):
                     expids = expids.intersection(cids)
                 else:
                     expids = expids.union(cids)
-            if len(expids) == 0:
-                debug(2, "No experiments found matching all details")
-                return 'No experiment match found for details', []
+        if len(expids) == 0:
+            debug(2, "No experiments found matching all details")
+            return '', []
+            # return 'No experiment match found for details', []
         if len(expids) > 1:
             debug(2, "Found %d experiments matching details" % len(expids))
         return '', list(expids)
