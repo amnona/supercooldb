@@ -189,14 +189,14 @@ def get_ontology_annotations():
     URL: ontology/get_annotations
     Method: GET
     URL Params:
-    Data Params: JSON
+    Data Params: Parameters
         {
             term : str
                 the ontology term to get the annotations for
         }
     Success Response:
         Code : 200
-        Content :
+        Content : JSON
         {
             "annotations" : list of
                 {
