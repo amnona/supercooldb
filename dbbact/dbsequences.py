@@ -97,12 +97,24 @@ def SeqFromID(con, cur, seqids):
         seqids = [seqids]
     sequences = []
     for cseqid in seqids:
-        cur.execute('SELECT sequence,taxonomy FROM SequencesTable WHERE id=%s', [cseqid])
+        cur.execute("SELECT sequence,coalesce(taxrootrank,''), coalesce(taxdomain,''),coalesce(taxphylum,''),  coalesce(taxclass,''),coalesce(taxfamily,''), coalesce(taxgenus,''),coalesce(taxorder,'') as taxonomy_str FROM SequencesTable WHERE id=%s", [cseqid])
+        
         if cur.rowcount == 0:
             sequences.append({'seq': ''})
             continue
         res = cur.fetchone()
-        cseqinfo = {'seq': res[0], 'taxonomy': res[1]}
+        
+        firstTax = True
+        taxStr = ''
+        list_of_pre_str = ["r__","d__","p__","c__","f__","g__","o__"]
+        for idx, val in enumerate(list_of_pre_str):
+            if res[idx + 1]:
+                if firstTax == False :
+                    taxStr += ';'
+                taxStr += val + res[idx + 1]            
+                firstTax = False
+        
+        cseqinfo = {'seq': res[0], 'taxonomy': taxStr}
         sequences.append(cseqinfo)
     return '', sequences
 
@@ -416,3 +428,46 @@ def AddSequenceTax(con, cur, seq_id, col, value):
     except:
         return False
     
+def GetSequenceTaxonomy(con, cur, sequence, region=None, userid=0):
+    """
+    Get taxonomy str for specific string
+    
+    Parameters
+    ----------
+    con,cur :
+    sequence : str ('ACGT')
+        the sequence to search for in the database
+    region : int (optional)
+        None to not compare region, or the regionid the sequence is from
+    userid : int (optional)
+        the id of the user requesting the annotations. Private annotations with non-matching user will not be returned
+
+    Returns
+    -------
+    err : str
+        The error encountered or '' if ok
+    taxonomy: Taxonomy string
+    """
+    
+    debug(1, 'GetSequenceTaxonomy sequence %s' % sequence)
+    
+    cseq = sequence.lower()
+    cur.execute("SELECT coalesce(taxrootrank,''), coalesce(taxdomain,''),coalesce(taxphylum,''),  coalesce(taxclass,''),coalesce(taxfamily,''), coalesce(taxgenus,''),coalesce(taxorder,'') as taxonomy_str FROM SequencesTable WHERE sequence=%s", [cseq])
+        
+    if cur.rowcount == 0:
+        ctaxinfo = {'taxonomy': taxStr}
+        return '', ctaxinfo
+    res = cur.fetchone()
+    
+    firstTax = True
+    taxStr = ''
+    list_of_pre_str = ["r__","d__","p__","c__","f__","g__","o__"]
+    for idx, val in enumerate(list_of_pre_str):
+        if res[idx]:
+            if firstTax == False :
+                taxStr += ';'
+            taxStr += val + res[idx]            
+            firstTax = False
+        
+    ctaxinfo = {'taxonomy': taxStr}
+    return '', ctaxinfo

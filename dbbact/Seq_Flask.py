@@ -111,6 +111,45 @@ def get_sequenceid():
 
 
 @login_required
+@Seq_Flask_Obj.route('/sequences/get_taxonomy_str', methods=['GET'])
+@auto.doc()
+def get_taxonomy_str():
+    """
+    Title: Query sequence:
+    Description : Get all the annotations about a given sequence
+    URL: /sequences/get_taxonomy_str
+    Method: GET
+    URL Params:
+    Data Params: JSON
+        {
+            sequence : str
+                the DNA sequence string to query the database (can be any length)
+            region : int (optional)
+                the region id (default=1 which is V4 515F 806R)
+    Success Response:
+        Code : 200
+        Content :
+        {
+            "taxonomy" : str
+        }
+    """
+    cfunc = get_sequence_annotations
+    alldat = request.get_json()
+    if alldat is None:
+        return(getdoc(cfunc))
+    sequence = alldat.get('sequence')
+    if sequence is None:
+        return('sequence parameter missing', 400)
+
+    err, taxonomyStr = dbsequences.GetSequenceTaxonomy(g.con, g.cur, sequence, userid=current_user.user_id)
+    if err:
+        debug(6, err)
+        return ('Problem geting details. error=%s' % err, 400)
+    return json.dumps({'taxonomy': taxonomyStr})
+
+
+
+@login_required
 @Seq_Flask_Obj.route('/sequences/get_annotations', methods=['GET'])
 @auto.doc()
 def get_sequence_annotations():
