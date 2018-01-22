@@ -292,8 +292,9 @@ def GetTaxonomyAnnotationIDs(con, cur, taxonomy, userid=None):
         list containing the ids of all annotations that contain a sequence with the taxonomy and the count of number of sequences from the taxonomy in that annotation
     '''
     taxonomy = taxonomy.lower()
+    taxStr = '%' + taxonomy + '%'
     debug(1, 'GetTaxonomyAnnotationIDS for taxonomy %s' % taxonomy)
-    cur.execute('SELECT id from SequencesTable where taxonomy LIKE %s', ['%' + taxonomy + '%'])
+    cur.execute('SELECT id from SequencesTable where (taxrootrank ILIKE %s OR taxdomain ILIKE %s OR taxphylum ILIKE %s OR taxclass ILIKE %s OR taxfamily ILIKE %s OR taxgenus ILIKE %s OR taxorder ILIKE %s)', [taxStr,taxStr,taxStr,taxStr,taxStr,taxStr,taxStr])
     res = cur.fetchall()
     seqids = []
     for cres in res:
