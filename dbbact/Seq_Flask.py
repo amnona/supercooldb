@@ -478,6 +478,8 @@ def get_taxonomy_annotation_ids():
         {
             annotationids : list of (int, int) (annotationid, count)
                 the annotation ids and number of sequences from the taxonomy appearing in that annotation *for all annotations that contain at least 1 sequence from the requested taxonomy)
+            seqids : list on int
+                list of the sequenceids that have this taxonomy in the database
         }
     Details :
         Returns a list of annotationids. can get the annotation details for them via another api call to sequences/get_fast_annotations or sequences/
@@ -492,12 +494,12 @@ def get_taxonomy_annotation_ids():
     taxonomy = alldat.get('taxonomy')
     if taxonomy is None:
         return('taxonomy parameter missing', 400)
-    err, annotationids = dbsequences.GetTaxonomyAnnotationIDs(g.con, g.cur, taxonomy, userid=current_user.user_id)
+    err, annotationids, seqids = dbsequences.GetTaxonomyAnnotationIDs(g.con, g.cur, taxonomy, userid=current_user.user_id)
     if err:
         errmsg = 'error encountered searching for taxonomy annotations for taxonomy %s: %s' % (taxonomy, err)
         debug(6, errmsg)
         return(errmsg, 400)
-    return json.dumps({'annotationids': annotationids})
+    return json.dumps({'annotationids': annotationids, 'seqids': seqids})
 
 
 @login_required
@@ -519,8 +521,10 @@ def get_taxonomy_annotations():
         Code : 200
         Content :
         {
-            list of (annotation, counts)
+            'annotations' : list of (annotation, counts)
                 the annotation details for all annotations that contain a sequence with the requested taxonomy (see /sequences/get_annotations) and the count of taxonomy sequences with the annotation
+            seqids : list on int
+                list of the sequenceids that have this taxonomy in the database
         }
     Validation:
         If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
@@ -533,12 +537,12 @@ def get_taxonomy_annotations():
     taxonomy = alldat.get('taxonomy')
     if taxonomy is None:
         return('taxonomy parameter missing', 400)
-    err, annotations = dbsequences.GetTaxonomyAnnotations(g.con, g.cur, taxonomy, userid=current_user.user_id)
+    err, annotations, seqids = dbsequences.GetTaxonomyAnnotations(g.con, g.cur, taxonomy, userid=current_user.user_id)
     if err:
         errmsg = 'error encountered searching for taxonomy annotations for taxonomy %s: %s' % (taxonomy, err)
         debug(6, errmsg)
         return(errmsg, 400)
-    return json.dumps({'annotations': annotations})
+    return json.dumps({'annotations': annotations, 'seqids': seqids})
 
 
 @Seq_Flask_Obj.route('/sequences/get_info', methods=['GET'])

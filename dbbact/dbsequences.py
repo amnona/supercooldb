@@ -290,6 +290,8 @@ def GetTaxonomyAnnotationIDs(con, cur, taxonomy, userid=None):
     -------
     annotationids : list of (int, int) (annotationid, count)
         list containing the ids of all annotations that contain a sequence with the taxonomy and the count of number of sequences from the taxonomy in that annotation
+    seqids : list of int
+        list of the sequenceids that have this annotation
     '''
     taxonomy = taxonomy.lower()
     taxStr = '%' + taxonomy + '%'
@@ -311,7 +313,7 @@ def GetTaxonomyAnnotationIDs(con, cur, taxonomy, userid=None):
     annotationids = []
     for k, v in annotationids_dict.items():
         annotationids.append((k, v))
-    return '', annotationids
+    return '', annotationids, seqids
 
 
 def GetTaxonomyAnnotations(con, cur, taxonomy, userid=None):
@@ -332,10 +334,12 @@ def GetTaxonomyAnnotations(con, cur, taxonomy, userid=None):
         list containing the details for all annotations that contain a sequence with the taxonomy
         annotation - (see dbannotations.GetAnnotationsFromID() )
         counts - the number of sequences from taxonomy appearing in this annotations
+    seqids : list of int
+        list of the sequenceids which have this taxonomy
     '''
     debug(1, 'GetTaxonomyAnnotations for taxonomy %s' % taxonomy)
     # get the annotation ids
-    err, annotationids = GetTaxonomyAnnotationIDs(con, cur, taxonomy, userid)
+    err, annotationids, seqids = GetTaxonomyAnnotationIDs(con, cur, taxonomy, userid)
     if err:
         errmsg = 'Failed to get annotationIDs for taxonomy %s: %s' % (taxonomy, err)
         debug(6, errmsg)
@@ -351,7 +355,7 @@ def GetTaxonomyAnnotations(con, cur, taxonomy, userid=None):
             continue
         annotations.append((cdetails, ccount))
     debug(1, 'got %d details' % len(annotations))
-    return '', annotations
+    return '', annotations, seqids
 
 
 def GetSequenceWithNoTaxonomyID(con, cur):
