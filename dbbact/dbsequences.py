@@ -294,7 +294,7 @@ def GetTaxonomyAnnotationIDs(con, cur, taxonomy, userid=None):
         list of the sequenceids that have this annotation
     '''
     taxonomy = taxonomy.lower()
-    taxStr = '%' + taxonomy + '%'
+    taxStr = taxonomy 
     debug(1, 'GetTaxonomyAnnotationIDS for taxonomy %s' % taxonomy)
     cur.execute('SELECT id from SequencesTable where (taxrootrank ILIKE %s OR taxdomain ILIKE %s OR taxphylum ILIKE %s OR taxclass ILIKE %s OR taxfamily ILIKE %s OR taxgenus ILIKE %s OR taxorder ILIKE %s)', [taxStr,taxStr,taxStr,taxStr,taxStr,taxStr,taxStr])
     res = cur.fetchall()
