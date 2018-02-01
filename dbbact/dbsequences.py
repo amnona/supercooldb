@@ -97,7 +97,7 @@ def SeqFromID(con, cur, seqids):
         seqids = [seqids]
     sequences = []
     for cseqid in seqids:
-        cur.execute("SELECT sequence,coalesce(taxrootrank,''), coalesce(taxdomain,''),coalesce(taxphylum,''),  coalesce(taxclass,''),coalesce(taxfamily,''), coalesce(taxgenus,''),coalesce(taxorder,'') as taxonomy_str FROM SequencesTable WHERE id=%s", [cseqid])
+        cur.execute("SELECT sequence,coalesce(taxdomain,''),coalesce(taxphylum,''),  coalesce(taxclass,''),coalesce(taxorder,''),coalesce(taxfamily,''), coalesce(taxgenus,'') as taxonomy_str FROM SequencesTable WHERE id=%s", [cseqid])
         
         if cur.rowcount == 0:
             sequences.append({'seq': ''})
@@ -106,7 +106,7 @@ def SeqFromID(con, cur, seqids):
         
         firstTax = True
         taxStr = ''
-        list_of_pre_str = ["r__","d__","p__","c__","f__","g__","o__"]
+        list_of_pre_str = ["d__","p__","c__","o__","f__","g__"]
         for idx, val in enumerate(list_of_pre_str):
             if res[idx + 1]:
                 if firstTax == False :
@@ -457,7 +457,7 @@ def GetSequenceTaxonomy(con, cur, sequence, region=None, userid=0):
     debug(1, 'GetSequenceTaxonomy sequence %s' % sequence)
     
     cseq = sequence.lower()
-    cur.execute("SELECT coalesce(taxrootrank,''), coalesce(taxdomain,''),coalesce(taxphylum,''),  coalesce(taxclass,''),coalesce(taxfamily,''), coalesce(taxgenus,''),coalesce(taxorder,'') as taxonomy_str FROM SequencesTable WHERE sequence=%s", [cseq])
+    cur.execute("SELECT coalesce(taxdomain,''),coalesce(taxphylum,''),  coalesce(taxclass,''),coalesce(taxorder,''),coalesce(taxfamily,''), coalesce(taxgenus,'') as taxonomy_str FROM SequencesTable WHERE sequence=%s", [cseq])
         
     if cur.rowcount == 0:
         ctaxinfo = {'taxonomy': taxStr}
@@ -466,7 +466,7 @@ def GetSequenceTaxonomy(con, cur, sequence, region=None, userid=0):
     
     firstTax = True
     taxStr = ''
-    list_of_pre_str = ["r__","d__","p__","c__","f__","g__","o__"]
+    list_of_pre_str = ["d__","p__","c__","o__","f__","g__"]
     for idx, val in enumerate(list_of_pre_str):
         if res[idx]:
             if firstTax == False :
