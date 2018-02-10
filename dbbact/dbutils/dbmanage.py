@@ -58,6 +58,12 @@ def connect_db(servertype='main', schema='AnnotationSchemaTest'):
 			user='postgres'
 			password='admin123'
 			port=5432
+		elif servertype=='openu':
+			debug(1, 'servertype is openu')
+			database = 'scdb'
+			user = 'postgres'
+			password = 'magNiv'
+			port = 5432
 		else:
 			debug(6,'unknown server type %s' % servertype)
 			print('unknown server type %s' % servertype)
