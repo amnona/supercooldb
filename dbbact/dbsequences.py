@@ -383,6 +383,31 @@ def GetSequenceWithNoTaxonomyID(con, cur):
     return '', return_id
 
 
+def GetSequenceWithNoHashID(con, cur):
+    '''
+    Get sequence with no hash value (if any)
+
+    Parameters
+    ----------
+    con,cur
+
+    Returns
+    -------
+    sequence id : return the sequence id
+    '''
+    debug(1, 'GetSequenceWithNoHashID')
+    
+    cur.execute("select id from annotationschematest.sequencestable where (COALESCE(hashfull,'')='' AND COALESCE(hash150,'')='' AND COALESCE(hash100,'')='') limit 1")
+    if cur.rowcount == 0:
+        errmsg = 'no missing hash'
+        debug(1, errmsg)
+        return errmsg, -1
+    res = cur.fetchone()
+    return_id = res[0]
+    
+    return '', return_id
+
+
 def GetSequenceStrByID(con, cur, seq_id):
     '''
     Get sequence with no taxonomy (if any)
@@ -407,6 +432,32 @@ def GetSequenceStrByID(con, cur, seq_id):
     return_id = res[0]
     
     return '', return_id
+
+
+def UpdateHash(con, cur, seq_id, hash_seq_full,hash_seq_150,hash_seq_100):
+    '''
+    update hash information
+
+    Parameters
+    ----------
+    con,cur
+    seq_id
+    hash_seq_full - hash for full
+    hash_seq_150 - hash for first 150 characters 
+    hash_seq_100 - hash for first 100 characters 
+    
+    Returns
+    -------
+    true or false
+    '''
+    debug(1, 'UpdateHash')
+    
+    try:
+        cur.execute("update annotationschematest.sequencestable set hashfull='%s',hash150='%s',hash100='%s' where id=%s" % (hash_seq_full,hash_seq_150,hash_seq_100,seq_id))
+        con.commit()
+        return True
+    except:
+        return False
 
 
 def AddSequenceTax(con, cur, seq_id, col, value):
