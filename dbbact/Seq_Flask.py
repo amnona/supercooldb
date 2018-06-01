@@ -544,6 +544,48 @@ def get_taxonomy_annotations():
         return(errmsg, 400)
     return json.dumps({'annotations': annotations, 'seqids': seqids})
 
+@login_required
+@Seq_Flask_Obj.route('/sequences/get_hash_annotations', methods=['GET'])
+@auto.doc()
+def get_hash_annotations():
+    """
+    Title: Get hash annotation ids
+    Description : Get annotation ids for hash string
+    URL: /sequences/get_hash_annotations
+    Method: GET
+    URL Params:
+    Data Params: JSON
+        {
+            hash : str
+                the hash substring to look for
+        }
+    Success Response:
+        Code : 200
+        Content :
+        {
+            'annotations' : list of (annotation, counts)
+                the annotation details for all annotations that contain a sequence with the requested taxonomy (see /sequences/get_annotations) and the count of taxonomy sequences with the annotation
+            seqids : list on int
+                list of the sequenceids that have this taxonomy in the database
+        }
+    Validation:
+        If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
+        If annotation is not private, return it (no need for authentication)
+    """
+    cfunc = get_hash_annotations
+    alldat = request.get_json()
+    if alldat is None:
+        return(getdoc(cfunc))
+    hash_str = alldat.get('hash')
+    if hash_str is None:
+        return('hash parameter missing', 400)
+    err, annotations, seqids = dbsequences.GetHashAnnotations(g.con, g.cur, hash_str, userid=current_user.user_id)
+    if err:
+        errmsg = 'error encountered searching for hash annotations for hash %s: %s' % (hash_str, err)
+        debug(6, errmsg)
+        return(errmsg, 400)
+    return json.dumps({'annotations': annotations, 'seqids': seqids})
+
 
 @Seq_Flask_Obj.route('/sequences/get_info', methods=['GET'])
 @auto.doc()
