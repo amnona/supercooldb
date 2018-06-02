@@ -357,6 +357,88 @@ def GetTaxonomyAnnotations(con, cur, taxonomy, userid=None):
     debug(1, 'got %d details' % len(annotations))
     return '', annotations, seqids
 
+def GetHashAnnotationIDs(con, cur, hash_str, userid=None):
+    '''
+    Get annotationids for all annotations containing any sequence matching the Hash (substring)
+
+    Parameters
+    ----------
+    con,cur
+    Hash : str
+        the Hash substring to look for
+    userid : int (optional)
+        the userid of the querying user (to enable searching private annotations)
+
+    Returns
+    -------
+    annotationids : list of (int, int) (annotationid, count)
+        list containing the ids of all annotations that contain a sequence with the Hash and the count of number of sequences from the Hash in that annotation
+    seqids : list of int
+        list of the sequenceids that have this annotation
+    '''
+    hash_str = hash_str.lower()
+    taxStr = hash_str 
+    debug(1, 'GetHashAnnotationIDS for Hash %s' % hash_str)
+    cur.execute('SELECT id from SequencesTable where (hashfull ILIKE %s or hash150 ILIKE %s or hash100 ILIKE %s)', [hash_str,hash_str,hash_str])
+    res = cur.fetchall()
+    seqids = []
+    for cres in res:
+        seqids.append(cres[0])
+    debug(1, 'found %d matching sequences for the Hash' % len(seqids))
+    annotationids_dict = defaultdict(int)
+    for cseq in seqids:
+        cur.execute('SELECT annotationid from sequencesAnnotationTable where seqid=%s', [cseq])
+        res = cur.fetchall()
+        for cres in res:
+            annotationids_dict[cres[0]] += 1
+    # NOTE: need to add user validation for the ids!!!!!!
+    debug(1, 'found %d unique annotations for the Hash' % len(annotationids_dict))
+    annotationids = []
+    for k, v in annotationids_dict.items():
+        annotationids.append((k, v))
+    return '', annotationids, seqids
+
+def GetHashAnnotations(con, cur, hash_str, userid=None):
+    '''
+    Get annotations for all annotations containing any sequence matching the hash (substring)
+
+    Parameters
+    ----------
+    con,cur
+    taxonomy : str
+        the hash substring to look for
+    userid : int (optional)
+        the userid of the querying user (to enable searching private annotations)
+
+    Returns
+    -------
+    annotations : list of tuples (annotation, counts)
+        list containing the details for all annotations that contain a sequence with the taxonomy
+        annotation - (see dbannotations.GetAnnotationsFromID() )
+        counts - the number of sequences from taxonomy appearing in this annotations
+    seqids : list of int
+        list of the sequenceids which have this taxonomy
+    '''
+    debug(1, 'GetHashAnnotations for hash %s' % hash_str)
+    # get the annotation ids
+    err, annotationids, seqids = GetHashAnnotationIDs(con, cur, hash_str, userid)
+    if err:
+        errmsg = 'Failed to get annotationIDs for hash_str %s: %s' % (hash_str, err)
+        debug(6, errmsg)
+        return errmsg, None
+    # and get the annotation details for each
+    annotations = []
+    for cres in annotationids:
+        cid = cres[0]
+        ccount = cres[1]
+        err, cdetails = dbannotations.GetAnnotationsFromID(con, cur, cid)
+        if err:
+            debug(6, err)
+            continue
+        annotations.append((cdetails, ccount))
+    debug(1, 'got %d details' % len(annotations))
+    return '', annotations, seqids
+
 
 def GetSequenceWithNoTaxonomyID(con, cur):
     '''
@@ -375,6 +457,31 @@ def GetSequenceWithNoTaxonomyID(con, cur):
     cur.execute("select id from annotationschematest.sequencestable where (COALESCE(taxrootrank,'')='' AND COALESCE(taxdomain,'')='' AND COALESCE(taxphylum,'')='' AND COALESCE(taxclass,'')='' AND COALESCE(taxfamily,'')='' AND COALESCE(taxgenus,'')='' AND COALESCE(taxorder,'')='') limit 1")
     if cur.rowcount == 0:
         errmsg = 'no missing taxonomy'
+        debug(1, errmsg)
+        return errmsg, -1
+    res = cur.fetchone()
+    return_id = res[0]
+    
+    return '', return_id
+
+
+def GetSequenceWithNoHashID(con, cur):
+    '''
+    Get sequence with no hash value (if any)
+
+    Parameters
+    ----------
+    con,cur
+
+    Returns
+    -------
+    sequence id : return the sequence id
+    '''
+    debug(1, 'GetSequenceWithNoHashID')
+    
+    cur.execute("select id from annotationschematest.sequencestable where (COALESCE(hashfull,'')='' AND COALESCE(hash150,'')='' AND COALESCE(hash100,'')='') limit 1")
+    if cur.rowcount == 0:
+        errmsg = 'no missing hash'
         debug(1, errmsg)
         return errmsg, -1
     res = cur.fetchone()
@@ -407,6 +514,32 @@ def GetSequenceStrByID(con, cur, seq_id):
     return_id = res[0]
     
     return '', return_id
+
+
+def UpdateHash(con, cur, seq_id, hash_seq_full,hash_seq_150,hash_seq_100):
+    '''
+    update hash information
+
+    Parameters
+    ----------
+    con,cur
+    seq_id
+    hash_seq_full - hash for full
+    hash_seq_150 - hash for first 150 characters 
+    hash_seq_100 - hash for first 100 characters 
+    
+    Returns
+    -------
+    true or false
+    '''
+    debug(1, 'UpdateHash')
+    
+    try:
+        cur.execute("update annotationschematest.sequencestable set hashfull='%s',hash150='%s',hash100='%s' where id=%s" % (hash_seq_full,hash_seq_150,hash_seq_100,seq_id))
+        con.commit()
+        return True
+    except:
+        return False
 
 
 def AddSequenceTax(con, cur, seq_id, col, value):
