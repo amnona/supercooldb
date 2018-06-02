@@ -32,7 +32,7 @@ def connect_db(schema='AnnotationSchemaTest'):
             user = 'postgres'
             password = 'magNiv'
             #password = 'admin123'
-            port = 5432            
+            port = 5432
         elif 'SCDB_SERVER_TYPE' in os.environ:
             servertype = os.environ['SCDB_SERVER_TYPE'].lower()
             debug(1, 'SCDB_SERVER_TYPE is %s' % servertype)
