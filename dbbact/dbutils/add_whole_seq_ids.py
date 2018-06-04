@@ -89,7 +89,7 @@ def connect_db(servertype='main', schema='AnnotationSchemaTest'):
 		return None
 
 
-def dbbact_seqs_to_fasta(output_file='dbbact_seqs.fa', servertype='main', overwrite=True):
+def dbbact_seqs_to_fasta(output_file='dbbact_seqs.fa', servertype='main'):
 	con, cur = connect_db(servertype=servertype)
 	print('getting sequences from database')
 	cur.execute('SELECT id,sequence,ggid FROM SequencesTable')
@@ -165,43 +165,8 @@ def iter_fasta_seqs(filename):
 	fl.close()
 
 
-def add_sequence_ggids(rdpfilename, overwrite=False, servertype='main'):
-	'''
-	Add taxonomies from an RDP output file to the database
-
-	Parameters:
-	rdpfilename : str
-		name of the RDP output file (run on fasta from get_sequences_fasta)
-	servertype : str (optional)
-		database to connect to ('main' or 'develop' or 'local')
-	'''
-	con, cur = connect_db(servertype=servertype)
-	fl=open(rdpfilename,'r')
-	for cline in fl:
-		cc=cline.split('\t')
-		cggid = cc[0]
-		csim = cc[1]
-		cid = cc[2]
-
-		cur.execute('SELECT ggid from SequencesTable WHERE id=%s',[cid])
-		if cur.rowcount==0:
-			print('id %s not found in database!' % cid)
-			continue
-		dbggid = cur.fetchone()[0]
-		writeit = True
-		if not overwrite:
-			if int(dbggid)>0:
-				print('skipping %d' % int(dbggid))
-				writeit = False
-		print('cid %s, cggid %s' % (cid, cggid))
-		if writeit:
-			print('write')
-			cur.execute('UPDATE SequencesTable SET ggid=%s WHERE id=%s', [cggid, cid])
-	con.commit()
-
-
-def add_whole_seq_ids(filename, servertype='local', overwrite=True, short_len=150, seqdbid='1'):
-	dbbact_seqs_to_fasta(output_file='dbbact_seqs.fa', servertype=servertype, overwrite=overwrite)
+def add_whole_seq_ids(filename, servertype='local', short_len=150, seqdbid='1'):
+	dbbact_seqs_to_fasta(output_file='dbbact_seqs.fa', servertype=servertype)
 	seq_hash, seq_lens, short_hash = hash_sequences(filename='dbbact_seqs.fa', short_len=short_len)
 	idx = 0
 	num_matches = 0
@@ -209,10 +174,7 @@ def add_whole_seq_ids(filename, servertype='local', overwrite=True, short_len=15
 	for cseq, chead in iter_fasta_seqs(filename):
 		idx += 1
 		if idx % 1000 == 0:
-			print(chead)
 			print(idx)
-		if idx > 1000:
-			break
 		for cpos in range(len(cseq) - short_len):
 				ccseq = cseq[cpos:cpos + short_len]
 				if ccseq in short_hash:
@@ -232,10 +194,9 @@ def main(argv):
 	parser = argparse.ArgumentParser(description='Add whole genome database ids to dbbact sequences. version ' + __version__)
 	parser.add_argument('-f', '--filename', help='name of whole sequence database fasta file (i.e. greenegenes or silva)')
 	parser.add_argument('--db', help='name of database to connect to (main/develop/local)', default='main')
-	parser.add_argument('--overwrite', help='overwrite sequences with taxonomy present', action='store_true')
 	parser.add_argument('--seqdbid', help='the whole genome db id (1=silva 13.2, 2=greengenes 13.8', default='1')
 	args = parser.parse_args(argv)
-	add_whole_seq_ids(filename=args.filename, servertype=args.db, overwrite=args.overwrite, seqdbid=args.seqdbid)
+	add_whole_seq_ids(filename=args.filename, servertype=args.db, seqdbid=args.seqdbid)
 
 
 if __name__ == "__main__":
