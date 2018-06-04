@@ -1,6 +1,6 @@
 import json
 from flask import Blueprint, request, g
-from flask.ext.login import login_required, current_user
+from flask_login import login_required, current_user
 from . import dbannotations
 from . import dbuser
 from .utils import debug, getdoc, send_email, random_str

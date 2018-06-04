@@ -1,6 +1,6 @@
 import json
 from flask import Blueprint, g, request
-from flask.ext.login import current_user
+from flask_login import current_user
 
 from .utils import getdoc, debug
 from .autodoc import auto

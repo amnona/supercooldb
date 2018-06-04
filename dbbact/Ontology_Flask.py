@@ -1,6 +1,6 @@
 import json
 from flask import Blueprint, g, request
-from flask.ext.login import login_required
+from flask_login import login_required
 from . import dbontology
 from .utils import getdoc, debug
 from .autodoc import auto

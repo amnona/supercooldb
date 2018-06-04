@@ -54,6 +54,12 @@ def connect_db(schema='AnnotationSchemaTest'):
                 user = 'postgres'
                 password = 'admin123'
                 port = 5432
+            elif servertype == 'amnon':
+                debug(1, 'servertype is amnon')
+                database = 'dbbact'
+                user = 'amnon'
+                password = 'magNiv'
+                port = 5432
             else:
                 debug(6, 'unknown server type %s' % servertype)
                 print('unknown server type %s' % servertype)

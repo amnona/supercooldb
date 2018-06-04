@@ -1,5 +1,5 @@
 from flask import Flask, g
-from flask.ext.login import LoginManager, UserMixin, login_required
+from flask_login import LoginManager, UserMixin, login_required
 
 from .autodoc import auto
 from .Seq_Flask import Seq_Flask_Obj
