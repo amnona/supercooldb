@@ -1,12 +1,12 @@
 import datetime
 import psycopg2
 
-import dbsequences
-import dbexperiments
-import dbidval
-import dbontology
-from dbontology import GetParents
-from utils import debug
+from . import dbsequences
+from . import dbexperiments
+from . import dbidval
+from . import dbontology
+from .dbontology import GetParents
+from .  utils import debug
 
 
 def AddSequenceAnnotations(con, cur, sequences, primer, expid, annotationtype, annotationdetails, method='',
@@ -1112,7 +1112,7 @@ def _get_annotation_string(cann):
     return cdesc
 
 
-def get_annotation_term_pairs(cann):
+def get_annotation_term_pairs(cann, max_terms=20):
     '''Get the pairs of terms in the annotation and their type
 
     Parameters
@@ -1127,7 +1127,7 @@ def get_annotation_term_pairs(cann):
     '''
     term_pairs = []
     details = cann['details']
-    if len(details) < 10:
+    if len(details) <= max_terms:
         for p1 in range(len(details)):
             # print('now detail term idx %d' % p1)
             for p2 in range(p1 + 1, len(details)):
@@ -1144,7 +1144,7 @@ def get_annotation_term_pairs(cann):
                 cnew_type = 'all'
                 if type1 == type2:
                     cnew_type == type1
-                cnew_term = [term1, term2].sorted()
+                cnew_term = sorted([term1, term2])
                 cnew_term = "+".join(cnew_term)
                 # cnew_term = '%s+%s' % (term1, term2)
                 term_pairs.append(cnew_term)

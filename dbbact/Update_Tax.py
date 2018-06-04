@@ -1,7 +1,7 @@
-from utils import debug, SetDebugLevel
-import db_access
-import dbsequences
-import dbuser
+from .utils import debug, SetDebugLevel
+from . import db_access
+from . import dbsequences
+from . import dbuser
 import os
 import time
 import datetime

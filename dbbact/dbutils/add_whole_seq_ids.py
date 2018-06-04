@@ -36,6 +36,7 @@ def connect_db(servertype='main', schema='AnnotationSchemaTest'):
 			'main' (default) - the main remote production database
 			'develop' - the remote development database
 			'local' - a local postgres instance of the database
+			'amnon' - the local mac installed veriosn of dbbact
 	schema : str (optional)
 		name of the schema containing the annotation database
 

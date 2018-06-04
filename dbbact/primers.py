@@ -26,7 +26,7 @@ def GetIdFromName(con, cur, name):
             res = cur.fetchone()
             return res[0]
     except psycopg2.DatabaseError as e:
-        print ('Error %s' % e)
+        print('Error %s' % e)
 
         # DB exception
         return -2

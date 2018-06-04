@@ -1,17 +1,17 @@
 from flask import Flask, g
 from flask.ext.login import LoginManager, UserMixin, login_required
 
-from autodoc import auto
-from Seq_Flask import Seq_Flask_Obj
-from Exp_Flask import Exp_Flask_Obj
-from Users_Flask import Users_Flask_Obj
-from Docs_Flask import Docs_Flask_Obj
-from DBStats_Flask import DBStats_Flask_Obj
-from Annotation_Flask import Annotation_Flask_Obj
-from Ontology_Flask import Ontology_Flask_Obj
-from utils import debug, SetDebugLevel
-import db_access
-import dbuser
+from .autodoc import auto
+from .Seq_Flask import Seq_Flask_Obj
+from .Exp_Flask import Exp_Flask_Obj
+from .Users_Flask import Users_Flask_Obj
+from .Docs_Flask import Docs_Flask_Obj
+from .DBStats_Flask import DBStats_Flask_Obj
+from .Annotation_Flask import Annotation_Flask_Obj
+from .Ontology_Flask import Ontology_Flask_Obj
+from .utils import debug, SetDebugLevel
+from . import db_access
+from . import dbuser
 import os
 
 dbDefaultUser = "na"  # anonymos user in case the field is empty

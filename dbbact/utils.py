@@ -3,6 +3,8 @@ import smtplib
 import random
 import string
 
+debugLevel = 4
+
 
 def debug(level, msg):
     """
@@ -16,8 +18,8 @@ def debug(level, msg):
     """
     global debuglevel
 
-    # if level>=debuglevel:
-    if True:
+    if level >= debuglevel:
+    # if True:
         print(msg, file=sys.stderr)
 
 

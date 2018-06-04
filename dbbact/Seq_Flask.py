@@ -1,11 +1,11 @@
 import json
 from flask import Blueprint, request, g
 from flask.ext.login import login_required, current_user
-import dbsequences
-import dbannotations
-import dbontology
-from utils import debug, getdoc
-from autodoc import auto
+from . import dbsequences
+from . import dbannotations
+from . import dbontology
+from .utils import debug, getdoc
+from .autodoc import auto
 # NOTE: local flask_cors module, not pip installed!
 from flask_cors import crossdomain
 
