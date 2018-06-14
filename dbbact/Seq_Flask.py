@@ -166,12 +166,15 @@ def get_sequence_annotations():
                 the region id (default=1 which is V4 515F 806R)
             get_term_info : bool (optional)
                 True (default) to get information about all ontology predecessors of terms of all annotations of the sequence.
+            get_tax_info: book (optional)
+                True (default) to get the dbbact taxonomy string of the sequence (or None if not in dbbact)
     Success Response:
         Code : 200
         Content :
         {
             "taxonomy" : str
-            (taxonomy from SequencesTable)
+                the taxonomy from dbBact taxonomies (if availble).
+                Not returned if get_tax_info is False
             "annotations" : list of
                 {
                     "annotationid" : int
@@ -232,6 +235,13 @@ def get_sequence_annotations():
     if sequence is None:
         return('sequence parameter missing', 400)
     get_term_info = alldat.get('get_term_info', True)
+    get_tax_info = alldat.get('get_tax_info', True)
+
+    taxonomy = None
+    if get_tax_info:
+        err, taxonomy = dbsequences.GetSequenceTaxonomy(g.con, g.cur, sequence, userid=current_user.user_id)
+        if err:
+            taxonomy = 'error: err'
 
     err, details = dbannotations.GetSequenceAnnotations(g.con, g.cur, sequence, userid=current_user.user_id)
     if err:
@@ -241,7 +251,7 @@ def get_sequence_annotations():
         term_info = dbontology.get_annotations_term_counts(g.con, g.cur, details)
     else:
         term_info = {}
-    return json.dumps({'annotations': details, 'term_info': term_info})
+    return json.dumps({'annotations': details, 'term_info': term_info, 'taxonomy': taxonomy})
 
 
 @login_required
