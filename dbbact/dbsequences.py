@@ -596,8 +596,9 @@ def GetSequenceTaxonomy(con, cur, sequence, region=None, userid=0):
 
     if cur.rowcount == 0:
         debug(1, 'taxonomy not found for sequence %s' % cseq)
-        ctaxinfo = {'taxonomy': 'NA'}
-        return '', ctaxinfo
+        # ctaxinfo = {'taxonomy': 'NA'}
+        # return '', ctaxinfo
+        return '', 'NA'
 
     res = cur.fetchone()
     firstTax = True
@@ -610,5 +611,6 @@ def GetSequenceTaxonomy(con, cur, sequence, region=None, userid=0):
             taxStr += val + res[idx]
             firstTax = False
 
-    ctaxinfo = {'taxonomy': taxStr}
-    return '', ctaxinfo
+    # ctaxinfo = {'taxonomy': taxStr}
+    # return '', ctaxinfo
+    return '', taxStr
