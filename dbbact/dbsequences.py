@@ -565,11 +565,12 @@ def AddSequenceTax(con, cur, seq_id, col, value):
         return True
     except:
         return False
-    
+
+
 def GetSequenceTaxonomy(con, cur, sequence, region=None, userid=0):
     """
-    Get taxonomy str for specific string
-    
+    Get taxonomy str for given sequence
+
     Parameters
     ----------
     con,cur :
@@ -584,28 +585,30 @@ def GetSequenceTaxonomy(con, cur, sequence, region=None, userid=0):
     -------
     err : str
         The error encountered or '' if ok
-    taxonomy: Taxonomy string
+    taxonomy: str
+        The taxonomy string (of format d__XXX;p__YYYY;...)
     """
-    
+
     debug(1, 'GetSequenceTaxonomy sequence %s' % sequence)
-    
+
     cseq = sequence.lower()
     cur.execute("SELECT coalesce(taxdomain,''),coalesce(taxphylum,''),  coalesce(taxclass,''),coalesce(taxorder,''),coalesce(taxfamily,''), coalesce(taxgenus,'') as taxonomy_str FROM SequencesTable WHERE sequence=%s", [cseq])
-        
+
     if cur.rowcount == 0:
-        ctaxinfo = {'taxonomy': taxStr}
+        debug(1, 'taxonomy not found for sequence %s' % cseq)
+        ctaxinfo = {'taxonomy': 'NA'}
         return '', ctaxinfo
+
     res = cur.fetchone()
-    
     firstTax = True
     taxStr = ''
-    list_of_pre_str = ["d__","p__","c__","o__","f__","g__"]
+    list_of_pre_str = ["d__", "p__", "c__", "o__", "f__", "g__"]
     for idx, val in enumerate(list_of_pre_str):
         if res[idx]:
-            if firstTax == False :
+            if firstTax is False:
                 taxStr += ';'
-            taxStr += val + res[idx]            
+            taxStr += val + res[idx]
             firstTax = False
-        
+
     ctaxinfo = {'taxonomy': taxStr}
     return '', ctaxinfo
