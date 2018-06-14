@@ -1112,7 +1112,47 @@ def _get_annotation_string(cann):
     return cdesc
 
 
-def get_annotation_term_pairs(cann, max_terms=20):
+# def get_annotation_term_pairs(cann, max_terms=20):
+#     '''Get the pairs of terms in the annotation and their type
+
+#     Parameters
+#     ----------
+#     cann : dict
+#         items of the output of get_seq_annotations()
+
+#     Returns
+#     -------
+#     list of str of term1 + "+" + term2 (sorted alphabetically term1<term2)
+#     if term is "lower in", it will be preceeded by "-"
+#     '''
+#     term_pairs = []
+#     details = cann['details']
+#     if len(details) <= max_terms:
+#         for p1 in range(len(details)):
+#             # print('now detail term idx %d' % p1)
+#             for p2 in range(p1 + 1, len(details)):
+#                 det1 = details[p1]
+#                 det2 = details[p2]
+#                 term1 = det1[1]
+#                 term2 = det2[1]
+#                 type1 = det1[0]
+#                 type2 = det2[0]
+#                 if type1 == 'low':
+#                     term1 = '-' + term1
+#                 if type2 == 'low':
+#                     term2 = '-' + term2
+#                 cnew_type = 'all'
+#                 if type1 == type2:
+#                     cnew_type == type1
+#                 cnew_term = sorted([term1, term2])
+#                 cnew_term = "+".join(cnew_term)
+#                 # cnew_term = '%s+%s' % (term1, term2)
+#                 term_pairs.append(cnew_term)
+#         # print('new details: %d' % len(details))
+#     return term_pairs
+
+
+def get_annotation_term_pairs(cann, max_terms=20, get_pairs=True, get_singles=True):
     '''Get the pairs of terms in the annotation and their type
 
     Parameters
@@ -1127,26 +1167,37 @@ def get_annotation_term_pairs(cann, max_terms=20):
     '''
     term_pairs = []
     details = cann['details']
-    if len(details) <= max_terms:
-        for p1 in range(len(details)):
-            # print('now detail term idx %d' % p1)
-            for p2 in range(p1 + 1, len(details)):
-                det1 = details[p1]
-                det2 = details[p2]
-                term1 = det1[1]
-                term2 = det2[1]
-                type1 = det1[0]
-                type2 = det2[0]
-                if type1 == 'low':
-                    term1 = '-' + term1
-                if type2 == 'low':
-                    term2 = '-' + term2
-                cnew_type = 'all'
-                if type1 == type2:
-                    cnew_type == type1
-                cnew_term = sorted([term1, term2])
-                cnew_term = "+".join(cnew_term)
-                # cnew_term = '%s+%s' % (term1, term2)
-                term_pairs.append(cnew_term)
-        # print('new details: %d' % len(details))
+    # add single terms
+    if get_singles:
+        for cdetail in details:
+            cterm = cdetail[1]
+            ctype = cdetail[0]
+            if ctype == 'low':
+                cterm = '-' + cterm
+            term_pairs.append(cterm)
+
+    # add term pairs
+    if get_pairs:
+        if len(details) <= max_terms:
+            for p1 in range(len(details)):
+                # print('now detail term idx %d' % p1)
+                for p2 in range(p1 + 1, len(details)):
+                    det1 = details[p1]
+                    det2 = details[p2]
+                    term1 = det1[1]
+                    term2 = det2[1]
+                    type1 = det1[0]
+                    type2 = det2[0]
+                    if type1 == 'low':
+                        term1 = '-' + term1
+                    if type2 == 'low':
+                        term2 = '-' + term2
+                    cnew_type = 'all'
+                    if type1 == type2:
+                        cnew_type == type1
+                    cnew_term = sorted([term1, term2])
+                    cnew_term = "+".join(cnew_term)
+                    # cnew_term = '%s+%s' % (term1, term2)
+                    term_pairs.append(cnew_term)
+            # print('new details: %d' % len(details))
     return term_pairs

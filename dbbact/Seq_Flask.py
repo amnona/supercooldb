@@ -148,7 +148,6 @@ def get_taxonomy_str():
     return json.dumps({'taxonomy': taxonomyStr})
 
 
-
 @login_required
 @Seq_Flask_Obj.route('/sequences/get_annotations', methods=['GET'])
 @auto.doc()
