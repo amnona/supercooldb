@@ -379,11 +379,13 @@ def GetHashAnnotationIDs(con, cur, hash_str, userid=None):
     hash_str = hash_str.lower()
     taxStr = hash_str 
     debug(1, 'GetHashAnnotationIDS for Hash %s' % hash_str)
-    cur.execute('SELECT id from SequencesTable where (hashfull ILIKE %s or hash150 ILIKE %s or hash100 ILIKE %s)', [hash_str,hash_str,hash_str])
+    cur.execute('SELECT id,sequence from SequencesTable where (hashfull ILIKE %s or hash150 ILIKE %s or hash100 ILIKE %s)', [hash_str,hash_str,hash_str])
     res = cur.fetchall()
     seqids = []
+    seqnames = []
     for cres in res:
         seqids.append(cres[0])
+        seqnames.append(cres[1])
     debug(1, 'found %d matching sequences for the Hash' % len(seqids))
     annotationids_dict = defaultdict(int)
     for cseq in seqids:
@@ -396,7 +398,7 @@ def GetHashAnnotationIDs(con, cur, hash_str, userid=None):
     annotationids = []
     for k, v in annotationids_dict.items():
         annotationids.append((k, v))
-    return '', annotationids, seqids
+    return '', annotationids, seqids, seqnames
 
 def GetHashAnnotations(con, cur, hash_str, userid=None):
     '''
@@ -418,10 +420,11 @@ def GetHashAnnotations(con, cur, hash_str, userid=None):
         counts - the number of sequences from taxonomy appearing in this annotations
     seqids : list of int
         list of the sequenceids which have this taxonomy
+    seqnames : list of sequence strings
     '''
     debug(1, 'GetHashAnnotations for hash %s' % hash_str)
     # get the annotation ids
-    err, annotationids, seqids = GetHashAnnotationIDs(con, cur, hash_str, userid)
+    err, annotationids, seqids, seqnames = GetHashAnnotationIDs(con, cur, hash_str, userid)
     if err:
         errmsg = 'Failed to get annotationIDs for hash_str %s: %s' % (hash_str, err)
         debug(6, errmsg)
@@ -437,7 +440,7 @@ def GetHashAnnotations(con, cur, hash_str, userid=None):
             continue
         annotations.append((cdetails, ccount))
     debug(1, 'got %d details' % len(annotations))
-    return '', annotations, seqids
+    return '', annotations, seqids, seqnames
 
 
 def GetSequenceWithNoTaxonomyID(con, cur):
@@ -490,6 +493,88 @@ def GetSequenceWithNoHashID(con, cur):
     return '', return_id
 
 
+def SequencesToFile(con, cur, fileName):
+    '''
+    Save list of sequences to file, this will be used later 'whole' ids script
+
+    Parameters
+    ----------
+    con,cur
+
+    Returns
+    -------
+    error message
+    '''
+    debug(1, 'GetSequenceWithNoHashID')
+    
+    try:
+        cur.execute("SELECT id,sequence,ggid FROM sequencestable")
+        seq_count = 0
+        with open(fileName, 'w') as fl:
+            for cres in cur:
+                fl.write('>%s\n%s\n' % (cres[0], cres[1]))
+                seq_count += 1
+    except psycopg2.DatabaseError as e:
+        debug(7, 'database error %s' % e)
+        return "database error %s" % e
+    return ''
+
+
+def AddWholeSeqId (con, cur, dbidVal, dbbactidVal, wholeseqidVal):
+    '''
+    Add record to wholeseqidstable table
+
+    Parameters
+    ----------
+    con,cur
+    dbidVal - db type (e.g. silva, gg)
+    dbbactidVal - sequnence id in dbbact
+    wholeseqidVal - the id in different db (e.g. silva, gg)
+
+    Returns
+    -------
+    error message
+    '''
+    debug(1, 'AddWholeSeqId')
+    
+    try:
+        cur.execute('INSERT INTO wholeseqidstable (dbid, dbbactid, wholeseqid) VALUES (%s, %s, %s)', [dbidVal, dbbactidVal, wholeseqidVal])
+        con.commit()
+    except psycopg2.DatabaseError as e:
+        debug(7, 'database error %s' % e)
+        return "database error %s" % e
+    return ""    
+
+def WholeSeqIdExists (con, cur, dbidVal, dbbactidVal, wholeseqidVal):
+    '''
+    Check if record is already exist in wholeseqidstable table
+
+    Parameters
+    ----------
+    con,cur
+    dbidVal - db type (e.g. silva, gg)
+    dbbactidVal - sequnence id in dbbact
+    wholeseqidVal - the id in different db (e.g. silva, gg)
+
+    Returns
+    -------
+    True if exist
+    error message
+    '''
+    debug(1, 'WholeSeqIdExists')
+    
+    try:
+        cur.execute("SELECT * FROM wholeseqidstable where dbid = %s and dbbactid = %s and wholeseqid = %s ", [dbidVal, dbbactidVal,wholeseqidVal])
+        if cur.rowcount > 0:
+            return "",True
+        else:
+            return "",False 
+    
+    except psycopg2.DatabaseError as e:
+        debug(7, 'database error %s' % e)
+        return "database error %s" % e, False
+    return "", False     
+    
 def GetSequenceStrByID(con, cur, seq_id):
     '''
     Get sequence with no taxonomy (if any)

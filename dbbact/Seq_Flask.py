@@ -588,12 +588,12 @@ def get_hash_annotations():
     hash_str = alldat.get('hash')
     if hash_str is None:
         return('hash parameter missing', 400)
-    err, annotations, seqids = dbsequences.GetHashAnnotations(g.con, g.cur, hash_str, userid=current_user.user_id)
+    err, annotations, seqids, seqnames = dbsequences.GetHashAnnotations(g.con, g.cur, hash_str, userid=current_user.user_id)
     if err:
         errmsg = 'error encountered searching for hash annotations for hash %s: %s' % (hash_str, err)
         debug(6, errmsg)
         return(errmsg, 400)
-    return json.dumps({'annotations': annotations, 'seqids': seqids})
+    return json.dumps({'annotations': annotations, 'seqids': seqids , 'seqstr': seqnames })
 
 
 @Seq_Flask_Obj.route('/sequences/get_info', methods=['GET'])
