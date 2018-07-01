@@ -1,18 +1,19 @@
 from flask import Flask, g
-from flask.ext.login import LoginManager, UserMixin, login_required
+from flask_login import LoginManager, UserMixin, login_required
 
-from autodoc import auto
-from Seq_Flask import Seq_Flask_Obj
-from Exp_Flask import Exp_Flask_Obj
-from Users_Flask import Users_Flask_Obj
-from Docs_Flask import Docs_Flask_Obj
-from DBStats_Flask import DBStats_Flask_Obj
-from Annotation_Flask import Annotation_Flask_Obj
-from Ontology_Flask import Ontology_Flask_Obj
-from utils import debug, SetDebugLevel
-import db_access
-import dbuser
+from .autodoc import auto
+from .Seq_Flask import Seq_Flask_Obj
+from .Exp_Flask import Exp_Flask_Obj
+from .Users_Flask import Users_Flask_Obj
+from .Docs_Flask import Docs_Flask_Obj
+from .DBStats_Flask import DBStats_Flask_Obj
+from .Annotation_Flask import Annotation_Flask_Obj
+from .Ontology_Flask import Ontology_Flask_Obj
+from .utils import debug, SetDebugLevel
+from . import db_access
+from . import dbuser
 import os
+
 
 dbDefaultUser = "na"  # anonymos user in case the field is empty
 dbDefaultPwd = ""
@@ -117,10 +118,31 @@ def load_user(request):
         return None
 
 
+def gunicorn(debug_level=6):
+    '''The entry point for running the api server through gunicorn (http://gunicorn.org/)
+    to run dbbact rest server using gunicorn, use:
+
+    gunicorn 'dbbact.Server_Main:gunicorn(debug_level=6)' -b 0.0.0.0:5001 --workers 4 --name=dbbact-rest-api
+
+
+    Parameters
+    ----------
+    debug_level: int, optional
+        The minimal level of debug messages to log (10 is max, ~5 is equivalent to warning)
+
+    Returns
+    -------
+    Flask app
+    '''
+    SetDebugLevel(debug_level)
+    debug(2, 'starting dbbact rest-api server')
+    return app
+
+
 if __name__ == '__main__':
-    SetDebugLevel(0)
+    SetDebugLevel(6)
     debug(2, 'starting server')
     if 'OPENU_FLAG' in os.environ:
-        app.run(host='0.0.0.0',port=5001,threaded=True)
+        app.run(host='0.0.0.0', port=5001, threaded=True)
     else:
         app.run(threaded=True)

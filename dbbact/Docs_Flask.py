@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template
 # from flask.ext.login import current_user
 
-from autodoc import auto
+from .autodoc import auto
 
 
 Docs_Flask_Obj = Blueprint('Docs_Flask_Obj', __name__, template_folder='templates')

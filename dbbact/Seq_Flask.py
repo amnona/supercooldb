@@ -1,13 +1,13 @@
 import json
 from flask import Blueprint, request, g
-from flask.ext.login import login_required, current_user
-import dbsequences
-import dbannotations
-import dbontology
-from utils import debug, getdoc
-from autodoc import auto
+from flask_login import login_required, current_user
+from . import dbsequences
+from . import dbannotations
+from . import dbontology
+from .utils import debug, getdoc
+from .autodoc import auto
 # NOTE: local flask_cors module, not pip installed!
-from flask_cors import crossdomain
+# from flask_cors import crossdomain
 
 Seq_Flask_Obj = Blueprint('Seq_Flask_Obj', __name__, template_folder='templates')
 # CORS(Seq_Flask_Obj)
@@ -642,7 +642,7 @@ def get_sequence_info():
 
 @login_required
 @Seq_Flask_Obj.route('/sequences/get_string_annotations', methods=['GET', 'POST', 'OPTIONS'])
-@crossdomain(origin='*', headers=['Content-Type'])
+# @crossdomain(origin='*', headers=['Content-Type'])
 @auto.doc()
 def get_sequence_string_annotations():
     """

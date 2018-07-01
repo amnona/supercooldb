@@ -3,7 +3,7 @@ import os
 import psycopg2
 import psycopg2.extras
 
-from utils import debug
+from .utils import debug
 
 
 def connect_db(schema='AnnotationSchemaTest'):
@@ -53,6 +53,12 @@ def connect_db(schema='AnnotationSchemaTest'):
                 database = 'postgres'
                 user = 'postgres'
                 password = 'admin123'
+                port = 5432
+            elif servertype == 'amnon':
+                debug(1, 'servertype is amnon')
+                database = 'dbbact'
+                user = 'amnon'
+                password = 'magNiv'
                 port = 5432
             else:
                 debug(6, 'unknown server type %s' % servertype)

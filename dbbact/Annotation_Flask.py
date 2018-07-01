@@ -1,12 +1,12 @@
 import json
 
 from flask import Blueprint, request, g
-from flask.ext.login import current_user
-from flask.ext.login import login_required
+from flask_login import current_user
+from flask_login import login_required
 
-import dbannotations
-from utils import debug, getdoc
-from autodoc import auto
+from . import dbannotations
+from .utils import debug, getdoc
+from .autodoc import auto
 
 
 Annotation_Flask_Obj = Blueprint('Annottion_Flask_Obj', __name__, template_folder='templates')

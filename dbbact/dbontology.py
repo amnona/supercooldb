@@ -1,7 +1,7 @@
 import psycopg2
-from utils import debug
-import dbidval
-import dbannotations
+from .utils import debug
+from . import dbidval
+from . import dbannotations
 
 
 def AddTerm(con, cur, term, parent='na', ontologyname='scdb', synonyms=[], commit=True):
@@ -443,3 +443,29 @@ def GetIDs(con, cur, ontList):
     except psycopg2.DatabaseError as e:
         debug(7, 'database error %s' % e)
         return "database error %s" % e, None
+
+
+def get_term_pairs_count(con, cur, term_pairs):
+    '''Get the total count of experiments where each term pair appears
+
+    Parameters
+    ----------
+    con,cur : database connection and cursor
+    term_pairs: list of str
+        the term pairs to count
+
+    Returns
+    -------
+    term_count: dict of {term(str): count(float)}
+    '''
+    term_count = {}
+    for cterm in term_pairs:
+        cur.execute("SELECT AnnotationCount from TermPairsTable WHERE TermPair=%s", [cterm])
+        if cur.rowcount == 0:
+            debug(5, 'term pair %s not found' % cterm)
+            term_count[cterm] = 0
+            continue
+        res = cur.fetchone()
+        term_count[cterm] = res[0]
+    debug(2, 'Found term pairs for %d terms' % len(term_count))
+    return term_count

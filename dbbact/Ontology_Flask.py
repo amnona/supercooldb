@@ -1,9 +1,9 @@
 import json
 from flask import Blueprint, g, request
-from flask.ext.login import login_required
-import dbontology
-from utils import getdoc, debug
-from autodoc import auto
+from flask_login import login_required
+from . import dbontology
+from .utils import getdoc, debug
+from .autodoc import auto
 
 Ontology_Flask_Obj = Blueprint('Ontology_Flask_Obj', __name__, template_folder='templates')
 
@@ -382,3 +382,38 @@ def get_ontology_term_stats():
     #     return ('Problem geting term stats. error=%s' % err, 400)
     return json.dumps({'term_info': term_info})
 
+
+@Ontology_Flask_Obj.route('/ontology/get_term_pair_count', methods=['GET'])
+@auto.doc()
+def get_term_pair_count():
+    """
+    Title: get_term_pair_count
+    Description : Get statistics about ontology term pair (i.e. "feces+homo sapiens") (in how many experiments it appears)
+    URL: ontology/get_term_pair_count
+    Method: GET
+    URL Params:
+    Data Params: JSON
+        {
+            term_pairs : list of str
+                list of ontology term pairs to get the experiment count for
+        }
+    Success Response:
+        Code : 200
+        Content :
+        {
+            term_count : dict of {term, float}
+                The total number of experiments each term pair appears in
+        }
+    Details :
+        Validation:
+    """
+    cfunc = get_term_pair_count
+    alldat = request.get_json()
+    term_pairs = alldat.get('term_pairs')
+    if term_pairs is None:
+        return(getdoc(cfunc))
+    term_count = dbontology.get_term_pairs_count(g.con, g.cur, term_pairs)
+    # if err:
+    #     debug(6, err)
+    #     return ('Problem geting term stats. error=%s' % err, 400)
+    return json.dumps({'term_count': term_count})

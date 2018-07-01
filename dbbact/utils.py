@@ -2,6 +2,10 @@ import sys
 import smtplib
 import random
 import string
+import datetime
+import inspect
+
+debuglevel = 6
 
 
 def debug(level, msg):
@@ -10,15 +14,23 @@ def debug(level, msg):
 
     input:
     level : int
-        error level (0=debug...10=critical)
+        error level (0=debug, 4=info, 7=warning,...10=critical)
     msg : str
         the debug message
     """
     global debuglevel
 
-    # if level>=debuglevel:
-    if True:
-        print(msg, file=sys.stderr)
+    if level >= debuglevel:
+        try:
+            cf = inspect.stack()[1]
+            cfile = cf.filename.split('/')[-1]
+            cline = cf.lineno
+            cfunction = cf.function
+        except:
+            cfile = 'NA'
+            cline = 'NA'
+            cfunction = 'NA'
+        print('[%s] [%d] [%s:%s:%s] %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), level, cfile, cfunction, cline, msg), file=sys.stderr)
 
 
 def SetDebugLevel(level):
@@ -56,21 +68,20 @@ def tolist(data):
     output:
     data : list of str
     """
-    if isinstance(data, basestring):
+    if isinstance(data, str):
         return [data]
     return data
 
 
 def send_email(user, pwd, recipient, subject, body):
-    
     import os
+
     if 'OPENU_FLAG' in os.environ:
         debug(1, 'Sending mail using openu server')
-        openu_str = "echo '%s' | mail -s '%s' -r %s %s" % (body,subject,'dbbact@openu.ac.il',recipient)
+        openu_str = "echo '%s' | mail -s '%s' -r %s %s" % (body, subject, ' dbbact@openu.ac.il', recipient)
         os.system(openu_str)
         return
-    
-    import smtplib
+
     gmail_user = user
     gmail_pwd = pwd
     FROM = user

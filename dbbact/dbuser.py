@@ -1,5 +1,5 @@
 import psycopg2
-from utils import debug
+from .utils import debug
 
 maxfailedattempt = 3
 
