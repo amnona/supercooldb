@@ -51,8 +51,11 @@ def hash_sequences(filename, short_len=100):
 	num_too_short = 0
 	seq_hash = {}
 	seq_lens = set()
+	all_ids = set()
 	short_hash = defaultdict(dict)
 	for cseq, chead in iter_fasta_seqs(filename):
+		all_ids.add(chead)
+		
 		clen = len(cseq)
 		if clen < short_len:
 			num_too_short += 1
@@ -62,10 +65,11 @@ def hash_sequences(filename, short_len=100):
 		if clen not in seq_lens:
 			seq_lens.add(clen)
 		seq_hash[cseq] = chead
+    
 	debug(2,'processed %d sequences.' % len(seq_hash))
 	debug(2,'lens: %s' % seq_lens)
 	debug(2,'num too short: %d' % num_too_short)
-	return seq_hash, seq_lens, short_hash
+	return all_ids, seq_hash, seq_lens, short_hash
 
 
 def iter_fasta_seqs(filename):
@@ -124,10 +128,18 @@ if __name__ == '__main__':
     
     count_success = 0
     count_failure = 0
+    count_dummy_success = 0
+    count_dummy_failure = 0
     count_seq_success = 0
     count_seq_failure = 0
     count_seq_is_exist_failure = 0
     count_seq_exist = 0
+    
+    count_seq_is_exist_dummy_failure = 0
+    count_seq_dummy_exist = 0
+    count_seq_dummy_failure = 0
+    count_seq_dummy_success = 0
+    
     count = 1
     hash_log = ""
     sleep_time = 86400
@@ -135,14 +147,19 @@ if __name__ == '__main__':
     seqdbid = 1 # SILVA
     silva_log = ""
     
+    tempFileName = 'tempEitanJune.fasta'
     silvaFileName = 'SILVA_132_SSURef_tax_silva.fasta'
     
-    #dbsequences.SequencesToFile(con, cur, 'tempEitanJune.fasta')
-    
     while isFileExist("stop") == False:
-    #while isFileExist("stop") == False:
         
-        seq_hash, seq_lens, short_hash = hash_sequences(filename='tempEitanJune.fasta', short_len=150)
+        #Create the file and read it
+        dbsequences.SequencesWholeToFile(con, cur, tempFileName, seqdbid)    
+        all_ids , seq_hash, seq_lens, short_hash = hash_sequences(filename=tempFileName, short_len=150)
+        
+        #nothing to do, go to sleep
+        if len(all_ids) == 0:
+            debug(2, "go tol sleep")
+            time.sleep(sleep_time)
         
         idx = 0
         num_matches = 0
@@ -173,6 +190,7 @@ if __name__ == '__main__':
                                 isFound = True
                                 break
                             else:
+                                debug(2, "add normal")
                                 err = dbsequences.AddWholeSeqId(con,cur, seqdbid, v, cid)
                                 if err:
                                     silva_log += "failed to add"
@@ -183,16 +201,36 @@ if __name__ == '__main__':
                                     count_seq_success += 1
                                     isFound = True
                                     break
-            #if count_seq_success == 10000:
-            #    break
+        
+        
+        #go over all ids, if not exist add record
+        for seq_id in all_ids:
+            err, existFlag = dbsequences.WholeSeqIdExists(con,cur, seqdbid, seq_id)
+            if err:
+                count_seq_is_exist_dummy_failure += 1 
+                silva_log += "failed to found"
+            if existFlag:
+                count_seq_dummy_exist += 1
+                silva_log += "found"
+                isFound = True
+                break
+            else:
+                debug(2, "add dummy")
+                err = dbsequences.AddWholeSeqId(con,cur, seqdbid, seq_id, 'na')
+                if err:
+                    silva_log += "failed to add"
+                    count_seq_dummy_failure += 1 
+                    break
+                else:
+                    silva_log += "added"
+                    count_seq_dummy_success += 1
+                    break
+            
         
         debug(2, 'done')
         
-        
-        summary_str = "failed count = %s\nsuccess count = %s\nis exist count = %s\nis exist error = %s\n" % (count_seq_failure,count_seq_success,count_seq_exist,count_seq_is_exist_failure)
+        summary_str = "failed count = %s\nsuccess count = %s\nis exist count = %s\nis exist error = %s\nfailed dummy count = %s\nsuccess dummy count = %s\nis exist dummy count = %s\nis exist dummy error %s\n" % (count_seq_failure,count_seq_success,count_seq_exist,count_seq_is_exist_failure,count_seq_dummy_failure,count_seq_dummy_success,count_seq_dummy_exist,count_seq_dummy_exist)
         
         saveStringToFile("silva_summary_log_" + date_time_str,summary_str)
         saveStringToFile("silva_log_" + date_time_str,silva_log)
-        
-        
-        break
+    
