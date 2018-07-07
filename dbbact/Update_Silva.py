@@ -158,7 +158,9 @@ if __name__ == '__main__':
         
         #nothing to do, go to sleep
         if len(all_ids) == 0:
-            debug(2, "go tol sleep")
+            debug(2, "go to sleep")
+            silva_log += "sleep start " + datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S") + "\n"
+            saveStringToFile("silva_summary_log_sleep" + date_time_str,"sleep started " + datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S"))
             time.sleep(sleep_time)
         
         idx = 0
@@ -169,6 +171,11 @@ if __name__ == '__main__':
             idx += 1
             if idx % 1000 == 0:
                 debug(2, "count: %d"  % idx)
+                summary_str = "failed count = %s\nsuccess count = %s\nis exist count = %s\nis exist error = %s\nfailed dummy count = %s\nsuccess dummy count = %s\nis exist dummy count = %s\nis exist dummy error %s\n" % (count_seq_failure,count_seq_success,count_seq_exist,count_seq_is_exist_failure,count_seq_dummy_failure,count_seq_dummy_success,count_seq_dummy_exist,count_seq_dummy_exist)
+        
+                saveStringToFile("silva_summary_log_" + date_time_str,summary_str)
+                saveStringToFile("silva_log_" + date_time_str,silva_log)
+        
             for cpos in range(len(cseq) - short_len):
                 ccseq = cseq[cpos:cpos + short_len]
                 if ccseq in short_hash:
@@ -183,21 +190,21 @@ if __name__ == '__main__':
                             err, existFlag = dbsequences.WholeSeqIdExists(con,cur, seqdbid, v, cid);
                             if err:
                                 count_seq_is_exist_failure += 1 
-                                silva_log += "failed to found"
+                                silva_log += "failed to found\n"
                             if existFlag:
                                 count_seq_exist += 1
-                                silva_log += "found"
+                                silva_log += "found\n"
                                 isFound = True
                                 break
                             else:
                                 debug(2, "add normal")
                                 err = dbsequences.AddWholeSeqId(con,cur, seqdbid, v, cid)
                                 if err:
-                                    silva_log += "failed to add"
+                                    silva_log += "failed to add\n"
                                     count_seq_failure += 1 
                                     break
                                 else:
-                                    silva_log += "added"
+                                    silva_log += "added\n"
                                     count_seq_success += 1
                                     isFound = True
                                     break
@@ -208,21 +215,21 @@ if __name__ == '__main__':
             err, existFlag = dbsequences.WholeSeqIdExists(con,cur, seqdbid, seq_id)
             if err:
                 count_seq_is_exist_dummy_failure += 1 
-                silva_log += "failed to found"
+                silva_log += "failed to found\n"
             if existFlag:
                 count_seq_dummy_exist += 1
-                silva_log += "found"
+                silva_log += "found\n"
                 isFound = True
                 break
             else:
                 debug(2, "add dummy")
                 err = dbsequences.AddWholeSeqId(con,cur, seqdbid, seq_id, 'na')
                 if err:
-                    silva_log += "failed to add"
+                    silva_log += "failed to add\n"
                     count_seq_dummy_failure += 1 
                     break
                 else:
-                    silva_log += "added"
+                    silva_log += "added\n"
                     count_seq_dummy_success += 1
                     break
             

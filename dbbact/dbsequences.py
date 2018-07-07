@@ -512,7 +512,7 @@ def SequencesWholeToFile(con, cur, fileName, dbid):
     try:
         #cur.execute("SELECT id,sequence,ggid FROM sequencestable")
         
-        cur.execute("SELECT id,sequence,ggid FROM sequencestable where id not in (select distinct id from wholeseqidstable where dbid=%s)" % dbid)
+        cur.execute("SELECT id,sequence,ggid FROM sequencestable where id not in (select distinct dbbactid from wholeseqidstable where dbid=%s)" % dbid)
         
         seq_count = 0
         with open(fileName, 'w') as fl:
