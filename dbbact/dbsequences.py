@@ -1,9 +1,9 @@
 from collections import defaultdict
 import psycopg2
 
-from . import primers
-from .utils import debug
-from . import dbannotations
+import primers
+from utils import debug
+import dbannotations
 
 # length for the seed sequence
 # used for fast searching of sub sequences
@@ -493,22 +493,27 @@ def GetSequenceWithNoHashID(con, cur):
     return '', return_id
 
 
-def SequencesToFile(con, cur, fileName):
+def SequencesWholeToFile(con, cur, fileName, dbid):
     '''
     Save list of sequences to file, this will be used later 'whole' ids script
 
     Parameters
     ----------
     con,cur
+    fileName - output file name
+    dbid - type of db (e.g. silva)
 
     Returns
     -------
     error message
     '''
-    debug(1, 'GetSequenceWithNoHashID')
+    debug(1, 'SequencesWholeToFile')
     
     try:
-        cur.execute("SELECT id,sequence,ggid FROM sequencestable")
+        #cur.execute("SELECT id,sequence,ggid FROM sequencestable")
+        
+        cur.execute("SELECT id,sequence,ggid FROM sequencestable where id not in (select distinct dbbactid from wholeseqidstable where dbid=%s)" % dbid)
+        
         seq_count = 0
         with open(fileName, 'w') as fl:
             for cres in cur:
@@ -545,7 +550,7 @@ def AddWholeSeqId (con, cur, dbidVal, dbbactidVal, wholeseqidVal):
         return "database error %s" % e
     return ""    
 
-def WholeSeqIdExists (con, cur, dbidVal, dbbactidVal, wholeseqidVal):
+def WholeSeqIdExists (con, cur, dbidVal, dbbactidVal, wholeseqidVal = ''):
     '''
     Check if record is already exist in wholeseqidstable table
 
@@ -554,7 +559,8 @@ def WholeSeqIdExists (con, cur, dbidVal, dbbactidVal, wholeseqidVal):
     con,cur
     dbidVal - db type (e.g. silva, gg)
     dbbactidVal - sequnence id in dbbact
-    wholeseqidVal - the id in different db (e.g. silva, gg)
+    wholeseqidVal - the id in different db (e.g. silva, gg) 
+    if empty we will retrive all the ids which have at list one record
 
     Returns
     -------
@@ -564,7 +570,10 @@ def WholeSeqIdExists (con, cur, dbidVal, dbbactidVal, wholeseqidVal):
     debug(1, 'WholeSeqIdExists')
     
     try:
-        cur.execute("SELECT * FROM wholeseqidstable where dbid = %s and dbbactid = %s and wholeseqid = %s ", [dbidVal, dbbactidVal,wholeseqidVal])
+        if wholeseqidVal:
+            cur.execute("SELECT * FROM wholeseqidstable where dbid = %s and dbbactid = %s and wholeseqid = %s ", [dbidVal, dbbactidVal,wholeseqidVal])
+        else:
+            cur.execute("SELECT * FROM wholeseqidstable where dbid = %s and dbbactid = %s", [dbidVal, dbbactidVal])
         if cur.rowcount > 0:
             return "",True
         else:
