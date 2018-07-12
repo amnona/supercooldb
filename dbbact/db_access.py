@@ -3,7 +3,7 @@ import os
 import psycopg2
 import psycopg2.extras
 
-from utils import debug
+from .utils import debug
 
 
 def connect_db(schema='AnnotationSchemaTest'):
