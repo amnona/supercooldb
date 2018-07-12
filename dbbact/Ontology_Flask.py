@@ -410,6 +410,7 @@ def get_term_pair_count():
     cfunc = get_term_pair_count
     alldat = request.get_json()
     term_pairs = alldat.get('term_pairs')
+    debug(1, 'get_term_pair_count for %d term pairs' % len(term_pairs))
     if term_pairs is None:
         return(getdoc(cfunc))
     term_count = dbontology.get_term_pairs_count(g.con, g.cur, term_pairs)

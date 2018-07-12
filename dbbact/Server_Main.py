@@ -1,4 +1,4 @@
-from flask import Flask, g
+from flask import Flask, g, request
 from flask_login import LoginManager, UserMixin, login_required
 
 from .autodoc import auto
@@ -47,6 +47,7 @@ class User(UserMixin):
 # whenever a new request arrives, connect to the database and store in g.db
 @app.before_request
 def before_request():
+    debug(1, 'got request from source ip: %s' % request.remote_addr)
     con, cur = db_access.connect_db()
     g.con = con
     g.cur = cur

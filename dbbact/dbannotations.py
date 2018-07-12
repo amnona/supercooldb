@@ -478,7 +478,7 @@ def GetAnnotationsFromID(con, cur, annotationid, userid=0):
         debug(3, 'annotationid %d not found' % annotationid)
         return 'Annotationid %d not found', None
     res = cur.fetchone()
-    debug(4, res)
+    debug(1, res)
     if res['isprivate'] == 'y':
         if res['iduser'] != userid:
             debug(3, 'cannot view annotation %d (created by user %d), request from used %d' % (annotationid, res['iduser'], userid))

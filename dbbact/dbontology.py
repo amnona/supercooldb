@@ -309,7 +309,7 @@ def GetTermCounts(con, cur, terms):
     terms = list(set(terms))
     term_info = {}
     for cterm in terms:
-        cur.execute('SELECT seqCount, annotationCount from OntologyTable WHERE description=%s LIMIT 1', [cterm])
+        cur.execute('SELECT seqCount, annotationCount, exp_count from OntologyTable WHERE description=%s LIMIT 1', [cterm])
         if cur.rowcount == 0:
             debug(2, 'Term %s not found in ontology table' % cterm)
             continue
@@ -317,6 +317,7 @@ def GetTermCounts(con, cur, terms):
         term_info[cterm] = {}
         term_info[cterm]['total_sequences'] = res[0]
         term_info[cterm]['total_annotations'] = res[1]
+        term_info[cterm]['total_experiments'] = res[2]
     debug(1, 'found info for %d terms' % len(term_info))
     return term_info
 
