@@ -9,7 +9,7 @@ from collections import defaultdict
 #change the working directory
 import sys
 sys.path.insert(0, '/Users/admin/supercooldb')
-sys.path.insert(0, '/Users/admin/supercooldb')
+sys.path.insert(0, '/home/eitano/supercooldb')
     
 
 from dbbact.utils import debug, SetDebugLevel
