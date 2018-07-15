@@ -1,7 +1,4 @@
-from utils import debug, SetDebugLevel
-import db_access
-import dbsequences
-import dbuser
+
 import os
 import time
 import datetime
@@ -9,6 +6,16 @@ import hashlib
 from pathlib import Path
 from collections import defaultdict
 
+#change the working directory
+import sys
+sys.path.insert(0, '/Users/admin/supercooldb')
+sys.path.insert(0, '/Users/admin/supercooldb')
+    
+
+from dbbact.utils import debug, SetDebugLevel
+from dbbact import db_access
+from dbbact import dbsequences
+from dbbact import dbuser
 
 def removeFile(file_name):
     try:
@@ -143,6 +150,7 @@ if __name__ == '__main__':
     count = 1
     hash_log = ""
     sleep_time = 86400
+    #sleep_time = 10
     short_len=150
     seqdbid = 1 # SILVA
     silva_log = ""
@@ -160,8 +168,20 @@ if __name__ == '__main__':
         if len(all_ids) == 0:
             debug(2, "go to sleep")
             silva_log += "sleep start " + datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S") + "\n"
-            saveStringToFile("silva_summary_log_sleep" + date_time_str,"sleep started " + datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S"))
+            saveStringToFile("silva_summary_log_sleep_” + date_time_str,"sleep started " + datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S"))
             time.sleep(sleep_time)
+            continue
+        else:
+            for seq_id in all_ids:
+                err = dbsequences.AddWholeSeqId(con,cur, seqdbid, seq_id, 'na', noTest = True)
+                if err:
+                    debug(2, "failed to add dummy")
+                    silva_log += "failed to add\n"
+                    count_seq_dummy_failure += 1 
+                else:
+                    debug(2, "add dummy")
+                    silva_log += "added\n"
+                    count_seq_dummy_success += 1
         
         idx = 0
         num_matches = 0

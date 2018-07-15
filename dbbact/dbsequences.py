@@ -1,9 +1,9 @@
 from collections import defaultdict
 import psycopg2
 
-from . import primers
-from .utils import debug
-from . import dbannotations
+import dbbact.primers
+from dbbact.utils import debug
+import dbbact.dbannotations
 
 # length for the seed sequence
 # used for fast searching of sub sequences
@@ -525,7 +525,7 @@ def SequencesWholeToFile(con, cur, fileName, dbid):
     return ''
 
 
-def AddWholeSeqId (con, cur, dbidVal, dbbactidVal, wholeseqidVal):
+def AddWholeSeqId (con, cur, dbidVal, dbbactidVal, wholeseqidVal, noTest = False):
     '''
     Add record to wholeseqidstable table
 
@@ -543,7 +543,10 @@ def AddWholeSeqId (con, cur, dbidVal, dbbactidVal, wholeseqidVal):
     debug(1, 'AddWholeSeqId')
     
     try:
-        cur.execute('INSERT INTO wholeseqidstable (dbid, dbbactid, wholeseqid) VALUES (%s, %s, %s)', [dbidVal, dbbactidVal, wholeseqidVal])
+        if noTest == True or WholeSeqIdExists( con, cur, dbidVal, dbbactidVal, 'na' ) == False:
+            cur.execute('INSERT INTO wholeseqidstable (dbid, dbbactid, wholeseqid) VALUES (%s, %s, %s)', [dbidVal, dbbactidVal, wholeseqidVal])
+        else:
+            cur.execute('UPDATE wholeseqidstable set wholeseqid = %s where (dbid = %s and dbbactid = %s)', [wholeseqidVal, dbidVal, dbbactidVal])
         con.commit()
     except psycopg2.DatabaseError as e:
         debug(7, 'database error %s' % e)
@@ -573,7 +576,7 @@ def WholeSeqIdExists (con, cur, dbidVal, dbbactidVal, wholeseqidVal = ''):
         if wholeseqidVal:
             cur.execute("SELECT * FROM wholeseqidstable where dbid = %s and dbbactid = %s and wholeseqid = %s ", [dbidVal, dbbactidVal,wholeseqidVal])
         else:
-            cur.execute("SELECT * FROM wholeseqidstable where dbid = %s and dbbactid = %s", [dbidVal, dbbactidVal])
+            cur.execute("SELECT * FROM wholeseqidstable where dbid = %s and dbbactid = %s and wholeseqid != 'na'", [dbidVal, dbbactidVal])
         if cur.rowcount > 0:
             return "",True
         else:
