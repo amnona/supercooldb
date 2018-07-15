@@ -168,7 +168,7 @@ if __name__ == '__main__':
         if len(all_ids) == 0:
             debug(2, "go to sleep")
             silva_log += "sleep start " + datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S") + "\n"
-            saveStringToFile("silva_summary_log_sleep_” + date_time_str,"sleep started " + datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S"))
+            saveStringToFile("silva_summary_log_sleep_" + date_time_str,"sleep started " + datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S"))
             time.sleep(sleep_time)
             continue
         else:
