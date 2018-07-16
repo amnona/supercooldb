@@ -543,10 +543,14 @@ def AddWholeSeqId (con, cur, dbidVal, dbbactidVal, wholeseqidVal, noTest = False
     debug(1, 'AddWholeSeqId')
     
     try:
-        if noTest == True or WholeSeqIdExists( con, cur, dbidVal, dbbactidVal, 'na' ) == False:
+        if noTest == True :
             cur.execute('INSERT INTO wholeseqidstable (dbid, dbbactid, wholeseqid) VALUES (%s, %s, %s)', [dbidVal, dbbactidVal, wholeseqidVal])
         else:
-            cur.execute('UPDATE wholeseqidstable set wholeseqid = %s where (dbid = %s and dbbactid = %s)', [wholeseqidVal, dbidVal, dbbactidVal])
+            err, existFlag = WholeSeqIdExists( con, cur, dbidVal, dbbactidVal, 'na' )
+            if existFlag == False:
+                cur.execute('INSERT INTO wholeseqidstable (dbid, dbbactid, wholeseqid) VALUES (%s, %s, %s)', [dbidVal, dbbactidVal, wholeseqidVal])
+            else:
+                cur.execute('UPDATE wholeseqidstable set wholeseqid = %s where (dbid = %s and dbbactid = %s)', [wholeseqidVal, dbidVal, dbbactidVal])
         con.commit()
     except psycopg2.DatabaseError as e:
         debug(7, 'database error %s' % e)
