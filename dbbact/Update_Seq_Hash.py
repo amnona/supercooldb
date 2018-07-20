@@ -1,12 +1,19 @@
 from .utils import debug, SetDebugLevel
-from . import db_access
-from . import dbsequences
-from . import dbuser
 import os
 import time
 import datetime
 import hashlib
 from pathlib import Path
+
+#change the working directory
+import sys
+sys.path.insert(0, '/Users/admin/supercooldb')
+sys.path.insert(0, '/home/eitano/supercooldb')
+
+from dbbact import db_access
+from dbbact import dbsequences
+from dbbact import dbuser
+
 
 
 def removeFile(file_name):
@@ -74,7 +81,11 @@ if __name__ == '__main__':
         err, seq_id = dbsequences.GetSequenceWithNoHashID(con, cur)
         if err or seq_id == -1:
             #If no empty sequence, wait for long time
+            debug(2, "go to sleep")
+            silva_log += "sleep start " + datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S") + "\n"
+            saveStringToFile("hash_summary_log_sleep_" + date_time_str,"sleep started " + datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S"))
             time.sleep(sleep_time)
+            continue 
         
         hash_log += "sequence id = " + str(seq_id) + "\n"
         
