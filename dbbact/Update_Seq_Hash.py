@@ -1,4 +1,3 @@
-from .utils import debug, SetDebugLevel
 import os
 import time
 import datetime
@@ -10,6 +9,7 @@ import sys
 sys.path.insert(0, '/Users/admin/supercooldb')
 sys.path.insert(0, '/home/eitano/supercooldb')
 
+from dbbact.utils import debug, SetDebugLevel
 from dbbact import db_access
 from dbbact import dbsequences
 from dbbact import dbuser
@@ -82,7 +82,7 @@ if __name__ == '__main__':
         if err or seq_id == -1:
             #If no empty sequence, wait for long time
             debug(2, "go to sleep")
-            silva_log += "sleep start " + datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S") + "\n"
+            hash_log += "sleep start " + datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S") + "\n"
             saveStringToFile("hash_summary_log_sleep_" + date_time_str,"sleep started " + datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S"))
             time.sleep(sleep_time)
             continue 

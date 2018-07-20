@@ -91,7 +91,7 @@ if __name__ == '__main__':
         if err or seq_id == -1:
             #If no empty sequence, wait for long time
             debug(2, "go to sleep")
-            silva_log += "sleep start " + datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S") + "\n"
+            tax_log += "sleep start " + datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S") + "\n"
             saveStringToFile("tax_summary_log_sleep_" + date_time_str,"sleep started " + datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S"))
             time.sleep(sleep_time)
             continue
