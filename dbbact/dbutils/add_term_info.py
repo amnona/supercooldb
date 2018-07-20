@@ -3,7 +3,7 @@
 import sys
 import os
 
-sys.path.append(os.getcwd())
+# sys.path.append(os.getcwd())
 
 import argparse
 import psycopg2
@@ -145,8 +145,6 @@ def main(argv):
     parser.add_argument('--log-level', help='log level (1 is most detailed, 10 is only critical', default=1, type=int)
     args = parser.parse_args(argv)
     SetDebugLevel(args.log_level)
-    debug(1, 'test1')
-    debug(10, 'test10')
     add_term_info(servertype=args.db, overwrite=args.overwrite)
 
 
