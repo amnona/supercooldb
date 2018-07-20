@@ -143,7 +143,7 @@ def main(argv):
     parser = argparse.ArgumentParser(description='Add term info. version ' + __version__)
     parser.add_argument('--db', help='name of database to connect to (main/develop/local/amnon)', default='develop')
     parser.add_argument('--overwrite', help='delete current numbers', action='store_true')
-    parser.add_argument('--log-level', help='log level (1 is most detailed, 10 is only critical', default='1')
+    parser.add_argument('--log-level', help='log level (1 is most detailed, 10 is only critical', default=1, type=int)
     args = parser.parse_args(argv)
     SetDebugLevel(args.log_level)
     add_term_info(servertype=args.db, overwrite=args.overwrite)
