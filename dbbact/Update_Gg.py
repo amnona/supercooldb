@@ -152,12 +152,12 @@ if __name__ == '__main__':
     sleep_time = 86400
     #sleep_time = 10
     short_len=150
-    seqdbid = 1 # SILVA
-    silva_log = ""
+    seqdbid = 2 # GG
+    gg_log = ""
     
-    tempFileName = 'tempSilvaScript.fasta'
-    silvaFileName = 'SILVA_132_SSURef_tax_silva.fasta'
-    
+    tempFileName = 'tempGgScript.fasta'
+    ggFileName = '/Volumes/Photos/Temporary Studies/gg_13_5.fasta'
+        
     while isFileExist("stop") == False:
         
         #Create the file and read it
@@ -167,8 +167,8 @@ if __name__ == '__main__':
         #nothing to do, go to sleep
         if len(all_ids) == 0:
             debug(2, "go to sleep")
-            silva_log += "sleep start " + datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S") + "\n"
-            saveStringToFile("silva_summary_log_sleep_" + date_time_str,"sleep started " + datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S"))
+            gg_log += "sleep start " + datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S") + "\n"
+            saveStringToFile("gg_summary_log_sleep_" + date_time_str,"sleep started " + datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S"))
             time.sleep(sleep_time)
             continue
         else:
@@ -176,25 +176,25 @@ if __name__ == '__main__':
                 err = dbsequences.AddWholeSeqId(con,cur, seqdbid, seq_id, 'na', noTest = True)
                 if err:
                     debug(2, "failed to add dummy")
-                    silva_log += "failed to add\n"
+                    gg_log += "failed to add\n"
                     count_seq_dummy_failure += 1 
                 else:
                     debug(2, "add dummy")
-                    silva_log += "added\n"
+                    gg_log += "added\n"
                     count_seq_dummy_success += 1
         
         idx = 0
         num_matches = 0
         
-        for cseq, chead in iter_fasta_seqs(silvaFileName):
+        for cseq, chead in iter_fasta_seqs(ggFileName):
             isFound = False 
             idx += 1
             if idx % 1000 == 0:
                 debug(2, "count: %d"  % idx)
                 summary_str = "failed count = %s\nsuccess count = %s\nis exist count = %s\nis exist error = %s\nfailed dummy count = %s\nsuccess dummy count = %s\nis exist dummy count = %s\nis exist dummy error %s\n" % (count_seq_failure,count_seq_success,count_seq_exist,count_seq_is_exist_failure,count_seq_dummy_failure,count_seq_dummy_success,count_seq_dummy_exist,count_seq_dummy_exist)
         
-                saveStringToFile("silva_summary_log_" + date_time_str,summary_str)
-                saveStringToFile("silva_log_" + date_time_str,silva_log)
+                saveStringToFile("gg_summary_log_" + date_time_str,summary_str)
+                saveStringToFile("gg_log_" + date_time_str,gg_log)
         
             for cpos in range(len(cseq) - short_len):
                 ccseq = cseq[cpos:cpos + short_len]
@@ -204,27 +204,27 @@ if __name__ == '__main__':
                         if k in cseq:
                             cid = chead.split(' ')[0]
                             
-                            silva_log += "rec found: seq id %s , db bact id %s, id %s\n" % (seqdbid, v, cid)
+                            gg_log += "rec found: seq id %s , db bact id %s, id %s\n" % (seqdbid, v, cid)
                             
                             #check if already exist
                             err, existFlag = dbsequences.WholeSeqIdExists(con,cur, seqdbid, v, cid);
                             if err:
                                 count_seq_is_exist_failure += 1 
-                                silva_log += "failed to found\n"
+                                gg_log += "failed to found\n"
                             if existFlag:
                                 count_seq_exist += 1
-                                silva_log += "found\n"
+                                gg_log += "found\n"
                                 isFound = True
                                 break
                             else:
                                 debug(2, "add normal")
                                 err = dbsequences.AddWholeSeqId(con,cur, seqdbid, v, cid)
                                 if err:
-                                    silva_log += "failed to add\n"
+                                    gg_log += "failed to add\n"
                                     count_seq_failure += 1 
                                     break
                                 else:
-                                    silva_log += "added\n"
+                                    gg_log += "added\n"
                                     count_seq_success += 1
                                     isFound = True
                                     break
@@ -235,21 +235,21 @@ if __name__ == '__main__':
             err, existFlag = dbsequences.WholeSeqIdExists(con,cur, seqdbid, seq_id)
             if err:
                 count_seq_is_exist_dummy_failure += 1 
-                silva_log += "failed to found\n"
+                gg_log += "failed to found\n"
             if existFlag:
                 count_seq_dummy_exist += 1
-                silva_log += "found\n"
+                gg_log += "found\n"
                 isFound = True
                 break
             else:
                 debug(2, "add dummy")
                 err = dbsequences.AddWholeSeqId(con,cur, seqdbid, seq_id, 'na')
                 if err:
-                    silva_log += "failed to add\n"
+                    gg_log += "failed to add\n"
                     count_seq_dummy_failure += 1 
                     break
                 else:
-                    silva_log += "added\n"
+                    gg_log += "added\n"
                     count_seq_dummy_success += 1
                     break
             
@@ -258,6 +258,6 @@ if __name__ == '__main__':
         
         summary_str = "failed count = %s\nsuccess count = %s\nis exist count = %s\nis exist error = %s\nfailed dummy count = %s\nsuccess dummy count = %s\nis exist dummy count = %s\nis exist dummy error %s\n" % (count_seq_failure,count_seq_success,count_seq_exist,count_seq_is_exist_failure,count_seq_dummy_failure,count_seq_dummy_success,count_seq_dummy_exist,count_seq_dummy_exist)
         
-        saveStringToFile("silva_summary_log_" + date_time_str,summary_str)
-        saveStringToFile("silva_log_" + date_time_str,silva_log)
+        saveStringToFile("gg_summary_log_" + date_time_str,summary_str)
+        saveStringToFile("gg_log_" + date_time_str,gg_log)
     
