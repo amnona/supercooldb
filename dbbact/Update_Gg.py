@@ -156,7 +156,8 @@ if __name__ == '__main__':
     gg_log = ""
     
     tempFileName = 'tempGgScript.fasta'
-    ggFileName = '/Volumes/Photos/Temporary Studies/gg_13_5.fasta'
+    #ggFileName = '/Volumes/Photos/Temporary Studies/gg_13_5.fasta'
+    ggFileName = 'gg_13_5.fasta'
         
     while isFileExist("stop") == False:
         
