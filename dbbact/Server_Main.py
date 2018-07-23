@@ -59,6 +59,16 @@ def teardown_request(exception):
     g.con.close()
 
 
+# handle the cross-site scripting requests (CORS)
+# code from https://stackoverflow.com/questions/25594893/how-to-enable-cors-in-flask-and-heroku
+# used for the html interactive heatmaps that need reposnse from the dbbact api from within a browser
+@app.after_request
+def after_request(response):
+    header = response.headers
+    header['Access-Control-Allow-Origin'] = '*'
+    return response
+
+
 # the following function will be called for every request autentication is required
 @login_manager.request_loader
 def load_user(request):
@@ -100,7 +110,7 @@ def load_user(request):
                 isadmin = 0
             user = User(userName, password, userId, isadmin)
             # add the user to the recent users list
-            # for tempUser in recentLoginUsers:
+            # for tempUser int recentLoginUsers:
             #   if( tempUser.name == user.name ):
             #       debug(1,'user %s already found' % (user.id))
             # add the user to the list
