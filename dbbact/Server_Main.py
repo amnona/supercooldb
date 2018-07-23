@@ -62,11 +62,11 @@ def teardown_request(exception):
 # handle the cross-site scripting requests (CORS)
 # code from https://stackoverflow.com/questions/25594893/how-to-enable-cors-in-flask-and-heroku
 # used for the html interactive heatmaps that need reposnse from the dbbact api from within a browser
-@app.after_request
-def after_request(response):
-    header = response.headers
-    header['Access-Control-Allow-Origin'] = '*'
-    return response
+# @app.after_request
+# def after_request(response):
+#     header = response.headers
+#     header['Access-Control-Allow-Origin'] = '*'
+#     return response
 
 
 # the following function will be called for every request autentication is required
