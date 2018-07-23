@@ -66,6 +66,7 @@ def teardown_request(exception):
 def after_request(response):
     header = response.headers
     header['Access-Control-Allow-Origin'] = '*'
+    # this part from: https://stackoverflow.com/questions/25727306/request-header-field-access-control-allow-headers-is-not-allowed-by-access-contr
     header["Access-Control-Allow-Headers"] = "Origin, X-Requested-With, Content-Type, Accept"
     return response
 
