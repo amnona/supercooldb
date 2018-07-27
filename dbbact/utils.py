@@ -31,6 +31,7 @@ def debug(level, msg):
             cline = 'NA'
             cfunction = 'NA'
         print('[%s] [%d] [%s:%s:%s] %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), level, cfile, cfunction, cline, msg), file=sys.stderr)
+        sys.stdout.flush()
 
 
 def SetDebugLevel(level):
