@@ -35,7 +35,7 @@ def AddSequences(con, cur, sequences, taxonomies=None, ggids=None, primer='V4', 
     # get the primer region id
     seqids = []
     numadded = 0
-    idprimer = primers.GetIdFromName(con, cur, primer)
+    idprimer = dbbact.primers.GetIdFromName(con, cur, primer)
     if idprimer < 0:
         debug(2, 'primer %s not found' % primer)
         return "primer %s not found" % primer, None
@@ -98,22 +98,22 @@ def SeqFromID(con, cur, seqids):
     sequences = []
     for cseqid in seqids:
         cur.execute("SELECT sequence,coalesce(taxdomain,''),coalesce(taxphylum,''),  coalesce(taxclass,''),coalesce(taxorder,''),coalesce(taxfamily,''), coalesce(taxgenus,'') as taxonomy_str FROM SequencesTable WHERE id=%s", [cseqid])
-        
+
         if cur.rowcount == 0:
             sequences.append({'seq': ''})
             continue
         res = cur.fetchone()
-        
+
         firstTax = True
         taxStr = ''
-        list_of_pre_str = ["d__","p__","c__","o__","f__","g__"]
+        list_of_pre_str = ["d__", "p__", "c__", "o__", "f__", "g__"]
         for idx, val in enumerate(list_of_pre_str):
             if res[idx + 1]:
-                if firstTax == False :
+                if firstTax is False:
                     taxStr += ';'
-                taxStr += val + res[idx + 1]            
+                taxStr += val + res[idx + 1]
                 firstTax = False
-        
+
         cseqinfo = {'seq': res[0], 'taxonomy': taxStr}
         sequences.append(cseqinfo)
     return '', sequences
@@ -181,7 +181,7 @@ def GetSequenceIdFromGG(con, cur, ggid):
         resid = cres[0]
         sid.append(resid)
 
-    debug(1, 'found %d sequences for ggid %d' % (len(sid),ggid))
+    debug(1, 'found %d sequences for ggid %d' % (len(sid), ggid))
     return '', sid
 
 
@@ -294,9 +294,9 @@ def GetTaxonomyAnnotationIDs(con, cur, taxonomy, userid=None):
         list of the sequenceids that have this annotation
     '''
     taxonomy = taxonomy.lower()
-    taxStr = taxonomy 
+    taxStr = taxonomy
     debug(1, 'GetTaxonomyAnnotationIDS for taxonomy %s' % taxonomy)
-    cur.execute('SELECT id from SequencesTable where (taxrootrank ILIKE %s OR taxdomain ILIKE %s OR taxphylum ILIKE %s OR taxclass ILIKE %s OR taxfamily ILIKE %s OR taxgenus ILIKE %s OR taxorder ILIKE %s)', [taxStr,taxStr,taxStr,taxStr,taxStr,taxStr,taxStr])
+    cur.execute('SELECT id from SequencesTable where (taxrootrank ILIKE %s OR taxdomain ILIKE %s OR taxphylum ILIKE %s OR taxclass ILIKE %s OR taxfamily ILIKE %s OR taxgenus ILIKE %s OR taxorder ILIKE %s)', [taxStr, taxStr, taxStr, taxStr, taxStr, taxStr, taxStr])
     res = cur.fetchall()
     seqids = []
     for cres in res:
@@ -349,13 +349,14 @@ def GetTaxonomyAnnotations(con, cur, taxonomy, userid=None):
     for cres in annotationids:
         cid = cres[0]
         ccount = cres[1]
-        err, cdetails = dbannotations.GetAnnotationsFromID(con, cur, cid)
+        err, cdetails = dbbact.dbannotations.GetAnnotationsFromID(con, cur, cid)
         if err:
             debug(6, err)
             continue
         annotations.append((cdetails, ccount))
     debug(1, 'got %d details' % len(annotations))
     return '', annotations, seqids
+
 
 def GetHashAnnotationIDs(con, cur, hash_str, userid=None):
     '''
@@ -377,9 +378,9 @@ def GetHashAnnotationIDs(con, cur, hash_str, userid=None):
         list of the sequenceids that have this annotation
     '''
     hash_str = hash_str.lower()
-    taxStr = hash_str 
+    taxStr = hash_str
     debug(1, 'GetHashAnnotationIDS for Hash %s' % hash_str)
-    cur.execute('SELECT id,sequence from SequencesTable where (hashfull ILIKE %s or hash150 ILIKE %s or hash100 ILIKE %s)', [hash_str,hash_str,hash_str])
+    cur.execute('SELECT id,sequence from SequencesTable where (hashfull ILIKE %s or hash150 ILIKE %s or hash100 ILIKE %s)', [hash_str, hash_str, hash_str])
     res = cur.fetchall()
     seqids = []
     seqnames = []
@@ -399,6 +400,7 @@ def GetHashAnnotationIDs(con, cur, hash_str, userid=None):
     for k, v in annotationids_dict.items():
         annotationids.append((k, v))
     return '', annotationids, seqids, seqnames
+
 
 def GetHashAnnotations(con, cur, hash_str, userid=None):
     '''
@@ -434,7 +436,7 @@ def GetHashAnnotations(con, cur, hash_str, userid=None):
     for cres in annotationids:
         cid = cres[0]
         ccount = cres[1]
-        err, cdetails = dbannotations.GetAnnotationsFromID(con, cur, cid)
+        err, cdetails = dbbact.dbannotations.GetAnnotationsFromID(con, cur, cid)
         if err:
             debug(6, err)
             continue
@@ -456,7 +458,7 @@ def GetSequenceWithNoTaxonomyID(con, cur):
     sequence id : return the sequence id
     '''
     debug(1, 'GetSequenceWithNoTaxonomy')
-    
+
     cur.execute("select id from annotationschematest.sequencestable where (COALESCE(taxrootrank,'')='' AND COALESCE(taxdomain,'')='' AND COALESCE(taxphylum,'')='' AND COALESCE(taxclass,'')='' AND COALESCE(taxfamily,'')='' AND COALESCE(taxgenus,'')='' AND COALESCE(taxorder,'')='') limit 1")
     if cur.rowcount == 0:
         errmsg = 'no missing taxonomy'
@@ -464,7 +466,7 @@ def GetSequenceWithNoTaxonomyID(con, cur):
         return errmsg, -1
     res = cur.fetchone()
     return_id = res[0]
-    
+
     return '', return_id
 
 
@@ -481,7 +483,7 @@ def GetSequenceWithNoHashID(con, cur):
     sequence id : return the sequence id
     '''
     debug(1, 'GetSequenceWithNoHashID')
-    
+
     cur.execute("select id from annotationschematest.sequencestable where (COALESCE(hashfull,'')='' AND COALESCE(hash150,'')='' AND COALESCE(hash100,'')='') limit 1")
     if cur.rowcount == 0:
         errmsg = 'no missing hash'
@@ -489,7 +491,7 @@ def GetSequenceWithNoHashID(con, cur):
         return errmsg, -1
     res = cur.fetchone()
     return_id = res[0]
-    
+
     return '', return_id
 
 
@@ -508,12 +510,11 @@ def SequencesWholeToFile(con, cur, fileName, dbid):
     error message
     '''
     debug(1, 'SequencesWholeToFile')
-    
+
     try:
-        #cur.execute("SELECT id,sequence,ggid FROM sequencestable")
-        
+        # cur.execute("SELECT id,sequence,ggid FROM sequencestable")
         cur.execute("SELECT id,sequence,ggid FROM sequencestable where id not in (select distinct dbbactid from wholeseqidstable where dbid=%s)" % dbid)
-        
+
         seq_count = 0
         with open(fileName, 'w') as fl:
             for cres in cur:
@@ -525,7 +526,7 @@ def SequencesWholeToFile(con, cur, fileName, dbid):
     return ''
 
 
-def AddWholeSeqId (con, cur, dbidVal, dbbactidVal, wholeseqidVal, noTest = False):
+def AddWholeSeqId(con, cur, dbidVal, dbbactidVal, wholeseqidVal, noTest=False):
     '''
     Add record to wholeseqidstable table
 
@@ -541,13 +542,13 @@ def AddWholeSeqId (con, cur, dbidVal, dbbactidVal, wholeseqidVal, noTest = False
     error message
     '''
     debug(1, 'AddWholeSeqId')
-    
+
     try:
-        if noTest == True :
+        if noTest is True:
             cur.execute('INSERT INTO wholeseqidstable (dbid, dbbactid, wholeseqid) VALUES (%s, %s, %s)', [dbidVal, dbbactidVal, wholeseqidVal])
         else:
-            err, existFlag = WholeSeqIdExists( con, cur, dbidVal, dbbactidVal, 'na' )
-            if existFlag == False:
+            err, existFlag = WholeSeqIdExists(con, cur, dbidVal, dbbactidVal, 'na')
+            if existFlag is False:
                 cur.execute('INSERT INTO wholeseqidstable (dbid, dbbactid, wholeseqid) VALUES (%s, %s, %s)', [dbidVal, dbbactidVal, wholeseqidVal])
             else:
                 cur.execute('UPDATE wholeseqidstable set wholeseqid = %s where (dbid = %s and dbbactid = %s)', [wholeseqidVal, dbidVal, dbbactidVal])
@@ -555,9 +556,10 @@ def AddWholeSeqId (con, cur, dbidVal, dbbactidVal, wholeseqidVal, noTest = False
     except psycopg2.DatabaseError as e:
         debug(7, 'database error %s' % e)
         return "database error %s" % e
-    return ""    
+    return ""
 
-def WholeSeqIdExists (con, cur, dbidVal, dbbactidVal, wholeseqidVal = ''):
+
+def WholeSeqIdExists(con, cur, dbidVal, dbbactidVal, wholeseqidVal=''):
     '''
     Check if record is already exist in wholeseqidstable table
 
@@ -566,7 +568,7 @@ def WholeSeqIdExists (con, cur, dbidVal, dbbactidVal, wholeseqidVal = ''):
     con,cur
     dbidVal - db type (e.g. silva, gg)
     dbbactidVal - sequnence id in dbbact
-    wholeseqidVal - the id in different db (e.g. silva, gg) 
+    wholeseqidVal - the id in different db (e.g. silva, gg)
     if empty we will retrive all the ids which have at list one record
 
     Returns
@@ -575,22 +577,23 @@ def WholeSeqIdExists (con, cur, dbidVal, dbbactidVal, wholeseqidVal = ''):
     error message
     '''
     debug(1, 'WholeSeqIdExists')
-    
+
     try:
         if wholeseqidVal:
-            cur.execute("SELECT * FROM wholeseqidstable where dbid = %s and dbbactid = %s and wholeseqid = %s ", [dbidVal, dbbactidVal,wholeseqidVal])
+            cur.execute("SELECT * FROM wholeseqidstable where dbid = %s and dbbactid = %s and wholeseqid = %s ", [dbidVal, dbbactidVal, wholeseqidVal])
         else:
             cur.execute("SELECT * FROM wholeseqidstable where dbid = %s and dbbactid = %s and wholeseqid != 'na'", [dbidVal, dbbactidVal])
         if cur.rowcount > 0:
-            return "",True
+            return "", True
         else:
-            return "",False 
-    
+            return "", False 
+
     except psycopg2.DatabaseError as e:
         debug(7, 'database error %s' % e)
         return "database error %s" % e, False
-    return "", False     
-    
+    return "", False
+
+
 def GetSequenceStrByID(con, cur, seq_id):
     '''
     Get sequence with no taxonomy (if any)
@@ -599,13 +602,13 @@ def GetSequenceStrByID(con, cur, seq_id):
     ----------
     con,cur
     seq_id
-    
+
     Returns
     -------
     sequence str : return the sequence str
     '''
     debug(1, 'GetSequenceStrByID')
-    
+
     cur.execute("select sequence from annotationschematest.sequencestable where id=%s" % seq_id)
     if cur.rowcount == 0:
         errmsg = 'no missing taxonomy'
@@ -613,11 +616,11 @@ def GetSequenceStrByID(con, cur, seq_id):
         return errmsg, seq_id
     res = cur.fetchone()
     return_id = res[0]
-    
+
     return '', return_id
 
 
-def UpdateHash(con, cur, seq_id, hash_seq_full,hash_seq_150,hash_seq_100):
+def UpdateHash(con, cur, seq_id, hash_seq_full, hash_seq_150, hash_seq_100):
     '''
     update hash information
 
@@ -626,17 +629,17 @@ def UpdateHash(con, cur, seq_id, hash_seq_full,hash_seq_150,hash_seq_100):
     con,cur
     seq_id
     hash_seq_full - hash for full
-    hash_seq_150 - hash for first 150 characters 
-    hash_seq_100 - hash for first 100 characters 
-    
+    hash_seq_150 - hash for first 150 characters
+    hash_seq_100 - hash for first 100 characters
+
     Returns
     -------
     true or false
     '''
     debug(1, 'UpdateHash')
-    
+
     try:
-        cur.execute("update annotationschematest.sequencestable set hashfull='%s',hash150='%s',hash100='%s' where id=%s" % (hash_seq_full,hash_seq_150,hash_seq_100,seq_id))
+        cur.execute("update annotationschematest.sequencestable set hashfull='%s',hash150='%s',hash100='%s' where id=%s" % (hash_seq_full, hash_seq_150, hash_seq_100, seq_id))
         con.commit()
         return True
     except:
@@ -653,15 +656,15 @@ def AddSequenceTax(con, cur, seq_id, col, value):
     seq_id
     col - taxonomyrank coloumn name
     value - taxonomyrank value
-    
+
     Returns
     -------
     true or false
     '''
     debug(1, 'GetSequenceStrByID')
-    
+
     try:
-        cur.execute("update annotationschematest.sequencestable set %s='%s' where id=%s" % (col,value,seq_id))
+        cur.execute("update annotationschematest.sequencestable set %s='%s' where id=%s" % (col, value, seq_id))
         con.commit()
         return True
     except:
