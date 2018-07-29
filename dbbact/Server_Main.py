@@ -29,10 +29,6 @@ app.register_blueprint(DBStats_Flask_Obj)
 app.register_blueprint(Users_Flask_Obj)
 app.register_blueprint(Docs_Flask_Obj)
 
-# to enable the stack traces on error
-# (from https://stackoverflow.com/questions/18059937/flask-app-raises-a-500-error-with-no-exception)
-app.debug = True
-
 auto.init_app(app)
 
 login_manager = LoginManager()
@@ -152,6 +148,9 @@ def gunicorn(debug_level=6):
     Flask app
     '''
     SetDebugLevel(debug_level)
+    # to enable the stack traces on error
+    # (from https://stackoverflow.com/questions/18059937/flask-app-raises-a-500-error-with-no-exception)
+    app.debug = True
     debug(6, 'starting dbbact rest-api server using gunicorn, debug_level=%d' % debug_level)
     return app
 
