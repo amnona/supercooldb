@@ -298,7 +298,6 @@ def AddAnnotationDetails(con, cur, annotationid, annotationdetails, commit=True)
     """
     try:
         numadded = 0
-        print(annotationdetails)
         for (cdetailtype, contologyterm) in annotationdetails:
             cdetailtypeid = dbidval.GetIdFromDescription(con, cur, "AnnotationDetailsTypesTable", cdetailtype)
             if cdetailtypeid < 0:
