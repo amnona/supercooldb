@@ -253,7 +253,6 @@ def get_sequence_annotations():
         term_info = {}
     return json.dumps({'annotations': details, 'term_info': term_info, 'taxonomy': taxonomy})
 
-
 @login_required
 @Seq_Flask_Obj.route('/sequences/get_list_annotations', methods=['GET'])
 @auto.doc()
@@ -595,6 +594,89 @@ def get_hash_annotations():
         return(errmsg, 400)
     return json.dumps({'annotations': annotations, 'seqids': seqids , 'seqstr': seqnames })
 
+@login_required
+@Seq_Flask_Obj.route('/sequences/get_gg_annotations', methods=['GET'])
+@auto.doc()
+def get_gg_annotations():
+    """
+    Title: Get annotation ids based on gg id
+    Description : Get annotation ids for gg id string
+    URL: /sequences/get_hash_annotations
+    Method: GET
+    URL Params:
+    Data Params: JSON
+        {
+            gg : str
+                the gg id to look for
+        }
+    Success Response:
+        Code : 200
+        Content :
+        {
+            'annotations' : list of (annotation, counts)
+                the annotation details for all annotations that contain a sequence with the requested taxonomy (see /sequences/get_annotations) and the count of taxonomy sequences with the annotation
+            seqids : list on int
+                list of the sequenceids that have this taxonomy in the database
+        }
+    Validation:
+        If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
+        If annotation is not private, return it (no need for authentication)
+    """
+    cfunc = get_gg_annotations
+    alldat = request.get_json()
+    if alldat is None:
+        return(getdoc(cfunc))
+    gg_str = alldat.get('gg_id')
+    if gg_str is None:
+        return('gg_id parameter missing', 400)
+    err, annotations, seqids, seqnames = dbsequences.GetGgAnnotations(g.con, g.cur, gg_str, userid=current_user.user_id)
+    if err:
+        errmsg = 'error encountered searching annotations for gg id %s: %s' % (hash_str, err)
+        debug(6, errmsg)
+        return(errmsg, 400)
+    return json.dumps({'annotations': annotations, 'seqids': seqids , 'seqstr': seqnames })
+
+@login_required
+@Seq_Flask_Obj.route('/sequences/get_silva_annotations', methods=['GET'])
+@auto.doc()
+def get_silva_annotations():
+    """
+    Title: Get annotation ids based on silva id
+    Description : Get annotation ids for silva id string
+    URL: /sequences/get_hash_annotations
+    Method: GET
+    URL Params:
+    Data Params: JSON
+        {
+            silva : str
+                the silva id to look for
+        }
+    Success Response:
+        Code : 200
+        Content :
+        {
+            'annotations' : list of (annotation, counts)
+                the annotation details for all annotations that contain a sequence with the requested taxonomy (see /sequences/get_annotations) and the count of taxonomy sequences with the annotation
+            seqids : list on int
+                list of the sequenceids that have this taxonomy in the database
+        }
+    Validation:
+        If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
+        If annotation is not private, return it (no need for authentication)
+    """
+    cfunc = get_silva_annotations
+    alldat = request.get_json()
+    if alldat is None:
+        return(getdoc(cfunc))
+    silva_str = alldat.get('silva_id')
+    if silva_str is None:
+        return('silva_id parameter missing', 400)
+    err, annotations, seqids, seqnames = dbsequences.GetSilvaAnnotations(g.con, g.cur, silva_str, userid=current_user.user_id)
+    if err:
+        errmsg = 'error encountered searching annotations for silva id %s: %s' % (silva_str, err)
+        debug(6, errmsg)
+        return(errmsg, 400)
+    return json.dumps({'annotations': annotations, 'seqids': seqids , 'seqstr': seqnames })
 
 @Seq_Flask_Obj.route('/sequences/get_info', methods=['GET'])
 @auto.doc()
