@@ -401,6 +401,44 @@ def GetHashAnnotationIDs(con, cur, hash_str, userid=None):
         annotationids.append((k, v))
     return '', annotationids, seqids, seqnames
 
+
+def get_seqs_from_db_id(con, cur, db_name, db_seq_id):
+    '''Get all sequences that match the db_seq_id supplied for silva/greengenes
+
+    Parameters
+    ----------
+    con, cur
+    db_name: str
+        name of the database from which the id originates. can be "silva" or "gg"
+    db_seq_id: str
+        the sequence identifier in the database (i.e. 'FJ978486.1.1387' for silva or '1111883' for greengenes)
+
+    Returns
+    -------
+    error: str or '' if ok
+    list of int
+        the dbbact ids for all the dbbact sequences matching the db_seq_id
+    list of str
+        the actual sequences for the dbbact sequences matching the db_seq_id (same order)
+    '''
+    database_ids = {'silva': 1, 'gg': 2}
+    if db_name in database_ids:
+        db_id = database_ids[db_name]
+    else:
+        err = 'database id %s not found. options are: %s' % database_ids.keys()
+        debug(9, err)
+        return err, [], []
+    cur.execute("SELECT id,sequence FROM SequencesTable where id in (select distinct dbbactid from WholeSeqIDsTable where WholeSeqID=%s AND dbid=%s)", [db_id, db_seq_id])
+    seq_ids = []
+    sequences = []
+    res = cur.fetchall()
+    for cres in res:
+        seq_ids.append(cres[0])
+        sequences.append(cres[1])
+    debug(1, 'found %d dbbact sequences for seqid %s' % (len(seq_ids), db_seq_id))
+    return '', seq_ids, sequences
+
+
 def GetGgAnnotationIDs(con, cur, gg_str, userid=None):
     '''
     Get annotationids for all annotations containing any sequence matching the gg id (substring)
@@ -421,18 +459,22 @@ def GetGgAnnotationIDs(con, cur, gg_str, userid=None):
         list of the sequenceids that have this annotation
     '''
     gg_str = gg_str.lower()
-    ggStr = gg_str 
+    ggStr = gg_str
     debug(1, 'GetGgAnnotationIDs for gg %s' % gg_str)
 
-    cur.execute("SELECT id,sequence,ggid FROM sequencestable where id in (select distinct dbbactid from wholeseqidstable where dbid=2 and wholeseqid != 'na' and wholeseqid ILIKE %s)" , [ggStr] )        
-    
-    res = cur.fetchall()
-    seqids = []
-    seqnames = []
-    for cres in res:
-        seqids.append(cres[0])
-        seqnames.append(cres[1])
-    debug(1, 'found %d matching sequences for the gg' % len(seqids))
+    # cur.execute("SELECT id,sequence,ggid FROM sequencestable where id in (select distinct dbbactid from wholeseqidstable where dbid=2 and wholeseqid != 'na' and wholeseqid ILIKE %s)", [ggStr])
+
+    # res = cur.fetchall()
+    # seqids = []
+    # seqnames = []
+    # for cres in res:
+    #     seqids.append(cres[0])
+    #     seqnames.append(cres[1])
+    # debug(1, 'found %d matching sequences for the gg' % len(seqids))
+    err, seqids, seqnames = get_seqs_from_db_id(con, cur, 'gg', ggStr)
+    if err != '':
+        return err, [], [], []
+
     annotationids_dict = defaultdict(int)
     for cseq in seqids:
         cur.execute('SELECT annotationid from sequencesAnnotationTable where seqid=%s', [cseq])
@@ -445,6 +487,7 @@ def GetGgAnnotationIDs(con, cur, gg_str, userid=None):
     for k, v in annotationids_dict.items():
         annotationids.append((k, v))
     return '', annotationids, seqids, seqnames
+
 
 def GetSilvaAnnotationIDs(con, cur, silva_str, userid=None):
     '''
@@ -460,22 +503,27 @@ def GetSilvaAnnotationIDs(con, cur, silva_str, userid=None):
 
     Returns
     -------
+    err: str
+        the error encountered or '' if successful
     annotationids : list of (int, int) (annotationid, count)
-        list containing the ids of all annotations that contain a sequence with the Hash and the count of number of sequences from the Hash in that annotation
+        list containing the ids of all annotations that contain a sequence with the silvaID and the count of number of sequences with the silvaID in that annotation
     seqids : list of int
-        list of the sequenceids that have this annotation
+        list of the sequenceids that have this silvaID
+    seqnames: list of str
+        the sequences matching the silvaID
     '''
-    silva_str = silva_str.lower()
-    silvaStr = silva_str 
-    debug(1, 'GetHashAnnotationIDS for Silva %s' % silva_str)
-    
-    cur.execute("SELECT id,sequence FROM sequencestable where id in (select distinct dbbactid from wholeseqidstable where dbid=1 and wholeseqid != 'na' and wholeseqid ILIKE %s)" , [silvaStr] )
-    res = cur.fetchall()
-    seqids = []
-    seqnames = []
-    for cres in res:
-        seqids.append(cres[0])
-        seqnames.append(cres[1])
+    debug(1, 'GetSilvaAnnotationIDs for Silva %s' % silva_str)
+
+    err, seqids, seqnames = get_seqs_from_db_id(con, cur, 'gg', silva_str)
+    if err != '':
+        return err, [], [], []
+    # cur.execute("SELECT id,sequence FROM sequencestable where id in (select distinct dbbactid from wholeseqidstable where dbid=1 and wholeseqid != 'na' and wholeseqid ILIKE %s)", [silvaStr])
+    # res = cur.fetchall()
+    # seqids = []
+    # seqnames = []
+    # for cres in res:
+    #     seqids.append(cres[0])
+    #     seqnames.append(cres[1])
     debug(1, 'found %d matching sequences for the silva' % len(seqids))
     annotationids_dict = defaultdict(int)
     for cseq in seqids:
@@ -489,6 +537,7 @@ def GetSilvaAnnotationIDs(con, cur, silva_str, userid=None):
     for k, v in annotationids_dict.items():
         annotationids.append((k, v))
     return '', annotationids, seqids, seqnames
+
 
 def GetHashAnnotations(con, cur, hash_str, userid=None):
     '''
@@ -574,9 +623,10 @@ def GetGgAnnotations(con, cur, gg_str, userid=None):
     debug(1, 'got %d details' % len(annotations))
     return '', annotations, seqids, seqnames
 
+
 def GetSilvaAnnotations(con, cur, silva_str, userid=None):
     '''
-    Get annotations for all annotations containing any sequence matching the hash (substring)
+    Get annotations for all annotations containing any sequence matching the silvaID (substring)
 
     Parameters
     ----------
@@ -596,7 +646,7 @@ def GetSilvaAnnotations(con, cur, silva_str, userid=None):
         list of the sequenceids which have this taxonomy
     seqnames : list of sequence strings
     '''
-    debug(1, 'GetSilvaAnnotations for hash %s' % silva_str)
+    debug(1, 'GetSilvaAnnotations for silva ID %s' % silva_str)
     # get the annotation ids
     err, annotationids, seqids, seqnames = GetSilvaAnnotationIDs(con, cur, silva_str, userid)
     if err:

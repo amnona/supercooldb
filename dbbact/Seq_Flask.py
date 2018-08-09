@@ -552,6 +552,7 @@ def get_taxonomy_annotations():
         return(errmsg, 400)
     return json.dumps({'annotations': annotations, 'seqids': seqids})
 
+
 @login_required
 @Seq_Flask_Obj.route('/sequences/get_hash_annotations', methods=['GET'])
 @auto.doc()
@@ -592,7 +593,8 @@ def get_hash_annotations():
         errmsg = 'error encountered searching for hash annotations for hash %s: %s' % (hash_str, err)
         debug(6, errmsg)
         return(errmsg, 400)
-    return json.dumps({'annotations': annotations, 'seqids': seqids , 'seqstr': seqnames })
+    return json.dumps({'annotations': annotations, 'seqids': seqids, 'seqstr': seqnames})
+
 
 @login_required
 @Seq_Flask_Obj.route('/sequences/get_gg_annotations', methods=['GET'])
@@ -631,10 +633,11 @@ def get_gg_annotations():
         return('gg_id parameter missing', 400)
     err, annotations, seqids, seqnames = dbsequences.GetGgAnnotations(g.con, g.cur, gg_str, userid=current_user.user_id)
     if err:
-        errmsg = 'error encountered searching annotations for gg id %s: %s' % (hash_str, err)
+        errmsg = 'error encountered searching annotations for gg id %s: %s' % (gg_str, err)
         debug(6, errmsg)
         return(errmsg, 400)
-    return json.dumps({'annotations': annotations, 'seqids': seqids , 'seqstr': seqnames })
+    return json.dumps({'annotations': annotations, 'seqids': seqids, 'seqstr': seqnames})
+
 
 @login_required
 @Seq_Flask_Obj.route('/sequences/get_silva_annotations', methods=['GET'])
@@ -648,8 +651,8 @@ def get_silva_annotations():
     URL Params:
     Data Params: JSON
         {
-            silva : str
-                the silva id to look for
+            'silva' : str
+                the silva id to look for (i.e. "LC133747.1.1482")
         }
     Success Response:
         Code : 200
@@ -657,8 +660,10 @@ def get_silva_annotations():
         {
             'annotations' : list of (annotation, counts)
                 the annotation details for all annotations that contain a sequence with the requested taxonomy (see /sequences/get_annotations) and the count of taxonomy sequences with the annotation
-            seqids : list on int
+            'seqids' : list on int
                 list of the sequenceids that have this taxonomy in the database
+            'seqstr': list of str
+                list of the sequences that have this silva ids (i.e. ACGT of each seqid)
         }
     Validation:
         If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
@@ -677,6 +682,7 @@ def get_silva_annotations():
         debug(6, errmsg)
         return(errmsg, 400)
     return json.dumps({'annotations': annotations, 'seqids': seqids , 'seqstr': seqnames })
+
 
 @Seq_Flask_Obj.route('/sequences/get_info', methods=['GET'])
 @auto.doc()
@@ -769,4 +775,46 @@ def get_sequence_string_annotations():
         debug(6, err)
         return ('Problem geting details. error=%s' % err, 400)
     res = json.dumps({'annotations': details})
+    return res
+
+
+@login_required
+@Seq_Flask_Obj.route('/sequences/get_seqs_from_external_db_id', methods=['GET', 'POST', 'OPTIONS'])
+@auto.doc()
+def api_get_seqs_from_db_id():
+    '''
+    Title: get_seqs_from_external_db_id
+    Description : Get all dbbact sequences that match the database_id supplied for silva/greengenes
+    URL: /sequences/get_seqs_from_external_db_id
+    Method: GET, POST
+    URL Params:
+    Data Params: JSON
+        {
+            seq_ids : list of str
+                the sequence identifiers in the database (i.e. 'FJ978486.1.1387' for silva or '1111883' for greengenes)
+            database_name : str
+                name of the database from which the ids originate. can be "silva" or "gg"
+    Success Response:
+        Code : 200
+        Content :
+        {
+            "dbbact_seqs_per_id": dict of {seq_id(str): tuple of (list of dbbact ids(int), list of dbbact sequences (str))}
+    '''
+    cfunc = api_get_seqs_from_db_id
+    alldat = request.get_json()
+    if alldat is None:
+        return(getdoc(cfunc))
+    seq_ids = alldat.get('seq_ids')
+    database_name = alldat.get('database_name')
+    if seq_ids is None:
+        return('seq_ids parameter missing', 400)
+
+    dbbact_seqs = {}
+    for cid in seq_ids:
+        err, cdb_ids, cdb_seqs = dbsequences.get_seqs_from_db_id(g.con, g.cur, db_name=database_name, db_seq_id=cid)
+        if err:
+            debug(6, err)
+            return('Problem geting sequences for id %s. error=%s' % (cid, err), 400)
+        dbbact_seqs[cid] = (cdb_ids, cdb_seqs)
+    res = json.dumps({'dbbact_seqs_per_id': dbbact_seqs})
     return res
