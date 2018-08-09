@@ -651,7 +651,7 @@ def get_silva_annotations():
     URL Params:
     Data Params: JSON
         {
-            'silva' : str
+            'silva_id' : str
                 the silva id to look for (i.e. "LC133747.1.1482")
         }
     Success Response:
@@ -808,6 +808,8 @@ def api_get_seqs_from_db_id():
     database_name = alldat.get('database_name')
     if seq_ids is None:
         return('seq_ids parameter missing', 400)
+    if database_name is None:
+        return('database_name parameter missing', 400)
 
     dbbact_seqs = {}
     for cid in seq_ids:

@@ -514,7 +514,7 @@ def GetSilvaAnnotationIDs(con, cur, silva_str, userid=None):
     '''
     debug(1, 'GetSilvaAnnotationIDs for Silva %s' % silva_str)
 
-    err, seqids, seqnames = get_seqs_from_db_id(con, cur, 'gg', silva_str)
+    err, seqids, seqnames = get_seqs_from_db_id(con, cur, 'silva', silva_str)
     if err != '':
         return err, [], [], []
     # cur.execute("SELECT id,sequence FROM sequencestable where id in (select distinct dbbactid from wholeseqidstable where dbid=1 and wholeseqid != 'na' and wholeseqid ILIKE %s)", [silvaStr])
