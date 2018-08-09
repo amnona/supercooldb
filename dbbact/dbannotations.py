@@ -1202,51 +1202,51 @@ def get_annotation_term_pairs(cann, max_terms=20, get_pairs=True, get_singles=Tr
     return term_pairs
 
 
-def get_fast_annotations_gg_silva(con, cur, seq_db_ids, database='silva', userid=0, get_term_info=True, get_all_exp_annotations=True):
-    '''
-    Get annotations for a list of sequences in a compact form based on the silva/greengenes ids
+# def get_fast_annotations_gg_silva(con, cur, seq_db_ids, database='silva', userid=0, get_term_info=True, get_all_exp_annotations=True):
+#     '''
+#     Get annotations for a list of sequences in a compact form based on the silva/greengenes ids
 
-    input:
-    con,cur :
-    seq_db_ids: list of str
-        the sequences database identifiers to search for (i.e. 'FJ978486.1.1387' for silva or '1111883' for greengenes)
-   database : str (optional)
-        the database for which the id originated. options are "silva" or "gg"
-    userid : int (optional)
-        the id of the user requesting the annotations. Provate annotations with non-matching user will not be returned
-    get_term_info : bool (optional)
-        True (default) to get the information about each term, False to skip this step
-    get_all_exp_annotations: bool (optional)
-        True (default) to get all annotations for each experiment which the sequence appear in at least one annotation.
-        False to get just the annotations where the sequence appears
+#     input:
+#     con,cur :
+#     seq_db_ids: list of str
+#         the sequences database identifiers to search for (i.e. 'FJ978486.1.1387' for silva or '1111883' for greengenes)
+#    database : str (optional)
+#         the database for which the id originated. options are "silva" or "gg"
+#     userid : int (optional)
+#         the id of the user requesting the annotations. Provate annotations with non-matching user will not be returned
+#     get_term_info : bool (optional)
+#         True (default) to get the information about each term, False to skip this step
+#     get_all_exp_annotations: bool (optional)
+#         True (default) to get all annotations for each experiment which the sequence appear in at least one annotation.
+#         False to get just the annotations where the sequence appears
 
-    output:
-    err : str
-        The error encountered or '' if ok
-    annotations : dict of {annotationid : annotation details (see GetAnnotationsFromID() }
-        a dict containing all annotations relevant to any of the sequences and the details about them
-        * includes 'parents' - list of all ontology term parents for each annotation
-    seqannotations : list of (seqpos, annotationids)
-        list of tuples.
-        seqpos : the position (in sequences) of the sequence with annotations
-        annotationsids : list of int
-            the ids of annotations about this sequence
-    term_info : dict of {term, dict}
-        Information about each term which appears in the annotation parents. Key is the ontolgy term. the value dict is:
-            'total_annotations' : int
-                total number of annotations where this term appears (as a parent)
-            'total_sequences' : int
-                total number of sequences in annotations where this term appears (as a parent)
-    id_seqs : dict of {seq_db_id(str): list of dbbact sequences (str of ACGT)}
-    '''
-    database_ids = {'silva': 1, 'gg': 2}
-    if database in database_ids:
-        db_id = database_ids[database]
-    else:
-        err = 'database id %s not found. options are: %s' % database_ids.keys()
-        debug(9, err)
-        return err, {}, [], {}, {}
+#     output:
+#     err : str
+#         The error encountered or '' if ok
+#     annotations : dict of {annotationid : annotation details (see GetAnnotationsFromID() }
+#         a dict containing all annotations relevant to any of the sequences and the details about them
+#         * includes 'parents' - list of all ontology term parents for each annotation
+#     seqannotations : list of (seqpos, annotationids)
+#         list of tuples.
+#         seqpos : the position (in sequences) of the sequence with annotations
+#         annotationsids : list of int
+#             the ids of annotations about this sequence
+#     term_info : dict of {term, dict}
+#         Information about each term which appears in the annotation parents. Key is the ontolgy term. the value dict is:
+#             'total_annotations' : int
+#                 total number of annotations where this term appears (as a parent)
+#             'total_sequences' : int
+#                 total number of sequences in annotations where this term appears (as a parent)
+#     id_seqs : dict of {seq_db_id(str): list of dbbact sequences (str of ACGT)}
+#     '''
+#     database_ids = {'silva': 1, 'gg': 2}
+#     if database in database_ids:
+#         db_id = database_ids[database]
+#     else:
+#         err = 'database id %s not found. options are: %s' % database_ids.keys()
+#         debug(9, err)
+#         return err, {}, [], {}, {}
 
-    debug(2, 'getting fast annotations gg_silva for %d ids' % len(seq_db_ids))
-    for cid in seq_db_ids:
-        seqs = 
+#     debug(2, 'getting fast annotations gg_silva for %d ids' % len(seq_db_ids))
+#     for cid in seq_db_ids:
+#         seqs = 
