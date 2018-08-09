@@ -428,7 +428,7 @@ def get_seqs_from_db_id(con, cur, db_name, db_seq_id):
         err = 'database id %s not found. options are: %s' % database_ids.keys()
         debug(9, err)
         return err, [], []
-    cur.execute("SELECT id,sequence FROM SequencesTable where id in (select distinct dbbactid from WholeSeqIDsTable where WholeSeqID=%s AND dbid=%s)", [db_id, db_seq_id])
+    cur.execute("SELECT id,sequence FROM SequencesTable where id in (select distinct dbbactid from WholeSeqIDsTable where WholeSeqID=%s AND dbid=%s)", [str(db_id), db_seq_id])
     seq_ids = []
     sequences = []
     res = cur.fetchall()
