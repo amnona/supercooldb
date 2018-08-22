@@ -117,6 +117,7 @@ def isFileExist(fileName):
     return False
 
 if __name__ == '__main__':
+    
     SetDebugLevel(0)
     date_time_str = datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S")
     
@@ -218,6 +219,8 @@ if __name__ == '__main__':
                                 break
                             else:
                                 debug(2, "add normal")
+                                cid = cid.replace('.', '')
+                                cid = cid.lower()
                                 err = dbsequences.AddWholeSeqId(con,cur, seqdbid, v, cid)
                                 if err:
                                     silva_log += "failed to add\n"
