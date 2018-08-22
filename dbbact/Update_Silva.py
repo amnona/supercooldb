@@ -205,6 +205,15 @@ if __name__ == '__main__':
                         if k in cseq:
                             cid = chead.split(' ')[0]
                             
+                            # remove the tail from the id
+                            split_cid=cid.split('.') 
+                            if len(split_cid) > 2:
+                                cid=".".join(split_cid[:-2])
+                            else:
+                                cid=".".join(split_cid)
+                            cid = cid.lower()
+
+                            
                             silva_log += "rec found: seq id %s , db bact id %s, id %s\n" % (seqdbid, v, cid)
                             
                             #check if already exist
