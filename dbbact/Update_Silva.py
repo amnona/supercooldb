@@ -117,6 +117,7 @@ def isFileExist(fileName):
     return False
 
 if __name__ == '__main__':
+    
     SetDebugLevel(0)
     date_time_str = datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S")
     
@@ -204,6 +205,15 @@ if __name__ == '__main__':
                         if k in cseq:
                             cid = chead.split(' ')[0]
                             
+                            # remove the tail from the id
+                            split_cid=cid.split('.') 
+                            if len(split_cid) > 2:
+                                cid=".".join(split_cid[:-2])
+                            else:
+                                cid=".".join(split_cid)
+                            cid = cid.lower()
+
+                            
                             silva_log += "rec found: seq id %s , db bact id %s, id %s\n" % (seqdbid, v, cid)
                             
                             #check if already exist
@@ -218,6 +228,8 @@ if __name__ == '__main__':
                                 break
                             else:
                                 debug(2, "add normal")
+                                cid = cid.replace('.', '')
+                                cid = cid.lower()
                                 err = dbsequences.AddWholeSeqId(con,cur, seqdbid, v, cid)
                                 if err:
                                     silva_log += "failed to add\n"
