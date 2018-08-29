@@ -820,3 +820,116 @@ def api_get_seqs_from_db_id():
         dbbact_seqs[cid] = (cdb_ids, cdb_seqs)
     res = json.dumps({'dbbact_seqs_per_id': dbbact_seqs})
     return res
+
+
+@login_required
+@Seq_Flask_Obj.route('/sequences/get_fast_annotations_external_db_id', methods=['GET'])
+@auto.doc()
+def get_fast_annotations_external_db_id():
+    """
+    Title: Get Fast Annotations from external database ids (i.e silva/gg)
+    Description : Get annotations for a list of external database sequences in a compressed form
+    URL: /sequences/get_fast_annotations
+    Method: GET
+    URL Params:
+    Data Params: JSON
+        {
+            seq_db_ids: list of str
+                the silva/greengenes sequence identifiers to search for
+                (i.e. 'FJ978486.1.1387' for silva or '1111883' for greengenes)
+            db_name : str
+                the database for which the id originated. options are "silva" or "gg"
+            get_term_info : bool (optional)
+                True (default) to get the information about each term, False to skip this step
+            get_all_exp_annotations: bool (optional)
+                True (default) to get all annotations for each experiment which the sequence appear in at least one annotation.
+                False to get just the annotations where the sequence appears
+
+    Success Response:
+        Code : 200
+        Content :
+        {
+            annotations: dict of (annotationid: details):
+                    annotationid : the annotationid used in seqannotations
+                    details:
+                {
+                    "annotationid" : int
+                        the id of the annotation
+                    "user" : str
+                        name of the user who added this annotation
+                        (userName from UsersTable)
+                    "addedDate" : str (DD-MM-YYYY HH:MM:SS)
+                        date when the annotation was added
+                        (addedDate from CurationsTable)
+                    "expid" : int
+                        the ID of the experiment from which this annotation originated
+                        (uniqueId from ExperimentsTable)
+                        (see Query Experiment)
+                    "currType" : str
+                        curration type (differential expression/contaminant/etc.)
+                        (description from CurationTypesTable)
+                    "method" : str
+                        The method used to detect this behavior (i.e. observation/ranksum/clustering/etc")
+                        (description from MethodTypesTable)
+                    "agentType" : str
+                        Name of the program which submitted this annotation (i.e. heatsequer)
+                        (description from AgentTypesTable)
+                    "description" : str
+                        Free text describing this annotation (i.e. "lower in green tomatoes comapred to red ones")
+                    "private" : bool
+                        True if the curation is private, False if not
+                    "CurationList" : list of
+                        {
+                            "detail" : str
+                                the type of detail (i.e. ALL/HIGH/LOW)
+                                (description from CurationDetailsTypeTable)
+                            "term" : str
+                                the ontology term for this detail (i.e. feces/ibd/homo sapiens)
+                                (description from OntologyTable)
+                        }
+                    "parents" : list of tuples (type, list of terms)
+                        {
+                            type : type of the annotation type ('high'/'low','all')
+                            list of terms - list of ontology terms which are annotated or parents of annotated ontology term
+                        }
+                }
+            seq_db_id_seqs : list of list of str
+                the seqyences (ACGT) associated with each seq_db_id. in order of the query seq_db_ids
+                (so the first entry is a list of all dbbact sequences associated with the first silva/gg id)
+
+            seq_db_id_annotations: list of (list of dict of {annotationid(int): count(int)})
+                the ids and counts of the annotations matching each seq_db_id (i.e. silva/gg) ordered by the query order.
+                the dbbact annotation ids (matching the annotations dict) are the key, and the number of dbbact sequences having this annotation is the value (note that each seq_db_id can appear in several dbbact sequences,
+                and therefore may match several sequences with this annotation, so this will manifest in the count).
+            term_info : dict of {term, dict}:
+            Information about each term which appears in the annotation parents. Key is the ontolgy term. the value dict is:
+            {
+                    'total_annotations' : int
+                        total number of annotations where this term appears (as a parent)
+                    'total_sequences' : int
+                        total number of sequences in annotations where this term appears (as a parent)
+            }
+        }
+    Details :
+        Return a dict of details for all the annotations associated with at least one of the sequences used as input, and a list of seqpos and the associated annotationids describing it
+        (i.e. a sparse representation of the annotations vector for the input sequence list)
+    Validation:
+        If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
+        If annotation is not private, return it (no need for authentication)
+    """
+    cfunc = get_fast_annotations_external_db_id
+    alldat = request.get_json()
+    if alldat is None:
+        return(getdoc(cfunc))
+    seq_db_ids = alldat.get('seq_db_ids')
+    if seq_db_ids is None:
+        return('seq_db_ids parameter missing', 400)
+    db_name = alldat.get('db_name', 'silva')
+    get_term_info = alldat.get('get_term_info', True)
+    err, annotations, seq_db_id_seqs, term_info, seq_db_id_annotations = dbannotations.get_fast_annotations_gg_silva(g.con, g.cur, seq_db_ids, db_name=db_name, userid=current_user.user_id, get_term_info=get_term_info)
+    if err:
+        errmsg = 'error encountered while getting the external db fast annotations: %s' % err
+        debug(6, errmsg)
+        return(errmsg, 400)
+    res = {'annotations': annotations, 'seq_db_id_seqs': seq_db_id_seqs, 'term_info': term_info, 'seq_db_id_annotations': seq_db_id_annotations}
+    return json.dumps(res)

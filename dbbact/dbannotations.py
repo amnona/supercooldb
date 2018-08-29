@@ -237,10 +237,10 @@ def AddAnnotation(con, cur, expid, annotationtype, annotationdetails, method='',
     if methodid < 0:
         err, methodid = dbidval.AddItem(con, cur, 'MethodTypesTable', method)
         if err:
-            #return 'method %s unknown' % method, -1
+            # return 'method %s unknown' % method, -1
             debug(3, "failed to add method. aborting")
             return err, -1
-    
+
     # get annotationtypeid
     agenttypeid = dbidval.GetIdFromDescription(con, cur, 'AgentTypesTable', agenttype, noneok=True, addifnone=True, commit=False)
     if agenttypeid < 0:
@@ -1253,8 +1253,8 @@ def get_fast_annotations_gg_silva(con, cur, seq_db_ids, db_name='silva', userid=
         err, ids, seqs = dbsequences.get_seqs_from_db_id(con, cur, db_name=db_name, db_seq_id=cid)
         if err:
             return err, {}, [], {}, []
-        seq_ids[cid] = ids
-        all_seqs.add(set(ids))
+        seq_ids[cid] = seqs
+        all_seqs = all_seqs.union(set(seqs))
         seq_db_id_seqs.append(seqs)
     # get the annotations for all the sequences
     all_seqs = list(all_seqs)
@@ -1265,17 +1265,17 @@ def get_fast_annotations_gg_silva(con, cur, seq_db_ids, db_name='silva', userid=
 
     # create the seq_db_id_annotations parameter
     # first we need to see for each sequenceid, in what annotations is participated
-    seq_annotations = {}
+    seq_annotations_dict = {}
     for cseqpos, cseqannotationids in seqannotations:
         cseq = all_seqs[cseqpos]
-        seq_annotations[cseq] = cseqannotationids
+        seq_annotations_dict[cseq] = cseqannotationids
 
     seq_db_id_annotations = []
     for cid in seq_db_ids:
         cseqs = seq_ids[cid]
         cseq_annotations = defaultdict(int)
         for ccseq in cseqs:
-            for canno in seq_annotations[ccseq]:
+            for canno in seq_annotations_dict[ccseq]:
                 cseq_annotations[canno] += 1
         seq_db_id_annotations.append(dict(cseq_annotations))
 

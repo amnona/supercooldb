@@ -428,6 +428,7 @@ def get_seqs_from_db_id(con, cur, db_name, db_seq_id):
         err = 'database id %s not found. options are: %s' % database_ids.keys()
         debug(9, err)
         return err, [], []
+    db_seq_id = db_seq_id.lower()
     cur.execute("SELECT id,sequence FROM SequencesTable where id in (select distinct dbbactid from WholeSeqIDsTable where WholeSeqID=%s AND dbid=%s)", [db_seq_id, db_id])
     seq_ids = []
     sequences = []
@@ -808,7 +809,7 @@ def WholeSeqIdExists(con, cur, dbidVal, dbbactidVal, wholeseqidVal=''):
         if cur.rowcount > 0:
             return "", True
         else:
-            return "", False 
+            return "", False
 
     except psycopg2.DatabaseError as e:
         debug(7, 'database error %s' % e)
@@ -940,6 +941,4 @@ def GetSequenceTaxonomy(con, cur, sequence, region=None, userid=0):
     # ctaxinfo = {'taxonomy': taxStr}
     # return '', ctaxinfo
     return '', taxStr
-    
-    
-    
+

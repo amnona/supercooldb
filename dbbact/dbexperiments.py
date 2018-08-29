@@ -185,14 +185,14 @@ def TestExpIdExists(con, cur, expid, userid=None):
     res = cur.fetchone()
     # if not private - say it exists
     if res[0] == 'n':
-        debug(2, "expid %d public - exists" % expid)
+        debug(1, "expid %d public - exists" % expid)
         return True
     # if private and same user - say it exists
     if res[1] == userid:
-        debug(2, "expid %d private but same user - exists" % expid)
+        debug(1, "expid %d private but same user - exists" % expid)
         return True
     # so private and different user - say it does not exist
-    debug(2, "expid %d private and different users (created by %d, queried by %s). Say it doesn't exist" % (expid, res[1], userid))
+    debug(1, "expid %d private and different users (created by %d, queried by %s). Say it doesn't exist" % (expid, res[1], userid))
     return False
 # except:
     debug(7, "error in TestExpIdExists")
