@@ -144,7 +144,7 @@ def add_term_info(servertype='develop', overwrite=False):
                 term_pos_exps.add(expid)
                 term_pos_annotations += 1
 
-        cur.execute('UPDATE OntologyTable SET annotationcount=%s, exp_count=%s, annotation_neg_count=%s WHERE id=%s', [term_annotations, len(term_exps), term_neg_annotations, cid])
+        cur.execute('UPDATE OntologyTable SET annotationcount=%s, exp_count=%s, annotation_neg_count=%s, annotation_pos_count=%s, exp_neg_count=%s, exp_pos_count=%s WHERE id=%s', [term_annotations, len(term_exps), term_neg_annotations, term_pos_annotations, len(term_neg_exps), len(term_pos_exps), cid])
     debug(6, 'commiting')
     con.commit()
     debug(6, 'done')
