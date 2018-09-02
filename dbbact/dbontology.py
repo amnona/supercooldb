@@ -351,8 +351,7 @@ def get_annotations_term_counts(con, cur, annotations):
     return GetTermCounts(con, cur, terms)
 
 
-
-def GetListOfOntologies(con,cur):
+def GetListOfOntologies(con, cur):
     '''
     Get list of ontologies
 
@@ -379,7 +378,7 @@ def GetListOfOntologies(con,cur):
     return all_ontologies
 
 
-def GetListOfSynonym(con,cur):
+def GetListOfSynonym(con, cur):
     '''
     Get list of synonym
 
@@ -404,7 +403,7 @@ def GetListOfSynonym(con,cur):
     all_synonym = []
     for cres in res:
         all_synonym.append(cres[0])
-    return all_synonym	
+    return all_synonym
 
 
 def GetIDs(con, cur, ontList):
@@ -414,7 +413,7 @@ def GetIDs(con, cur, ontList):
     con,cur : database connection and cursor
     ontList: list of str
         the ontolgies
-        
+
     output:
     errmsg : str
         "" if ok, error msg if error encountered
@@ -424,23 +423,23 @@ def GetIDs(con, cur, ontList):
     ontids = []
     try:
         sqlStr = "SELECT id from ontologyTable WHERE (description='%s')" % ontList[0]
-        idx = 0 
+        idx = 0
         while idx < len(ontList):
             sqlStr += " OR (description='%s')" % ontList[idx]
             idx = idx + 1
-        
+
         print(sqlStr)
         cur.execute(sqlStr)
         if cur.rowcount == 0:
             debug(2, 'Failed to get list of terms')
-        else:    
+        else:
             res = cur.fetchall()
             for cres in res:
                 ontids.append(res[0])
 
         debug(3, "Number of ontology ids (out of %d)" % (len(ontids)))
         return "", ontids
-    
+
     except psycopg2.DatabaseError as e:
         debug(7, 'database error %s' % e)
         return "database error %s" % e, None

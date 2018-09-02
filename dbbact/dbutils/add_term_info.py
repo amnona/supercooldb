@@ -117,7 +117,9 @@ def add_term_info(servertype='develop', overwrite=False):
         term_seqs = set()
         term_annotations = 0
         term_neg_annotations = 0
+        term_pos_annotations = 0
         term_neg_exps = set()
+        term_pos_exps = set()
         cid = cres[0]
         cur.execute('SELECT idannotation, idannotationdetail from AnnotationListTable where idontology=%s', [cid])
         ann = cur.fetchall()
@@ -129,6 +131,7 @@ def add_term_info(servertype='develop', overwrite=False):
             xx = cur.fetchone()
             if xx is None:
                 debug(9, 'no details found for annotation %s' % cannid)
+                continue
             else:
                 expid = xx[0]
                 term_exps.add(expid)
@@ -136,6 +139,11 @@ def add_term_info(servertype='develop', overwrite=False):
             # if low annotation, count is as so
             if canntype == 2:
                 term_neg_annotations += 1
+                term_neg_exps.add(expid)
+            else:
+                term_pos_exps.add(expid)
+                term_pos_annotations += 1
+
         cur.execute('UPDATE OntologyTable SET annotationcount=%s, exp_count=%s, annotation_neg_count=%s WHERE id=%s', [term_annotations, len(term_exps), term_neg_annotations, cid])
     debug(6, 'commiting')
     con.commit()
