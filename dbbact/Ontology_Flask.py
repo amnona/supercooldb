@@ -376,7 +376,8 @@ def get_ontology_term_stats():
     ontology_terms = alldat.get('terms')
     if ontology_terms is None:
         return(getdoc(cfunc))
-    term_info = dbontology.GetTermCounts(g.con, g.cur, ontology_terms)
+    # term_info = dbontology.GetTermCounts(g.con, g.cur, ontology_terms)
+    term_info = dbontology.get_term_counts(g.con, g.cur, ontology_terms)
     # if err:
     #     debug(6, err)
     #     return ('Problem geting term stats. error=%s' % err, 400)
