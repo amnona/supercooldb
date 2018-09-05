@@ -322,6 +322,39 @@ def GetTermCounts(con, cur, terms):
     return term_info
 
 
+def get_term_counts(con, cur, terms, term_types=('single'), ignore_lower=False):
+    '''Get the number of annotations and experiments containing each term in terms.
+    NOTE: terms can be also term pairs (term1+term2)
+
+    Parameters
+    ----------
+    terms: list of str
+        list of terms to look for. can be term pairs
+    ignore_lower: bool, optional. TODO
+        True to look for total counts combining "all"/"high" and "lower" counts
+
+    Returns
+    -------
+    dict of {term(str): {'total_annotations': int, 'total_experiments': int}}
+    '''
+    debug(1, 'get_term_counts for %d terms' % len(terms))
+    terms = list(set(terms))
+    term_info = {}
+    for cterm in terms:
+        cur.execute('SELECT TotalExperiments, TotalAnnotations from TermInfoTable WHERE term=%s LIMIT 1', [cterm])
+        # cur.execute('SELECT seqCount, annotationCount, exp_count from OntologyTable WHERE description=%s LIMIT 1', [cterm])
+        if cur.rowcount == 0:
+            debug(2, 'Term %s not found in ontology table' % cterm)
+            continue
+        res = cur.fetchone()
+        term_info[cterm] = {}
+        # term_info[cterm]['total_sequences'] = 0
+        term_info[cterm]['total_experiments'] = res[0]
+        term_info[cterm]['total_annotations'] = res[1]
+    debug(1, 'found info for %d terms' % len(term_info))
+    return term_info
+
+
 def get_annotations_term_counts(con, cur, annotations):
     '''
     Get information about all ontology terms in annotations

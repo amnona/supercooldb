@@ -355,7 +355,7 @@ def get_ontology_term_stats():
     Data Params: JSON
         {
             terms : list of str
-                list of ontology terms to get the statistics for
+                list of ontology terms to get the statistics for. Can include term pairs in the format of 'term1+term2' where term1 is alphabetically before term2
         }
     Success Response:
         Code : 200

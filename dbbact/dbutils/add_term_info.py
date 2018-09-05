@@ -7,9 +7,9 @@ sys.path.append(os.getcwd())
 
 import argparse
 import psycopg2
+from collections import defaultdict
 import psycopg2.extras
 
-from dbbact import dbannotations
 from dbbact.utils import SetDebugLevel, debug
 
 __version__ = "0.9"
@@ -88,15 +88,22 @@ def connect_db(servertype='main', schema='AnnotationSchemaTest'):
         return None
 
 
-def add_term_info(servertype='develop', overwrite=False):
-    '''Fill the term info details for each ontology term.
-    These include:
-        total_sequences: total number of unique sequences that have this term
-        total_associations: total number of sequece-annotation associations that have this term
-        total_annotations: number of annotations with this term
-        total_neg_annotations: number of annotations where this term is in negative context (lower in)
-        total_experiments: number of experiments containing this term
-        total_neg_experiments: number of experiments containing this term only in a negative manner (lower in)
+def tessa(source):
+    '''get all pairs from a list
+    '''
+    result = []
+    for p1 in range(len(source)):
+            for p2 in range(p1 + 1, len(source)):
+                    result.append([source[p1], source[p2]])
+    return result
+
+
+def add_term_info(servertype='develop', overwrite=False, add_pairs=True, add_single=True, max_annotation_terms=15):
+    '''Fill the term info details for each ontology term into the TermInfoTable.
+    Terms are taken from all the annotations in the database
+    Term details include:
+    TotalExperiments: total number of experiments the term appears in
+    TotalAnnotations: total number of annotations the term appears in
 
     Parameters
     ----------
@@ -105,46 +112,94 @@ def add_term_info(servertype='develop', overwrite=False):
 
     overwrite : bool (optional)
         False (default) to not overwrite existing (non-zero) seqCounts, True to delete all
+
+    add_pairs: bool (optional)
+        Add information about term pairs from each annotation
+    add_single: bool, optional
+        Add information about each single term in the annotation
+    max_annotation_terms: int, optional
+        maximal number of terms in an annotation in order to process the pairs in it
     '''
     con, cur = connect_db(servertype=servertype)
-    cur.execute('SELECT id from OntologyTable')
-    res = cur.fetchall()
-    debug(6, 'adding term info for %d terms' % len(res))
-    for idx, cres in enumerate(res):
-        if idx % 100 == 0:
-            debug(4, 'processed %d terms' % idx)
-        term_exps = set()
-        term_seqs = set()
-        term_annotations = 0
-        term_neg_annotations = 0
-        term_pos_annotations = 0
-        term_neg_exps = set()
-        term_pos_exps = set()
-        cid = cres[0]
-        cur.execute('SELECT idannotation, idannotationdetail from AnnotationListTable where idontology=%s', [cid])
-        ann = cur.fetchall()
-        term_associations = len(ann)
-        for cann in ann:
-            cannid = cann[0]
-            canntype = cann[1]
-            cur.execute('SELECT idexp from AnnotationsTable WHERE id=%s', [cannid])
-            xx = cur.fetchone()
-            if xx is None:
-                debug(9, 'no details found for annotation %s' % cannid)
-                continue
-            else:
-                expid = xx[0]
-                term_exps.add(expid)
-            term_annotations += 1
-            # if low annotation, count is as so
-            if canntype == 2:
-                term_neg_annotations += 1
-                term_neg_exps.add(expid)
-            else:
-                term_pos_exps.add(expid)
-                term_pos_annotations += 1
 
-        cur.execute('UPDATE OntologyTable SET annotationcount=%s, exp_count=%s, annotation_neg_count=%s, annotation_pos_count=%s, exp_neg_count=%s, exp_pos_count=%s WHERE id=%s', [term_annotations, len(term_exps), term_neg_annotations, term_pos_annotations, len(term_neg_exps), len(term_pos_exps), cid])
+    # remove the old counts
+    cur.execute('DELETE FROM TermInfoTable')
+
+    # get the lower detailtypes (i.e. 'low'). For these types we add - before
+    lowertypes = set()
+    cur.execute('SELECT id FROM AnnotationDetailsTypesTable WHERE description=%s', ['low'])
+    lowertypes.add(cur.fetchone()[0])
+
+    term_id_experiments = defaultdict(set)
+    term_id_annotations = defaultdict(int)
+    all_term_ids = set()
+    cur.execute('SELECT id, idexp from AnnotationsTable')
+    res = cur.fetchall()
+    debug(6, 'Getting term info from %d annotations' % len(res))
+    # iterate over all annotations
+    for idx, cres in enumerate(res):
+        annotation_terms = set()
+        if idx % 100 == 0:
+            debug(4, 'processed %d annotations' % idx)
+        cannotation_id = cres[0]
+        cexp_id = cres[1]
+        cur.execute('SELECT idontology, idannotationdetail FROM AnnotationListTable WHERE idannotation=%s', [cannotation_id])
+        res2 = cur.fetchall()
+        for cres2 in res2:
+            cterm = cres2[0]
+            all_term_ids.add(cterm)
+            # if it is lower, add it as negative (we'll use it when we convert to strings...)
+            if cres2[1] in lowertypes:
+                cterm = -cterm
+            term_id_experiments[cterm].add(cexp_id)
+            term_id_annotations[cterm] += 1
+            annotation_terms.add(cterm)
+
+        if add_pairs:
+            if len(annotation_terms) <= max_annotation_terms:
+                pairs = tessa(list(annotation_terms))
+                for cpair in pairs:
+                    cpair = tuple(sorted(cpair))
+                    term_id_experiments[cpair].add(cexp_id)
+                    term_id_annotations[cpair] += 1
+
+    # get the term names for all the terms we encountered
+    term_id_to_name = {}
+    for cterm_id in all_term_ids:
+        cur.execute('SELECT description FROM OntologyTable WHERE id=%s LIMIT 1', [cterm_id])
+        res = cur.fetchone()
+        term_id_to_name[cterm_id] = res[0]
+
+    debug(6, 'found %d terms' % len(term_id_experiments))
+    num_single = 0
+    num_pairs = 0
+    for cid in term_id_experiments.keys():
+        if add_single:
+            if isinstance(cid, int):
+                if cid > 0:
+                    cterm = term_id_to_name[cid]
+                else:
+                    cterm = '-' + term_id_to_name[-cid]
+                term_experiments = len(term_id_experiments[cid])
+                term_annotations = term_id_annotations[cid]
+                cur.execute('INSERT INTO TermInfoTable (term, TotalExperiments, TotalAnnotations,TermType) VALUES (%s, %s, %s, %s)', [cterm, term_experiments, term_annotations, 'single'])
+                num_single += 1
+        if add_pairs:
+            if isinstance(cid, tuple):
+                cnames = []
+                for ccid in cid:
+                    if ccid > 0:
+                        cnames.append(term_id_to_name[ccid])
+                    else:
+                        cnames.append('-' + term_id_to_name[-ccid])
+                cnames = sorted(cnames)
+                cterm = '+'.join(cnames)
+                term_experiments = len(term_id_experiments[cid])
+                term_annotations = term_id_annotations[cid]
+                cur.execute('INSERT INTO TermInfoTable (term, TotalExperiments, TotalAnnotations,TermType) VALUES (%s, %s, %s, %s)', [cterm, term_experiments, term_annotations, 'pair'])
+                num_pairs += 1
+
+    debug(6, 'updated %d single, %d pairs' % (num_single, num_pairs))
     debug(6, 'commiting')
     con.commit()
     debug(6, 'done')
@@ -154,10 +209,12 @@ def main(argv):
     parser = argparse.ArgumentParser(description='Add term info. version ' + __version__)
     parser.add_argument('--db', help='name of database to connect to (main/develop/local/amnon)', default='develop')
     parser.add_argument('--overwrite', help='delete current numbers', action='store_true')
+    parser.add_argument('--add-pairs', help='add term pairs', action='store_true')
+    parser.add_argument('--add-single', help='add single terms', action='store_true')
     parser.add_argument('--log-level', help='log level (1 is most detailed, 10 is only critical', default=1, type=int)
     args = parser.parse_args(argv)
     SetDebugLevel(args.log_level)
-    add_term_info(servertype=args.db, overwrite=args.overwrite)
+    add_term_info(servertype=args.db, overwrite=args.overwrite, add_pairs=args.add_pairs, add_single=args.add_single)
 
 
 if __name__ == "__main__":
