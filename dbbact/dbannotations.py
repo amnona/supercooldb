@@ -476,7 +476,7 @@ def GetAnnotationsFromID(con, cur, annotationid, userid=0):
     cur.execute('SELECT AnnotationsTable.*,userstable.username FROM AnnotationsTable,userstable WHERE AnnotationsTable.iduser = userstable.id and AnnotationsTable.id=%s', [annotationid])
     if cur.rowcount == 0:
         debug(3, 'annotationid %d not found' % annotationid)
-        return 'Annotationid %d not found', None
+        return 'Annotationid %d not found' % annotationid, None
     res = cur.fetchone()
     debug(1, res)
     if res['isprivate'] == 'y':

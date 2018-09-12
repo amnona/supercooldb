@@ -323,19 +323,18 @@ def get_ontology():
         Action:
         Get ids for list of ontologies
     """
-    
+
     cfunc = get_ontology
     if request.method == 'GET':
         return(getdoc(cfunc))
-    
+
     alldat = request.get_json()
     ontologies = alldat.get('ontologies')
     if ontologies is None:
         return(getdoc(cfunc))
 
-    
     err, ontids = dbontology.GetIDs(g.con, g.cur, ontList=ontologies)
-    
+
     if err:
         return(err, 400)
     debug(2, 'added/found %d sequences' % len(ontids))
