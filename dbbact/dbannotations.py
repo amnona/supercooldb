@@ -981,7 +981,8 @@ def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info
 
         seqannotations.append((cseqpos, cseqannotationids))
     if get_term_info:
-        term_info = dbontology.GetTermCounts(con, cur, all_terms)
+        # term_info = dbontology.GetTermCounts(con, cur, all_terms)
+        term_info = dbontology.get_term_counts(con, cur, all_terms)
     else:
         term_info = {}
     debug(1, 'found %d annotations, %d annotated sequences' % (len(annotations), len(seqannotations)))
