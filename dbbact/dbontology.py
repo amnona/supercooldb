@@ -284,42 +284,42 @@ def GetTermAnnotations(con, cur, term, use_synonyms=True):
     return '', annotations
 
 
-def GetTermCounts(con, cur, terms):
-    '''
-    Get information about each ontology term in terms
+# def GetTermCounts(con, cur, terms):
+#     '''
+#     Get information about each ontology term in terms
 
-    Parameters
-    ----------
-    con, cur
-    terms : list of str
-        The list of terms to get information about
+#     Parameters
+#     ----------
+#     con, cur
+#     terms : list of str
+#         The list of terms to get information about
 
-    Returns
-    -------
-    term_info : dict of {str: dict}:
-        Key is the ontology term.
-        Value is a dict of pairs:
-            'total_annotations' : int
-                The total number of annotations where this ontology term is a predecessor
-            'total_squences' : int
-                The total number of sequences in annotations where this ontology term is a predecessor
-    '''
-    # get rid of duplicate terms
-    debug(1, 'GetTermCounts for %d terms' % len(terms))
-    terms = list(set(terms))
-    term_info = {}
-    for cterm in terms:
-        cur.execute('SELECT seqCount, annotationCount, exp_count from OntologyTable WHERE description=%s LIMIT 1', [cterm])
-        if cur.rowcount == 0:
-            debug(2, 'Term %s not found in ontology table' % cterm)
-            continue
-        res = cur.fetchone()
-        term_info[cterm] = {}
-        term_info[cterm]['total_sequences'] = res[0]
-        term_info[cterm]['total_annotations'] = res[1]
-        term_info[cterm]['total_experiments'] = res[2]
-    debug(1, 'found info for %d terms' % len(term_info))
-    return term_info
+#     Returns
+#     -------
+#     term_info : dict of {str: dict}:
+#         Key is the ontology term.
+#         Value is a dict of pairs:
+#             'total_annotations' : int
+#                 The total number of annotations where this ontology term is a predecessor
+#             'total_squences' : int
+#                 The total number of sequences in annotations where this ontology term is a predecessor
+#     '''
+#     # get rid of duplicate terms
+#     debug(1, 'GetTermCounts for %d terms' % len(terms))
+#     terms = list(set(terms))
+#     term_info = {}
+#     for cterm in terms:
+#         cur.execute('SELECT seqCount, annotationCount, exp_count from OntologyTable WHERE description=%s LIMIT 1', [cterm])
+#         if cur.rowcount == 0:
+#             debug(2, 'Term %s not found in ontology table' % cterm)
+#             continue
+#         res = cur.fetchone()
+#         term_info[cterm] = {}
+#         term_info[cterm]['total_sequences'] = res[0]
+#         term_info[cterm]['total_annotations'] = res[1]
+#         term_info[cterm]['total_experiments'] = res[2]
+#     debug(1, 'found info for %d terms' % len(term_info))
+#     return term_info
 
 
 def get_term_counts(con, cur, terms, term_types=('single'), ignore_lower=False):
@@ -330,7 +330,7 @@ def get_term_counts(con, cur, terms, term_types=('single'), ignore_lower=False):
     ----------
     terms: list of str
         list of terms to look for. can be term pairs
-    ignore_lower: bool, optional. TODO
+    TODO: ignore_lower: bool, optional. TODO
         True to look for total counts combining "all"/"high" and "lower" counts
 
     Returns
@@ -378,10 +378,13 @@ def get_annotations_term_counts(con, cur, annotations):
     debug(1, 'get_annotations_term_counts for %d annotations' % len(annotations))
     terms = []
     for cannotation in annotations:
-        for cdetail in cannotation['details']:
-            terms.append(cdetail[1])
+        for ctype, cterm in cannotation['details']:
+            if ctype == 'low':
+                cterm = '-' + cterm
+            terms.append(cterm)
     terms = list(set(terms))
-    return GetTermCounts(con, cur, terms)
+    # return GetTermCounts(con, cur, terms)
+    return get_term_counts(con, cur, terms)
 
 
 def GetListOfOntologies(con, cur):
@@ -461,7 +464,6 @@ def GetIDs(con, cur, ontList):
             sqlStr += " OR (description='%s')" % ontList[idx]
             idx = idx + 1
 
-        print(sqlStr)
         cur.execute(sqlStr)
         if cur.rowcount == 0:
             debug(2, 'Failed to get list of terms')

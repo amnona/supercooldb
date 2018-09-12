@@ -388,7 +388,7 @@ def GetAnnotationParents(con, cur, annotationid):
     output:
     err: str
         error encountered or '' if ok
-    parents : dict of (str:list of str) (detail type (i.e. 'higher in'): list of ontology terms)
+    parents : dict of {str:list of str} {detail type (i.e. 'higher in'): list of ontology terms}
     '''
     debug(1, 'GetAnnotationParents for id %d' % annotationid)
     cur.execute('SELECT annotationdetail,ontology FROM AnnotationParentsTable WHERE idannotation=%s', [annotationid])
@@ -973,8 +973,11 @@ def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info
                     err, parents = GetAnnotationParents(con, cur, cannotationid)
                     cdetails['parents'] = parents
                     # add to the set of all terms to get the info for
+                    # note we add a "-" for terms that have a "low" annotation type
                     for ctype, cterms in parents.items():
                         for cterm in cterms:
+                            if ctype == 'low':
+                                cterm = '-' + cterm
                             all_terms.add(cterm)
                     # and add the annotation
                     annotations[cannotationid] = cdetails

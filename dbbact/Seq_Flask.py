@@ -253,6 +253,7 @@ def get_sequence_annotations():
         term_info = {}
     return json.dumps({'annotations': details, 'term_info': term_info, 'taxonomy': taxonomy})
 
+
 @login_required
 @Seq_Flask_Obj.route('/sequences/get_list_annotations', methods=['GET'])
 @auto.doc()
