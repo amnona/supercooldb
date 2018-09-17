@@ -881,7 +881,7 @@ def DeleteSequenceFromAnnotation(con, cur, sequences, annotationid, userid=0, co
     return('')
 
 
-def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info=True, get_all_exp_annotations=True):
+def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info=True, get_all_exp_annotations=True, get_taxonomy=True):
     """
     Get annotations for a list of sequences in a compact form
 
@@ -898,6 +898,8 @@ def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info
     get_all_exp_annotations: bool (optional)
         True (default) to get all annotations for each experiment which the sequence appear in at least one annotation.
         False to get just the annotations where the sequence appears
+    get_taxonomy: bool, False
+        True to get the taxonomy for each sequence (returned in the 'taxonomy' field)
 
     output:
     err : str
@@ -916,6 +918,8 @@ def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info
                 total number of annotations where this term appears (as a parent)
             'total_sequences' : int
                 total number of sequences in annotations where this term appears (as a parent)
+    taxonomy : list of str
+        the dbbact taxonomy string for each supplied sequence (order similar to query sequences)
     """
     debug(1, 'GetFastAnnotations for %d sequences' % len(sequences))
     annotations = {}
@@ -989,7 +993,15 @@ def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info
     else:
         term_info = {}
     debug(1, 'found %d annotations, %d annotated sequences' % (len(annotations), len(seqannotations)))
-    return '', annotations, seqannotations, term_info
+    taxonomy = []
+    if get_taxonomy:
+        for cseq in sequences:
+            cerr, ctax = dbsequences.GetSequenceTaxonomy(con, cur, cseq)
+            if cerr == '':
+                taxonomy.append(ctax)
+            else:
+                taxonomy.append('na')
+    return '', annotations, seqannotations, term_info, taxonomy
 
 
 def GetAllAnnotations(con, cur, userid=0):

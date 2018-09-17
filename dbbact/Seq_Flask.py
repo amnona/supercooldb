@@ -377,7 +377,9 @@ def get_fast_annotations():
             region : int (optional)
                 the region id (default=1 which is V4 515F 806R)
             get_term_info: bool (optional)
-                True (info) to return also information about each term, False not to return
+                True (default) to return also information about each term, False not to return
+            get_taxonomy: bool (optional)
+                True (default) to get the dbbact assigned taxonomy for each query sequence
     Success Response:
         Code : 200
         Content :
@@ -440,6 +442,8 @@ def get_fast_annotations():
                     'total_sequences' : int
                         total number of sequences in annotations where this term appears (as a parent)
             }
+            taxonomy : list of str
+            The dbbact assigned taxonomy for each sequence (ordered in the same order as query sequences)
         }
     Details :
         Return a dict of details for all the annotations associated with at least one of the sequences used as input, and a list of seqpos and the associated annotationids describing it
@@ -457,12 +461,13 @@ def get_fast_annotations():
         return('sequences parameter missing', 400)
     region = alldat.get('region')
     get_term_info = alldat.get('get_term_info', True)
-    err, annotations, seqannotations, term_info = dbannotations.GetFastAnnotations(g.con, g.cur, sequences, region=region, userid=current_user.user_id, get_term_info=get_term_info)
+    get_taxonomy = alldat.get('get_taxonomy', True)
+    err, annotations, seqannotations, term_info, taxonomy = dbannotations.GetFastAnnotations(g.con, g.cur, sequences, region=region, userid=current_user.user_id, get_term_info=get_term_info, get_taxonomy=get_taxonomy)
     if err:
         errmsg = 'error encountered while getting the fast annotations: %s' % err
         debug(6, errmsg)
         return(errmsg, 400)
-    res = {'annotations': annotations, 'seqannotations': seqannotations, 'term_info': term_info}
+    res = {'annotations': annotations, 'seqannotations': seqannotations, 'term_info': term_info, 'taxonomy': taxonomy}
     return json.dumps(res)
 
 

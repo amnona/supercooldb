@@ -582,6 +582,7 @@ def GetHashAnnotations(con, cur, hash_str, userid=None):
     debug(1, 'got %d details' % len(annotations))
     return '', annotations, seqids, seqnames
 
+
 def GetGgAnnotations(con, cur, gg_str, userid=None):
     '''
     Get annotations for all annotations containing any sequence matching the hash (substring)
@@ -941,4 +942,3 @@ def GetSequenceTaxonomy(con, cur, sequence, region=None, userid=0):
     # ctaxinfo = {'taxonomy': taxStr}
     # return '', ctaxinfo
     return '', taxStr
-
