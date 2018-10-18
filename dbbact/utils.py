@@ -8,7 +8,7 @@ import inspect
 debuglevel = 6
 
 
-def debug(level, msg):
+def debug(level, msg, request=None):
     """
     print a debug message
 
@@ -30,7 +30,12 @@ def debug(level, msg):
             cfile = 'NA'
             cline = 'NA'
             cfunction = 'NA'
-        print('[%s] [%d] [%s:%s:%s] %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), level, cfile, cfunction, cline, msg), file=sys.stderr, flush=True)
+        omsg = '[%s] [%d] [%s:%s:%s] ' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), level, cfile, cfunction, cline)
+        if request is not None:
+            source = request.remote_addr
+            omsg += '[IP: %s] ' % source
+        omsg += '%s' % msg
+        print(omsg, file=sys.stderr, flush=True)
 
 
 def SetDebugLevel(level):

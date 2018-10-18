@@ -1,5 +1,5 @@
 import json
-from flask import Blueprint, g
+from flask import Blueprint, g, request
 from .utils import debug
 from .autodoc import auto
 from . import dbstats
@@ -35,6 +35,7 @@ def dbdstats():
         }
     Details:
     """
+    debug(2, 'dbstats', request)
     err, stats = dbstats.GetStats(g.con, g.cur)
     if not err:
         debug(2, 'Got statistics')

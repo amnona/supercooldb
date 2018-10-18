@@ -56,6 +56,7 @@ def add_details():
             Return the new expId for these details
             for each "type"/"value" in the "details" list, if "type" exists in ExperimentTypesTable, get the id and add it to "type" field in ExperimentsIdentifiers table. Otherwise, create it there and get the id and add it to "type" field in ExperimentsIdentifiers.
     """
+    debug(2, 'experiments/add_details', request)
     cfunc = add_details
     if request.method == 'GET':
         return(getdoc(cfunc))
@@ -68,7 +69,7 @@ def add_details():
     if private is None:
         private = 'n'
     if expid == -1:
-        expid = None 
+        expid = None
     # TODO: get userid
     userid = 0
     res = dbexperiments.AddExperimentDetails(g.con, g.cur, expid=expid, details=details, userid=userid, private=private, commit=True)
@@ -111,6 +112,7 @@ def get_id_by_list():
             If study is private, return only if user is authenticated and created the study. If user not authenticated, do not return it in the list
             If study is not private, return it (no need for authentication)
     """
+    debug(2, 'experiments/get_id_by_list', request)
     alldat = request.get_json()
     nameArr = alldat.get('nameStrArr')
     valueArr = alldat.get('valueStrArr')
@@ -158,6 +160,7 @@ def get_id():
             If study is private, return only if user is authenticated and created the study. If user not authenticated, do not return it in the list
             If study is not private, return it (no need for authentication)
     """
+    debug(2, 'experiments/get_id', request)
     alldat = request.get_json()
     details = alldat.get('details')
     if details is None:
@@ -202,6 +205,7 @@ def get_details():
             If study is not private, return details (no need for authentication)
             if study not found - return error
     """
+    debug(2, 'experiments/get_details', request)
     alldat = request.get_json()
     if alldat is None:
         return('no expId supplied', 400)
@@ -250,6 +254,7 @@ def get_annotations():
             if annotation is private, return only if created by the same user as the querying
             if study not found - return error
     """
+    debug(2, 'experiments/get_annotations', request)
     alldat = request.get_json()
     if alldat is None:
         return('no expId supplied', 400)
@@ -289,6 +294,7 @@ def get_experiments_list():
         Validation:
             If experiment is private, return only if user is authenticated and created the study.
     """
+    debug(2, 'experiments/get_experiments_list', request)
     err, expdat = dbexperiments.GetExperimentsList(g.con, g.cur, userid=current_user.user_id)
     if err:
         return(err, 400)
