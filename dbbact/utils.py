@@ -32,7 +32,10 @@ def debug(level, msg, request=None):
             cfunction = 'NA'
         omsg = '[%s] [%d] [%s:%s:%s] ' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), level, cfile, cfunction, cline)
         if request is not None:
-            source = request.remote_addr
+            try:
+                source = request.environ['REMOTE_ADDR']
+            except:
+                source = 'Nan'
             omsg += '[IP: %s] ' % source
         omsg += '%s' % msg
         print(omsg, file=sys.stderr, flush=True)
