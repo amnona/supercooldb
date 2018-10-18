@@ -33,9 +33,12 @@ def debug(level, msg, request=None):
         omsg = '[%s] [%d] [%s:%s:%s] ' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), level, cfile, cfunction, cline)
         if request is not None:
             try:
-                source = request.environ['REMOTE_ADDR']
+                if request.environ.get('HTTP_X_FORWARDED_FOR') is None:
+                    source = request.environ['REMOTE_ADDR']
+                else:
+                    source = request.environ['HTTP_X_FORWARDED_FOR']
             except:
-                source = 'Nan'
+                source = 'Failed'
             omsg += '[IP: %s] ' % source
         omsg += '%s' % msg
         print(omsg, file=sys.stderr, flush=True)
