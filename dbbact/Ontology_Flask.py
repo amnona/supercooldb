@@ -51,7 +51,7 @@ def ontology_add_term():
             Get the ontologynameid from the OntologyNamesTable. Add (ontologyId = termid, ontologyParentId = parentif, ontologyNameId = ontologynameid)
             for each sysnonym, if not in OntologyTable add it, get the synonymid, add to OntologySynymTable (idOntology = termid, idSynonym = synonymid)
     """
-    debug(2, 'ontology_add_term', request)
+    debug(3, 'ontology_add_term', request)
     cfunc = ontology_add_term
     if request.method == 'GET':
         return(getdoc(cfunc))
@@ -102,7 +102,7 @@ def ontology_get_parents():
         If it is a synonym for a term, get the original term first.
         Note that if the term is in more than one ontology, will return all parents
     """
-    debug(2, 'ontology_get_parents', request)
+    debug(3, 'ontology_get_parents', request)
     term = request.args.get('term')
     if term is None:
         # # TODO: retrun error
@@ -139,7 +139,7 @@ def ontology_get_term():
             }
         }
     """
-    debug(2, 'ontology_get_term', request)
+    debug(3, 'ontology_get_term', request)
     cid = request.args.get('startid')
     if cid is None:
         return(getdoc(ontology_get_term))
@@ -175,7 +175,7 @@ def ontology_get_synonym():
             }
         }
     """
-    debug(2, 'ontology_get_synonym', request)
+    debug(3, 'ontology_get_synonym', request)
     cid = request.args.get('startid')
     if cid is None:
         return(getdoc(ontology_get_synonym))
@@ -248,7 +248,7 @@ def get_ontology_annotations():
             If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
             If annotation is not private, return it (no need for authentication)
     """
-    debug(2, 'get_ontology_annotations', request)
+    debug(3, 'get_ontology_annotations', request)
     cfunc = get_ontology_annotations
     ontology_term = request.args.get('term')
     if ontology_term is None:
@@ -300,7 +300,7 @@ def get_all_synonyms():
             }
         }
     """
-    debug(2, 'get_all_synonyms', request)
+    debug(3, 'get_all_synonyms', request)
     jsonRetData = dbontology.GetListOfSynonym(g.con, g.cur)
     return json.dumps(jsonRetData, ensure_ascii=False)
 
@@ -330,7 +330,7 @@ def get_ontology():
         Action:
         Get ids for list of ontologies
     """
-    debug(2, 'ontology/get', request)
+    debug(3, 'ontology/get', request)
     cfunc = get_ontology
     if request.method == 'GET':
         return(getdoc(cfunc))
@@ -377,7 +377,7 @@ def get_ontology_term_stats():
     Details :
         Validation:
     """
-    debug(2, 'get_ontology_term_stats', request)
+    debug(3, 'get_ontology_term_stats', request)
     cfunc = get_ontology_term_stats
     alldat = request.get_json()
     ontology_terms = alldat.get('terms')
@@ -415,7 +415,7 @@ def get_term_pair_count():
     Details :
         Validation:
     """
-    debug(2, 'get_term_pair_count', request)
+    debug(3, 'get_term_pair_count', request)
     cfunc = get_term_pair_count
     alldat = request.get_json()
     term_pairs = alldat.get('term_pairs')

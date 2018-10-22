@@ -881,7 +881,7 @@ def DeleteSequenceFromAnnotation(con, cur, sequences, annotationid, userid=0, co
     return('')
 
 
-def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info=True, get_all_exp_annotations=True, get_taxonomy=True):
+def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info=True, get_all_exp_annotations=True, get_taxonomy=True, get_parents=True):
     """
     Get annotations for a list of sequences in a compact form
 
@@ -898,8 +898,10 @@ def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info
     get_all_exp_annotations: bool (optional)
         True (default) to get all annotations for each experiment which the sequence appear in at least one annotation.
         False to get just the annotations where the sequence appears
-    get_taxonomy: bool, False
+    get_taxonomy: bool, True
         True to get the taxonomy for each sequence (returned in the 'taxonomy' field)
+    get_parents: bool, True
+        True to get the parent terms for each annotation term, False to just get the annotation terms
 
     output:
     err : str
@@ -913,7 +915,7 @@ def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info
         annotationsids : list of int
             the ids of annotations about this sequence
     term_info : dict of {term, dict}
-        Information about each term which appears in the annotation parents. Key is the ontolgy term. the value dict is:
+        Information about each term which appears in the annotation terms. Key is the ontolgy term. the value dict is:
             'total_annotations' : int
                 total number of annotations where this term appears (as a parent)
             'total_sequences' : int
@@ -959,6 +961,7 @@ def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info
 
             annotations_to_process = [cdetails]
             if get_all_exp_annotations:
+                debug(2, 'getting all exp annotations')
                 if 'expid' in cdetails:
                     expid = cdetails['expid']
                     # if we already added this experiment - finished
@@ -974,7 +977,17 @@ def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info
                     # if we didn't get annotation details, probably they are private - just ignore
                     if cdetails is None:
                         continue
-                    err, parents = GetAnnotationParents(con, cur, cannotationid)
+                    # if we need to get the parents, add all the parent terms
+                    if get_parents:
+                        err, parents = GetAnnotationParents(con, cur, cannotationid)
+                    else:
+                        # otherwise, just keep the annotation terms
+                        parents = {}
+                        for cdetailtype, cterm in cdetails['details']:
+                            if cdetailtype not in parents.keys():
+                                parents[cdetailtype] = [cterm]
+                            else:
+                                parents[cdetailtype].append(cterm)
                     cdetails['parents'] = parents
                     # add to the set of all terms to get the info for
                     # note we add a "-" for terms that have a "low" annotation type
@@ -988,7 +1001,6 @@ def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info
 
         seqannotations.append((cseqpos, cseqannotationids))
     if get_term_info:
-        # term_info = dbontology.GetTermCounts(con, cur, all_terms)
         term_info = dbontology.get_term_counts(con, cur, all_terms)
     else:
         term_info = {}

@@ -35,7 +35,7 @@ def dbdstats():
         }
     Details:
     """
-    debug(2, 'dbstats', request)
+    debug(3, 'dbstats', request)
     err, stats = dbstats.GetStats(g.con, g.cur)
     if not err:
         debug(2, 'Got statistics')

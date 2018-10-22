@@ -44,7 +44,7 @@ def add_sequences():
         Action:
         Add all sequences that don't already exist in SequencesTable
     """
-    debug(2, 'add_sequences', request)
+    debug(3, 'add_sequences', request)
     cfunc = add_sequences
     if request.method == 'GET':
         return(getdoc(cfunc))
@@ -96,7 +96,7 @@ def get_sequenceid():
         Validation:
         Action:
     """
-    debug(2, 'get_sequenceid', request)
+    debug(3, 'get_sequenceid', request)
     cfunc = get_sequenceid
     alldat = request.get_json()
     sequence = alldat.get('sequence')
@@ -135,7 +135,7 @@ def get_taxonomy_str():
             "taxonomy" : str
         }
     """
-    debug(2, 'get_taxonomy_str', request)
+    debug(3, 'get_taxonomy_str', request)
     cfunc = get_sequence_annotations
     alldat = request.get_json()
     if alldat is None:
@@ -230,7 +230,7 @@ def get_sequence_annotations():
             If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
             If annotation is not private, return it (no need for authentication)
     """
-    debug(2, 'get_sequence_annotations', request)
+    debug(3, 'get_sequence_annotations', request)
     cfunc = get_sequence_annotations
     alldat = request.get_json()
     if alldat is None:
@@ -327,7 +327,7 @@ def get_sequence_list_annotations():
             If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
             If annotation is not private, return it (no need for authentication)
     """
-    debug(2, 'get_list_annotations', request)
+    debug(3, 'get_list_annotations', request)
     cfunc = get_sequence_list_annotations
     alldat = request.get_json()
     if alldat is None:
@@ -385,6 +385,10 @@ def get_fast_annotations():
                 True (default) to return also information about each term, False not to return
             get_taxonomy: bool (optional)
                 True (default) to get the dbbact assigned taxonomy for each query sequence
+            get_parents: bool (optional)
+                True (default) to get the parent terms for each annotation ontology term, False to just get tge annotation terms
+            get_all_exp_annotations: bool (optional)
+                True (default) to get all the annotations from each experiment containing one annotation with the sequence, False to just get the annotations with the sequence
     Success Response:
         Code : 200
         Content :
@@ -457,7 +461,7 @@ def get_fast_annotations():
         If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
         If annotation is not private, return it (no need for authentication)
     """
-    debug(2, 'get_fast_annotations', request)
+    debug(3, 'get_fast_annotations', request)
     cfunc = get_fast_annotations
     alldat = request.get_json()
     if alldat is None:
@@ -468,7 +472,9 @@ def get_fast_annotations():
     region = alldat.get('region')
     get_term_info = alldat.get('get_term_info', True)
     get_taxonomy = alldat.get('get_taxonomy', True)
-    err, annotations, seqannotations, term_info, taxonomy = dbannotations.GetFastAnnotations(g.con, g.cur, sequences, region=region, userid=current_user.user_id, get_term_info=get_term_info, get_taxonomy=get_taxonomy)
+    get_parents = alldat.get('get_parents', True)
+    get_all_exp_annotations = alldat.get('get_all_exp_annotations', True)
+    err, annotations, seqannotations, term_info, taxonomy = dbannotations.GetFastAnnotations(g.con, g.cur, sequences, region=region, userid=current_user.user_id, get_term_info=get_term_info, get_taxonomy=get_taxonomy, get_parents=get_parents, get_all_exp_annotations=get_all_exp_annotations)
     if err:
         errmsg = 'error encountered while getting the fast annotations: %s' % err
         debug(6, errmsg)
@@ -507,7 +513,7 @@ def get_taxonomy_annotation_ids():
         If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
         If annotation is not private, return it (no need for authentication)
     """
-    debug(2, 'get_taxonomy_annotation_ids', request)
+    debug(3, 'get_taxonomy_annotation_ids', request)
     cfunc = get_taxonomy_annotation_ids
     alldat = request.get_json()
     if alldat is None:
@@ -551,7 +557,7 @@ def get_taxonomy_annotations():
         If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
         If annotation is not private, return it (no need for authentication)
     """
-    debug(2, 'get_taxonomy_annotations', request)
+    debug(3, 'get_taxonomy_annotations', request)
     cfunc = get_taxonomy_annotations
     alldat = request.get_json()
     if alldat is None:
@@ -595,7 +601,7 @@ def get_hash_annotations():
         If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
         If annotation is not private, return it (no need for authentication)
     """
-    debug(2, 'get_hash_annotations', request)
+    debug(3, 'get_hash_annotations', request)
     cfunc = get_hash_annotations
     alldat = request.get_json()
     if alldat is None:
@@ -639,7 +645,7 @@ def get_gg_annotations():
         If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
         If annotation is not private, return it (no need for authentication)
     """
-    debug(2, 'get_gg_annotations', request)
+    debug(3, 'get_gg_annotations', request)
     cfunc = get_gg_annotations
     alldat = request.get_json()
     if alldat is None:
@@ -685,7 +691,7 @@ def get_silva_annotations():
         If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
         If annotation is not private, return it (no need for authentication)
     """
-    debug(2, 'get_silva_annotations', request)
+    debug(3, 'get_silva_annotations', request)
     cfunc = get_silva_annotations
     alldat = request.get_json()
     if alldat is None:
@@ -730,7 +736,7 @@ def get_sequence_info():
         }
     Validation:
     """
-    debug(2, 'get_sequence_info', request)
+    debug(3, 'get_sequence_info', request)
     cfunc = get_sequence_info
     alldat = request.get_json()
     if alldat is None:
@@ -780,7 +786,7 @@ def get_sequence_string_annotations():
             If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
             If annotation is not private, return it (no need for authentication)
     """
-    debug(2, 'get_sequence_string_annotations', request)
+    debug(3, 'get_sequence_string_annotations', request)
     cfunc = get_sequence_string_annotations
     alldat = request.get_json()
     if alldat is None:
@@ -819,7 +825,7 @@ def api_get_seqs_from_db_id():
         {
             "dbbact_seqs_per_id": dict of {seq_id(str): tuple of (list of dbbact ids(int), list of dbbact sequences (str))}
     '''
-    debug(2, 'api_seqs_from_external_db_id', request)
+    debug(3, 'api_seqs_from_external_db_id', request)
     cfunc = api_get_seqs_from_db_id
     alldat = request.get_json()
     if alldat is None:
@@ -937,7 +943,7 @@ def get_fast_annotations_external_db_id():
         If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
         If annotation is not private, return it (no need for authentication)
     """
-    debug(2, 'get_fast_annotations_external_db_id', request)
+    debug(3, 'get_fast_annotations_external_db_id', request)
     cfunc = get_fast_annotations_external_db_id
     alldat = request.get_json()
     if alldat is None:

@@ -80,7 +80,7 @@ def add_annotations():
             Add all annotation details to AnnotationsTable (automatically adding userId and addedDate)
             Add all pairs to AnnotationListTable
     """
-    debug(2, 'add_annotations', request)
+    debug(3, 'add_annotations', request)
     cfunc = add_annotations
     if request.method == 'GET':
         return(getdoc(cfunc), 400)
@@ -168,7 +168,7 @@ def update_annotations():
         Action:
             Update all the non-None (supplied) fields in the existing annotation.
     """
-    debug(2, 'update_annotations', request)
+    debug(3, 'update_annotations', request)
     cfunc = add_annotations
     if request.method == 'GET':
         return(getdoc(cfunc), 400)
@@ -220,7 +220,7 @@ def get_annotation_sequences():
             If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
             If annotation is not private, return it (no need for authentication)
     """
-    debug(2, 'get_annotation_sequences', request)
+    debug(3, 'get_annotation_sequences', request)
     cfunc = get_annotation_sequences
     alldat = request.get_json()
     if alldat is None:
@@ -268,7 +268,7 @@ def get_annotation_full_sequences():
             If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
             If annotation is not private, return it (no need for authentication)
     """
-    debug(2, 'get_annotation_full_sequences', request)
+    debug(3, 'get_annotation_full_sequences', request)
     cfunc = get_annotation_full_sequences
     alldat = request.get_json()
     if alldat is None:
@@ -310,7 +310,7 @@ def delete_annotation():
             If user is not logged in, cannot delete
             Can only delete annotations created by the user
     """
-    debug(2, 'delete_annotation', request)
+    debug(3, 'delete_annotation', request)
     cfunc = delete_annotation
     if request.method == 'GET':
         return(getdoc(cfunc), 400)
@@ -356,7 +356,7 @@ def delete_sequences_from_annotation():
             If user is not logged in, cannot delete non-annonymous
             Can only delete annotations created by the user
     """
-    debug(2, 'delete_sequences_from_annotation', request)
+    debug(3, 'delete_sequences_from_annotation', request)
     cfunc = delete_sequences_from_annotation
     if request.method == 'GET':
         return(getdoc(cfunc), 400)
@@ -441,7 +441,7 @@ def get_annotation():
             If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
             If annotation is not private, return it (no need for authentication)
     """
-    debug(2, 'get_annotation', request)
+    debug(3, 'get_annotation', request)
     cfunc = get_annotation
     annotationid = request.args.get('annotationid')
     if annotationid is None:
@@ -485,7 +485,7 @@ def get_annotation_ontology_parents():
             If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
             If annotation is not private, return it (no need for authentication)
     """
-    debug(2, 'get_annotation_ontology_parents', request)
+    debug(3, 'get_annotation_ontology_parents', request)
     cfunc = get_annotation_ontology_parents
     alldat = request.get_json()
     if alldat is None:
@@ -526,7 +526,7 @@ def get_all_annotations():
             If an annotation is private, return it only if user is authenticated and created the curation. If user not authenticated, do not return it in the list
             If annotation is not private, return it (no need for authentication)
     """
-    debug(2, 'get_all_annotations', request)
+    debug(3, 'get_all_annotations', request)
     err, annotations = dbannotations.GetAllAnnotations(g.con, g.cur, userid=current_user.user_id)
     if err:
         debug(6, err)

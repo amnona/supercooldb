@@ -15,6 +15,25 @@ from dbbact.utils import SetDebugLevel, debug
 __version__ = "0.9"
 
 
+def get_annotaiton_parents():
+    cur.execute('SELECT annotationdetail,ontology FROM AnnotationParentsTable WHERE idannotation=%s', [annotationid])
+    if cur.rowcount == 0:
+        errmsg = 'No Annotation Parents found for annotationid %d in AnnotationParentsTable' % annotationid
+        debug(3, errmsg)
+        return(errmsg, {})
+    parents = {}
+    res = cur.fetchall()
+    for cres in res:
+        cdetail = cres[0]
+        conto = cres[1]
+        if cdetail in parents:
+            parents[cdetail].append(conto)
+        else:
+            parents[cdetail] = [conto]
+    debug(1, 'found %d detail types' % len(parents))
+    return '', parents
+
+
 def connect_db(servertype='main', schema='AnnotationSchemaTest'):
     """
     connect to the postgres database and return the connection and cursor
@@ -98,7 +117,7 @@ def tessa(source):
     return result
 
 
-def add_term_info(servertype='develop', overwrite=False, add_pairs=True, add_single=True, max_annotation_terms=15):
+def add_term_info(servertype='develop', overwrite=False, add_pairs=True, add_single=True, add_parents=True, max_annotation_terms=15):
     '''Fill the term info details for each ontology term into the TermInfoTable.
     Terms are taken from all the annotations in the database
     Term details include:
@@ -211,10 +230,11 @@ def main(argv):
     parser.add_argument('--overwrite', help='delete current numbers', action='store_true')
     parser.add_argument('--add-pairs', help='add term pairs', action='store_true')
     parser.add_argument('--add-single', help='add single terms', action='store_true')
+    parser.add_argument('--add-parents', help='add parent terms', action='store_true')
     parser.add_argument('--log-level', help='log level (1 is most detailed, 10 is only critical', default=1, type=int)
     args = parser.parse_args(argv)
     SetDebugLevel(args.log_level)
-    add_term_info(servertype=args.db, overwrite=args.overwrite, add_pairs=args.add_pairs, add_single=args.add_single)
+    add_term_info(servertype=args.db, overwrite=args.overwrite, add_pairs=args.add_pairs, add_single=args.add_single, add_parents=args.add_parents)
 
 
 if __name__ == "__main__":
