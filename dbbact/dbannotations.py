@@ -923,7 +923,7 @@ def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info
     taxonomy : list of str
         the dbbact taxonomy string for each supplied sequence (order similar to query sequences)
     """
-    debug(1, 'GetFastAnnotations for %d sequences' % len(sequences))
+    debug(2, 'GetFastAnnotations for %d sequences' % len(sequences))
     annotations = {}
     seqannotations = []
     all_terms = set()
@@ -997,11 +997,12 @@ def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info
                     annotations[cannotationid] = cdetails
 
         seqannotations.append((cseqpos, cseqannotationids))
+    debug(2, 'got annotations. found %d unique terms' % len(all_terms))
     if get_term_info:
         term_info = dbontology.get_term_counts(con, cur, all_terms)
     else:
         term_info = {}
-    debug(1, 'found %d annotations, %d annotated sequences' % (len(annotations), len(seqannotations)))
+    debug(2, 'found %d annotations, %d annotated sequences. %d term_info' % (len(annotations), len(seqannotations), len(term_info)))
     taxonomy = []
     if get_taxonomy:
         for cseq in sequences:
@@ -1010,6 +1011,7 @@ def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info
                 taxonomy.append(ctax)
             else:
                 taxonomy.append('na')
+        debug(2, 'got taxonomies')
     return '', annotations, seqannotations, term_info, taxonomy
 
 
