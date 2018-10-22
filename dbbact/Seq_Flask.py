@@ -480,6 +480,7 @@ def get_fast_annotations():
         debug(6, errmsg)
         return(errmsg, 400)
     res = {'annotations': annotations, 'seqannotations': seqannotations, 'term_info': term_info, 'taxonomy': taxonomy}
+    debug(2, 'returning fast annotations. res len is %d' % len(res))
     return json.dumps(res)
 
 
