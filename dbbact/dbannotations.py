@@ -982,11 +982,8 @@ def GetFastAnnotations(con, cur, sequences, region=None, userid=0, get_term_info
                         err, parents = GetAnnotationParents(con, cur, cannotationid)
                     else:
                         # otherwise, just keep the annotation terms
-                        parents = {}
+                        parents = defaultdict(list)
                         for cdetailtype, cterm in cdetails['details']:
-                            if cdetailtype not in parents.keys():
-                                parents[cdetailtype] = [cterm]
-                            else:
                                 parents[cdetailtype].append(cterm)
                     cdetails['parents'] = parents
                     # add to the set of all terms to get the info for
