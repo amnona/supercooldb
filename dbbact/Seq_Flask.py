@@ -112,6 +112,55 @@ def get_sequenceid():
     return json.dumps({"seqId": seqid})
 
 
+@Seq_Flask_Obj.route('/sequences/getid_list', methods=['GET'])
+@auto.doc()
+def get_sequenceid_list():
+    """
+    Title: Get dbbact ids for a list of given sequences
+    URL: /sequences/getid_list
+    Method: GET
+    URL Params:
+    Data Params: JSON
+        {
+            "sequences" : list of str
+                the list of sequences to get data about
+            "no_shorter" : bool (optional)
+                False (default) to get also shorter sequences from DB if matching.
+                True to get only sequences at least as long as the query
+            "no_longer" : bool (optional)
+                False (default) to get also longer sequences from DB if matching on query length.
+                True to get only sequences not longer than the query
+        }
+    Success Response:
+        Code : 201
+        Content :
+        {
+            "seqIds" : list of list of int
+                the sequence ids matching each original sequence,
+                Note: can be more than 1 id per sequence since we are looking for subsequences
+        }
+    Details:
+        Validation:
+        Action:
+    """
+    cfunc = get_sequenceid_list
+    alldat = request.get_json()
+    sequences = alldat.get('sequences')
+    no_shorter = alldat.get('no_shorter', False)
+    no_longer = alldat.get('no_longer', False)
+    if sequences is None:
+        return(getdoc(cfunc))
+
+    out_list = []
+    for cseq in sequences:
+        err, seqid = dbsequences.GetSequenceId(g.con, g.cur, sequence=cseq, no_shorter=no_shorter, no_longer=no_longer)
+        if err:
+            return(err, 400)
+        out_list.append(seqid)
+    debug(2, 'found sequences')
+    return json.dumps({"seqIds": out_list})
+
+
 @login_required
 @Seq_Flask_Obj.route('/sequences/get_taxonomy_str', methods=['GET'])
 @auto.doc()
