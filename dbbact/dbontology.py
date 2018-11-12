@@ -1,5 +1,5 @@
 import psycopg2
-from .utils import debug
+from .utils import debug, tolist
 from . import dbidval
 from . import dbannotations
 
@@ -243,14 +243,14 @@ def GetSynonymTerm(con, cur, synonym):
     return '', term
 
 
-def GetTermAnnotations(con, cur, term, use_synonyms=True):
+def GetTermAnnotations(con, cur, terms, use_synonyms=True):
     '''
     Get details for all annotations which contain the ontology term "term" as a parent of (or exact) annotation detail
 
     input:
     con, cur
-    term : str
-        the ontology term to search
+    terms : str or list of str
+        the ontology term to search. if list, retrieve only annotations containing all the terms in the list
     use_synonyms : bool (optional)
         True (default) to look in synonyms table if term is not found. False to look only for exact term
 
@@ -258,24 +258,35 @@ def GetTermAnnotations(con, cur, term, use_synonyms=True):
     annotations : list of dict
         list of annotation details per annotation which contains the term
     '''
-    term = term.lower()
-    debug(1, 'GetTermAnnotations for ontology term %s' % term)
-    cur.execute('SELECT idannotation FROM AnnotationParentsTable WHERE ontology=%s', [term])
-    if cur.rowcount == 0:
-        if use_synonyms:
-            err, term = GetSynonymTerm(con, cur, term)
-            if err:
-                debug(3, 'no annotations or synonyms for term %s' % term)
-                return '', []
-            debug(1, 'found original ontology term %s' % term)
-            cur.execute('SELECT idannotation FROM AnnotationParentsTable WHERE ontology=%s', [term])
-        else:
-                debug(3, 'no annotations for term %s' % term)
-                return '', []
-    res = cur.fetchall()
+    terms = tolist(terms)
+    debug(1, 'GetTermAnnotations for ontology terms %s' % terms)
+    annotation_ids = None
+    for cterm in terms:
+        print('pita term %s' % cterm)
+        cterm = cterm.lower()
+        cur.execute('SELECT idannotation FROM AnnotationParentsTable WHERE ontology=%s', [cterm])
+        if cur.rowcount == 0:
+            if use_synonyms:
+                err, cterm = GetSynonymTerm(con, cur, cterm)
+                if err:
+                    debug(3, 'no annotations or synonyms for term %s' % cterm)
+                    return '', []
+                debug(1, 'found original ontology term %s' % cterm)
+                cur.execute('SELECT idannotation FROM AnnotationParentsTable WHERE ontology=%s', [cterm])
+            else:
+                    debug(3, 'no annotations for term %s' % cterm)
+                    return '', []
+        res = cur.fetchall()
+        cannotation_ids = set()
+        for cres in res:
+            cannotation_ids.add(cres[0])
+        if annotation_ids is None:
+            annotation_ids = cannotation_ids
+        annotation_ids = annotation_ids.intersection(cannotation_ids)
+
     annotations = []
-    for cres in res:
-        err, cdetails = dbannotations.GetAnnotationsFromID(con, cur, cres[0])
+    for cannotation_id in annotation_ids:
+        err, cdetails = dbannotations.GetAnnotationsFromID(con, cur, cannotation_id)
         if err:
             debug(6, err)
             continue
