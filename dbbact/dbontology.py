@@ -262,7 +262,6 @@ def GetTermAnnotations(con, cur, terms, use_synonyms=True):
     debug(1, 'GetTermAnnotations for ontology terms %s' % terms)
     annotation_ids = None
     for cterm in terms:
-        print('pita term %s' % cterm)
         cterm = cterm.lower()
         cur.execute('SELECT idannotation FROM AnnotationParentsTable WHERE ontology=%s', [cterm])
         if cur.rowcount == 0:

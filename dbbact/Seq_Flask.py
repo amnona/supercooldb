@@ -155,7 +155,9 @@ def get_sequenceid_list():
     for cseq in sequences:
         err, seqid = dbsequences.GetSequenceId(g.con, g.cur, sequence=cseq, no_shorter=no_shorter, no_longer=no_longer)
         if err:
-            return(err, 400)
+            debug(4, 'Sequence %s not found from get_sequenceid_list' % cseq)
+            seqid = []
+            # return(err, 400)
         out_list.append(seqid)
     debug(2, 'found sequences')
     return json.dumps({"seqIds": out_list})
