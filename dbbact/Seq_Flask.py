@@ -169,7 +169,7 @@ def get_sequenceid_list():
 def get_taxonomy_str():
     """
     Title: Query sequence:
-    Description : Get all the annotations about a given sequence
+    Description : Get the dbbact srored taxonomy about a given sequence
     URL: /sequences/get_taxonomy_str
     Method: GET
     URL Params:
@@ -759,6 +759,53 @@ def get_silva_annotations():
     return json.dumps({'annotations': annotations, 'seqids': seqids, 'seqstr': seqnames})
 
 
+@Seq_Flask_Obj.route('/sequences/get_taxonomy_sequences', methods=['GET'])
+@auto.doc()
+def get_taxonomy_sequences():
+    """
+    Title: Get taxonomy sequences
+    Description : Get a list of dbbact sequences with the given taxonomy substring
+    URL: /sequences/get_taxonomy_sequences
+    Method: GET
+    URL Params:
+    Data Params: JSON
+        {
+            taxonomy : str
+                the taxonomy substring to look for
+        }
+    Success Response:
+        Code : 200
+        Content :
+        {
+            'sequences' : list of dict
+                information about each sequence in the annotation
+                {
+                    'seq' : str (ACGT)
+                        the sequence
+                    'seqid': int
+                        the dbbact sequence id
+                }
+        }
+    Validation:
+    """
+    debug(3, 'get_taxonomy_sequences', request)
+    cfunc = get_taxonomy_sequences
+    alldat = request.get_json()
+    if alldat is None:
+        return(getdoc(cfunc))
+    taxonomy = alldat.get('taxonomy')
+    if taxonomy is None:
+        return('taxonomy parameter missing', 400)
+    seqids = dbsequences.get_taxonomy_seqids(g.con, g.cur, taxonomy, userid=None)
+    sequences = []
+    for cid in seqids:
+        err, cseq = dbsequences.GetSequenceStrByID(g.con, g.cur, cid)
+        if err:
+            cseq = 'NA'
+        sequences.append({'seq': cseq, 'seqid': cid})
+    return json.dumps({'sequences': sequences})
+
+
 @Seq_Flask_Obj.route('/sequences/get_info', methods=['GET'])
 @auto.doc()
 def get_sequence_info():
@@ -1012,3 +1059,18 @@ def get_fast_annotations_external_db_id():
         return(errmsg, 400)
     res = {'annotations': annotations, 'seq_db_id_seqs': seq_db_id_seqs, 'term_info': term_info, 'seq_db_id_annotations': seq_db_id_annotations}
     return json.dumps(res)
+
+
+@Seq_Flask_Obj.route('/sequences/test', methods=['GET'])
+@auto.doc()
+def seqtest():
+    import time
+    print('test')
+    alldat = request.get_json()
+    stime = alldat.get('sleep')
+    print('sleeping %d secs' % stime)
+    for t in range(stime):
+        print(t)
+        time.sleep(1)
+    print('good morning')
+    return json.dumps({'tada': 'pita'})

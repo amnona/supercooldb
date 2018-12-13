@@ -274,6 +274,34 @@ def GetSequenceId(con, cur, sequence, idprimer=None, no_shorter=False, no_longer
     # return 'sequence %s not found with primer. non primer matches: %d' % (sequence,cur.rowcount),-1
 
 
+def get_taxonomy_seqids(con, cur, taxonomy, userid=None):
+    '''Get a list of all dbbact sequences containing the taxonomy as substring of the dbbact taxonomy
+
+    Parameters
+    ----------
+    con,cur
+    taxonomy : str
+        the taxonomy substring to look for
+    userid : int (optional)
+        the userid of the querying user (to enable searching private annotations)
+
+    Returns
+    -------
+    list of int
+        The sequenceids for all sequences containing the taxonomy
+    '''
+    taxonomy = taxonomy.lower()
+    taxStr = taxonomy
+    debug(1, 'GetTaxonomyAnnotationIDS for taxonomy %s' % taxonomy)
+    cur.execute('SELECT id from SequencesTable where (taxrootrank ILIKE %s OR taxdomain ILIKE %s OR taxphylum ILIKE %s OR taxclass ILIKE %s OR taxfamily ILIKE %s OR taxgenus ILIKE %s OR taxorder ILIKE %s)', [taxStr, taxStr, taxStr, taxStr, taxStr, taxStr, taxStr])
+    res = cur.fetchall()
+    seqids = []
+    for cres in res:
+        seqids.append(cres[0])
+    debug(1, 'found %d matching sequences for the taxonomy' % len(seqids))
+    return seqids
+
+
 def GetTaxonomyAnnotationIDs(con, cur, taxonomy, userid=None):
     '''
     Get annotationids for all annotations containing any sequence matching the taxonomy (substring)
@@ -293,15 +321,16 @@ def GetTaxonomyAnnotationIDs(con, cur, taxonomy, userid=None):
     seqids : list of int
         list of the sequenceids that have this annotation
     '''
-    taxonomy = taxonomy.lower()
-    taxStr = taxonomy
-    debug(1, 'GetTaxonomyAnnotationIDS for taxonomy %s' % taxonomy)
-    cur.execute('SELECT id from SequencesTable where (taxrootrank ILIKE %s OR taxdomain ILIKE %s OR taxphylum ILIKE %s OR taxclass ILIKE %s OR taxfamily ILIKE %s OR taxgenus ILIKE %s OR taxorder ILIKE %s)', [taxStr, taxStr, taxStr, taxStr, taxStr, taxStr, taxStr])
-    res = cur.fetchall()
-    seqids = []
-    for cres in res:
-        seqids.append(cres[0])
-    debug(1, 'found %d matching sequences for the taxonomy' % len(seqids))
+    seqids = get_taxonomy_seqids(con, cur, taxonomy=taxonomy, userid=userid)
+    # taxonomy = taxonomy.lower()
+    # taxStr = taxonomy
+    # debug(1, 'GetTaxonomyAnnotationIDS for taxonomy %s' % taxonomy)
+    # cur.execute('SELECT id from SequencesTable where (taxrootrank ILIKE %s OR taxdomain ILIKE %s OR taxphylum ILIKE %s OR taxclass ILIKE %s OR taxfamily ILIKE %s OR taxgenus ILIKE %s OR taxorder ILIKE %s)', [taxStr, taxStr, taxStr, taxStr, taxStr, taxStr, taxStr])
+    # res = cur.fetchall()
+    # seqids = []
+    # for cres in res:
+    #     seqids.append(cres[0])
+    # debug(1, 'found %d matching sequences for the taxonomy' % len(seqids))
     annotationids_dict = defaultdict(int)
     for cseq in seqids:
         cur.execute('SELECT annotationid from sequencesAnnotationTable where seqid=%s', [cseq])
