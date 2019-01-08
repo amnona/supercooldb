@@ -69,9 +69,26 @@ def connect_db(servertype='main', schema='AnnotationSchemaTest'):
         debug(1, 'connected to database')
         return (con, cur)
     except psycopg2.DatabaseError as e:
-        print ('Cannot connect to database. Error %s' % e)
+        print('Cannot connect to database. Error %s' % e)
         raise SystemError('Cannot connect to database. Error %s' % e)
         return None
+
+
+def find_duplicate_sequences_in_sequencestable(con, cur):
+    '''Find sequences appearing twice in sequencestable (maybe with different primers)
+    '''
+    print('looking for duplicate sequences in sequencestable')
+    cur.execute('SELECT id, idprimer, sequence FROM SequencesTable')
+    seqs = defaultdict(list)
+    res = cur.fetchall
+    for cres in res:
+        cseq = res[2]
+        seqs[cseq].append(res[1])
+    print('found %d unique sequences. looking for duplicates' % len(seqs))
+    for cseq, cregions in seqs.items():
+        if len(cregions) < 2:
+            continue
+        print('sequence %s regions %s' % (cseq, cregions))
 
 
 def find_duplicate_annotations(con, cur):
@@ -151,12 +168,14 @@ def find_duplicates(servertype='main'):
     1. annotations with similar details
     2. sequences present twice in same annotation
     3. empty annotations
+    4. same sequence appearing twice in sequencestable (different primers?)
     '''
     con, cur = connect_db(servertype=servertype)
 
     find_duplicate_annotations(con, cur)
     find_empty_annotations(con, cur)
     find_duplicate_seqs(con, cur)
+    find_duplicate_sequences_in_sequencestable(con, cur)
 
 
 def main(argv):
@@ -164,6 +183,7 @@ def main(argv):
     parser.add_argument('--db', help='name of database to connect to (main/develop/local)', default='develop')
     args = parser.parse_args(argv)
     find_duplicates(servertype=args.db)
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
