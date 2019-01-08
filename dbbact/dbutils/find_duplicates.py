@@ -89,7 +89,7 @@ def find_duplicate_sequences_in_sequencestable(con, cur):
     print('looking for duplicate sequences in sequencestable')
     cur.execute('SELECT id, idprimer, sequence FROM SequencesTable')
     seqs = defaultdict(list)
-    res = cur.fetchall
+    res = cur.fetchall()
     for cres in res:
         cseq = res[2]
         seqs[cseq].append(res[1])
