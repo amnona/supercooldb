@@ -65,6 +65,12 @@ def connect_db(servertype='main', schema='AnnotationSchemaTest'):
             user = 'postgres'
             password = 'magNiv'
             port = 5432
+        elif servertype == 'amnon':
+            debug(1, 'servertype is amnon')
+            database = 'dbbact'
+            user = 'amnon'
+            password = 'magNiv'
+            port = 5432
         else:
             debug(6, 'unknown server type %s' % servertype)
             print('unknown server type %s' % servertype)
@@ -83,21 +89,50 @@ def connect_db(servertype='main', schema='AnnotationSchemaTest'):
         return None
 
 
-def find_duplicate_sequences_in_sequencestable(con, cur):
+def find_duplicate_sequences_in_sequencestable(con, cur, fix=False):
     '''Find sequences appearing twice in sequencestable (maybe with different primers)
     '''
     print('looking for duplicate sequences in sequencestable')
     cur.execute('SELECT id, idprimer, sequence FROM SequencesTable')
     seqs = defaultdict(list)
+    seqids = defaultdict(list)
     res = cur.fetchall()
     for cres in res:
         cseq = cres[2]
         seqs[cseq].append(cres[1])
+        seqids[cseq].append(cres[0])
     print('found %d unique sequences. looking for duplicates' % len(seqs))
+    num_fixed = 0
+    num_duplicate = 0
     for cseq, cregions in seqs.items():
         if len(cregions) < 2:
             continue
-        print('sequence %s regions %s' % (cseq, cregions))
+        num_duplicate += 1
+        if len(set(cregions)) != len(cregions):
+            print('duplicate seq and region for sequence %s' % cseq)
+            continue
+        if fix:
+            if 1 not in cregions:
+                print('2 regions but not v4 for sequence %s' % cseq)
+                continue
+            v4pos = cregions.index(1)
+            v4id = seqids[cseq][v4pos]
+            num_fixed += 1
+            for cidx, cid in enumerate(seqids[cseq]):
+                if cregions[cidx] == 1:
+                    continue
+                # update the annotations to the v4id
+                cur.execute('UPDATE SequencesAnnotationTable SET seqid=%s WHERE seqid=%s', [v4id, cid])
+                # delete from the greengenes/silva table
+                cur.execute('DELETE FROM WholeSeqIDsTable WHERE dbbactid=%s', [cid])
+                # and delete the redundant sequence
+                cur.execute('DELETE FROM SequencesTable WHERE id=%s', [cid])
+        else:
+            # print('sequence %s regions %s' % (cseq, cregions))
+            pass
+    con.commit()
+    print('found %d duplicate seqs' % num_duplicate)
+    print('fixed %d sequences' % num_fixed)
 
 
 def find_duplicate_annotations(con, cur):
@@ -169,7 +204,7 @@ def find_duplicate_seqs(con, cur):
     print('done')
 
 
-def find_duplicates(servertype='main', sda=False, sea=False, sdsa=False, ssss=False):
+def find_duplicates(servertype='main', sda=False, sea=False, sdsa=False, ssss=False, fix_sss=False):
     '''
     Find duplcates in the dbBact database
 
@@ -188,7 +223,7 @@ def find_duplicates(servertype='main', sda=False, sea=False, sdsa=False, ssss=Fa
     if not sdsa:
         find_duplicate_seqs(con, cur)
     if not ssss:
-        find_duplicate_sequences_in_sequencestable(con, cur)
+        find_duplicate_sequences_in_sequencestable(con, cur, fix_sss)
     print('done')
 
 
@@ -199,8 +234,9 @@ def main(argv):
     parser.add_argument('--sea', help='skip empty annotations', action='store_true')
     parser.add_argument('--sdsa', help='skip duplicate sequence in annotation', action='store_true')
     parser.add_argument('--ssss', help='skip same sequence twice in sequencestable', action='store_true')
+    parser.add_argument('--fix-sss', help='fix same sequence in two regions to v4', action='store_true')
     args = parser.parse_args(argv)
-    find_duplicates(servertype=args.db, sda=args.sda, sea=args.sea, sdsa=args.sdsa, ssss=args.ssss)
+    find_duplicates(servertype=args.db, sda=args.sda, sea=args.sea, sdsa=args.sdsa, ssss=args.ssss, fix_sss=args.fix_sss)
 
 
 if __name__ == "__main__":
