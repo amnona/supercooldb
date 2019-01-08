@@ -990,7 +990,7 @@ def get_primers(con, cur):
     debug(1, 'get_primers')
 
     primers = []
-    cur.execute('SELECT (id, regionname, forwardprimer, reverseprimer) FROM PrimersTable')
+    cur.execute('SELECT id, regionname, forwardprimer, reverseprimer FROM PrimersTable')
     res = cur.fetchall()
     for cres in res:
         cprimer = {}
