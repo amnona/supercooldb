@@ -59,6 +59,12 @@ def connect_db(servertype='main', schema='AnnotationSchemaTest'):
             user = 'postgres'
             password = 'admin123'
             port = 5432
+        elif servertype == 'openu':
+            debug(1, 'servertype is openu')
+            database = 'scdb'
+            user = 'postgres'
+            password = 'magNiv'
+            port = 5432
         else:
             debug(6, 'unknown server type %s' % servertype)
             print('unknown server type %s' % servertype)
@@ -180,7 +186,7 @@ def find_duplicates(servertype='main'):
 
 def main(argv):
     parser = argparse.ArgumentParser(description='Find duplicates in dbBact. version ' + __version__)
-    parser.add_argument('--db', help='name of database to connect to (main/develop/local)', default='develop')
+    parser.add_argument('--db', help='name of database to connect to (main/develop/local)', default='openu')
     args = parser.parse_args(argv)
     find_duplicates(servertype=args.db)
 
