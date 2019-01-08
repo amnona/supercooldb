@@ -1000,4 +1000,4 @@ def get_primers(con, cur):
         cprimer['rprimer'] = cres[3]
         primers.append(cprimer)
     debug(1, 'found %d primers' % len(primers))
-    return primers
+    return '', primers
