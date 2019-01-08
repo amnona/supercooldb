@@ -70,7 +70,7 @@ def connect_db(servertype='main', schema='AnnotationSchemaTest'):
             print('unknown server type %s' % servertype)
         debug(1, 'connecting host=%s, database=%s, user=%s, port=%d' % (host, database, user, port))
         if servertype == 'opeu':
-            con = psycopg2.connect(host=host, database=database, user=user, password=password, port=port)
+            con = psycopg2.connect(database=database, user=user, password=password, port=port)
         else:
             con = psycopg2.connect(host=host, database=database, user=user, password=password, port=port)
         cur = con.cursor(cursor_factory=psycopg2.extras.DictCursor)
