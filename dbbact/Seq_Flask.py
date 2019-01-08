@@ -1061,6 +1061,43 @@ def get_fast_annotations_external_db_id():
     return json.dumps(res)
 
 
+@login_required
+@Seq_Flask_Obj.route('/sequences/get_primers', methods=['GET', 'POST', 'OPTIONS'])
+@auto.doc()
+def get_primers():
+    '''
+    Title: get_primers
+    Description : Get information about all the sequencing primers used in dbbact
+    URL: /sequences/get_primers
+    Method: GET, POST
+    URL Params:
+    Data Params: JSON
+        {
+        }
+    Success Response:
+        Code : 200
+        Content :
+        {
+            "primers": list of dict of {
+                'primerid': int
+                    dbbact internal id of the primer region (i.e. 1 for v4, etc.)
+                'name': str,
+                    name of the primer region (i.e. 'v4', 'its1', etc.)
+                'fprimer': str
+                'rprimer: str
+                    name of the forward and reverse primers for the region (i.e. 515f, etc.)
+            }
+        }
+    '''
+    debug(3, 'get_primers', request)
+    err, primers = dbsequences.get_primers(g.con, g.cur)
+    if err:
+        debug(6, err)
+        return ('Problem geting primers. error=%s' % err, 400)
+    res = json.dumps({'primers': primers})
+    return res
+
+
 @Seq_Flask_Obj.route('/sequences/test', methods=['GET'])
 @auto.doc()
 def seqtest():
