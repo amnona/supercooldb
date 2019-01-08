@@ -169,7 +169,7 @@ def find_duplicate_seqs(con, cur):
     print('done')
 
 
-def find_duplicates(servertype='main'):
+def find_duplicates(servertype='main', sda=False, sea=False, sdsa=False, ssss=False):
     '''
     Find duplcates in the dbBact database
 
@@ -181,17 +181,26 @@ def find_duplicates(servertype='main'):
     '''
     con, cur = connect_db(servertype=servertype)
 
-    find_duplicate_annotations(con, cur)
-    find_empty_annotations(con, cur)
-    find_duplicate_seqs(con, cur)
-    find_duplicate_sequences_in_sequencestable(con, cur)
+    if not sda:
+        find_duplicate_annotations(con, cur)
+    if not sea:
+        find_empty_annotations(con, cur)
+    if not sdsa:
+        find_duplicate_seqs(con, cur)
+    if not ssss:
+        find_duplicate_sequences_in_sequencestable(con, cur)
+    print('done')
 
 
 def main(argv):
     parser = argparse.ArgumentParser(description='Find duplicates in dbBact. version ' + __version__)
     parser.add_argument('--db', help='name of database to connect to (main/develop/local)', default='openu')
+    parser.add_argument('--sda', help='skip duplicate annotations', action='store_true')
+    parser.add_argument('--sea', help='skip empty annotations', action='store_true')
+    parser.add_argument('--sdsa', help='skip duplicate sequence in annotation', action='store_true')
+    parser.add_argument('--ssss', help='skip same sequence twice in sequencestable', action='store_true')
     args = parser.parse_args(argv)
-    find_duplicates(servertype=args.db)
+    find_duplicates(servertype=args.db, sda=args.sda, sea=args.sea, sdsa=args.sdsa, ssss=args.ssss)
 
 
 if __name__ == "__main__":
