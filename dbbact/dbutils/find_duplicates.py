@@ -91,8 +91,8 @@ def find_duplicate_sequences_in_sequencestable(con, cur):
     seqs = defaultdict(list)
     res = cur.fetchall()
     for cres in res:
-        cseq = res[2]
-        seqs[str(cseq)].append(res[1])
+        cseq = cres[2]
+        seqs[cseq].append(cres[1])
     print('found %d unique sequences. looking for duplicates' % len(seqs))
     for cseq, cregions in seqs.items():
         if len(cregions) < 2:
