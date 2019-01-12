@@ -110,18 +110,15 @@ def iter_fasta_seqs(filename):
 
 
 def isFileExist(fileName):
-    my_file = Path("stop")
+    my_file = Path(fileName)
     if my_file.is_file():
         # file exists
         return True
     return False
 
-if __name__ == '__main__':
+def main_func_gg():
     SetDebugLevel(0)
     date_time_str = datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S")
-    
-    #remove stop file
-    removeFile("stop")
     
     #connect to the db
     con, cur = db_access.connect_db()
@@ -159,7 +156,7 @@ if __name__ == '__main__':
     #ggFileName = '/Volumes/Photos/Temporary Studies/gg_13_5.fasta'
     ggFileName = 'gg_13_5.fasta'
         
-    while isFileExist("stop") == False:
+    while isFileExist("stop_gg") == False:
         
         #Create the file and read it
         dbsequences.SequencesWholeToFile(con, cur, tempFileName, seqdbid)    
@@ -170,8 +167,9 @@ if __name__ == '__main__':
             debug(2, "go to sleep")
             gg_log += "sleep start " + datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S") + "\n"
             saveStringToFile("gg_summary_log_sleep_" + date_time_str,"sleep started " + datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S"))
-            time.sleep(sleep_time)
-            continue
+            #time.sleep(sleep_time)
+            #continue
+            return # insted of sleep, one master file run all scripts
         else:
             for seq_id in all_ids:
                 err = dbsequences.AddWholeSeqId(con,cur, seqdbid, seq_id, 'na', noTest = True)
