@@ -41,18 +41,16 @@ def readResultFromFile(file_name):
     return ret
 
 def isFileExist(fileName):
-    my_file = Path("stop")
+    my_file = Path(fileName)
     if my_file.is_file():
         # file exists
         return True
     return False
 
-if __name__ == '__main__':
+def main_func_seq_hash():
     SetDebugLevel(0)
     date_time_str = datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S")
     
-    #remove stop file
-    removeFile("stop")
     
     #connect to the db
     con, cur = db_access.connect_db()
@@ -76,7 +74,7 @@ if __name__ == '__main__':
     hash_seq_150 = ''
     hash_seq_100 = ''
     
-    while isFileExist("stop") == False:
+    while isFileExist("stop_seq_hash") == False:
         
         err, seq_id = dbsequences.GetSequenceWithNoHashID(con, cur)
         if err or seq_id == -1:
@@ -84,8 +82,8 @@ if __name__ == '__main__':
             debug(2, "go to sleep")
             hash_log += "sleep start " + datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S") + "\n"
             saveStringToFile("hash_summary_log_sleep_" + date_time_str,"sleep started " + datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S"))
-            time.sleep(sleep_time)
-            continue 
+            #continue
+            return # insted of sleep, one master file run all scripts
         
         hash_log += "sequence id = " + str(seq_id) + "\n"
         

@@ -40,18 +40,16 @@ def readResultFromFile(file_name):
     return ret
 
 def isFileExist(fileName):
-    my_file = Path("stop")
+    my_file = Path(fileName)
     if my_file.is_file():
         # file exists
         return True
     return False
 
-if __name__ == '__main__':
+def main_func_tax():
     SetDebugLevel(0)
     date_time_str = datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S")
     
-    #remove stop file
-    removeFile("stop")
     
     #connect to the db
     con, cur = db_access.connect_db()
@@ -83,7 +81,7 @@ if __name__ == '__main__':
     rdp_exe_location = "rdp_classifier_2.12/"
     sleep_time = 86400
         
-    while isFileExist("stop") == False:
+    while isFileExist("stop_tax") == False:
         removeFile("%sinput" %  rdp_exe_location)
         removeFile("%soutput" %  rdp_exe_location)
         
@@ -93,8 +91,8 @@ if __name__ == '__main__':
             debug(2, "go to sleep")
             tax_log += "sleep start " + datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S") + "\n"
             saveStringToFile("tax_summary_log_sleep_" + date_time_str,"sleep started " + datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S"))
-            time.sleep(sleep_time)
-            continue
+            #continue
+            return # insted of sleep, one master file run all scripts
         
         tax_log += "sequence id = " + str(seq_id) + "\n"
         
