@@ -294,44 +294,6 @@ def GetTermAnnotations(con, cur, terms, use_synonyms=True):
     return '', annotations
 
 
-# def GetTermCounts(con, cur, terms):
-#     '''
-#     Get information about each ontology term in terms
-
-#     Parameters
-#     ----------
-#     con, cur
-#     terms : list of str
-#         The list of terms to get information about
-
-#     Returns
-#     -------
-#     term_info : dict of {str: dict}:
-#         Key is the ontology term.
-#         Value is a dict of pairs:
-#             'total_annotations' : int
-#                 The total number of annotations where this ontology term is a predecessor
-#             'total_squences' : int
-#                 The total number of sequences in annotations where this ontology term is a predecessor
-#     '''
-#     # get rid of duplicate terms
-#     debug(1, 'GetTermCounts for %d terms' % len(terms))
-#     terms = list(set(terms))
-#     term_info = {}
-#     for cterm in terms:
-#         cur.execute('SELECT seqCount, annotationCount, exp_count from OntologyTable WHERE description=%s LIMIT 1', [cterm])
-#         if cur.rowcount == 0:
-#             debug(2, 'Term %s not found in ontology table' % cterm)
-#             continue
-#         res = cur.fetchone()
-#         term_info[cterm] = {}
-#         term_info[cterm]['total_sequences'] = res[0]
-#         term_info[cterm]['total_annotations'] = res[1]
-#         term_info[cterm]['total_experiments'] = res[2]
-#     debug(1, 'found info for %d terms' % len(term_info))
-#     return term_info
-
-
 def get_term_counts(con, cur, terms, term_types=('single'), ignore_lower=False):
     '''Get the number of annotations and experiments containing each term in terms.
     NOTE: terms can be also term pairs (term1+term2)
@@ -397,30 +359,45 @@ def get_annotations_term_counts(con, cur, annotations):
     return get_term_counts(con, cur, terms)
 
 
-def GetListOfOntologies(con, cur):
+def get_ontology_terms_list(con, cur, min_term_id=None, ontologyid=None):
     '''
-    Get list of ontologies
+    Get list of all ontology terms
 
     Parameters
     ----------
     con, cur
+    min_term_id: int or None, optional
+        if int, get only terms with dbbactid > min_term_id (for fast syncing)
+        if None, get all terms
+    ontologies: list of str, optional
+        if not None, get only terms from ontologies in ontologies list
+        if None, get terms from all ontologies
+        TODO: NOT SUPPORTED YET!
 
     Returns
     -------
-    terms : list of str
-        The full list of ontologies
+    terms : dict of {term(str): id(int)}
+        The list of ontology terms from table OntologyTable
     '''
     # get rid of duplicate terms
     debug(1, 'GetListOfOntologies')
-    cur.execute('SELECT description from ontologyTable')
+    if ontologyid is None:
+        cur.execute('SELECT id, description from ontologyTable')
+    else:
+        cur.execute('SELECT ontologytreestructuretable.ontologyid, ontologytable.description FROM ontologytreestructuretable INNER JOIN ontologytable ON ontologytable.id=ontologytreestructuretable.ontologyid WHERE OntologyNameID=%s', [ontologyid])
+
     if cur.rowcount == 0:
         debug(1, 'Ontologies list is empty')
         return
 
+    if min_term_id is None:
+        min_term_id = 0
+
     res = cur.fetchall()
-    all_ontologies = []
+    all_ontologies = {}
     for cres in res:
-        all_ontologies.append(cres[0])
+        if cres[0] > min_term_id:
+            all_ontologies[cres[1]] = cres[0]
     return all_ontologies
 
 

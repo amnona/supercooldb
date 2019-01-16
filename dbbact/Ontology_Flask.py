@@ -113,40 +113,6 @@ def ontology_get_parents():
     return(json.dumps({'parents': parents}))
 
 
-@Ontology_Flask_Obj.route('/ontology/get_term', methods=['GET'])
-@auto.doc()
-def ontology_get_term():
-    """
-    Title: Query Ontology terms
-    Description : Get all ontology terms starting from a given id
-                    used to update the autocomplete list in the client
-    URL: /ontology/get_term
-    Method: GET
-    URL Params:
-        startid : int
-            retrieve all ontology terms with id bigger than startid (incremental update client)
-            (id from OntologyTable)
-    Success Response:
-        Code : 200
-        Content :
-        {
-            "terms" : list of
-            {
-                "id" : int
-                    the ontology term id (id from OntologyTable)
-                "description" : str
-                    the ontology term (description from OntologyTable)
-            }
-        }
-    """
-    debug(3, 'ontology_get_term', request)
-    cid = request.args.get('startid')
-    if cid is None:
-        return(getdoc(ontology_get_term))
-    jsonRetData = db_access.DB_ACCESS_FLASK_OntologyTable_GetRecsByStartId(cid, con=g.con, cur=g.cur)
-    return json.dumps(jsonRetData, ensure_ascii=False)
-
-
 @Ontology_Flask_Obj.route('/ontology/get_synonym', methods=['GET'])
 @auto.doc()
 def ontology_get_synonym():
@@ -260,26 +226,47 @@ def get_ontology_annotations():
     return json.dumps({'annotations': annotations})
 
 
-@Ontology_Flask_Obj.route('/ontology/get_all_descriptions', methods=['GET'])
+@Ontology_Flask_Obj.route('/ontology/get_all_terms', methods=['GET'])
 @auto.doc()
-def get_all_descriptions():
+def get_all_terms():
     """
     Title: Query Ontology
-    Description : Get all ontology descriptions
+    Description : Get all ontology terms
     Method: GET
+    Data Params: Parameters
+        {
+            min_term_id : int, optional
+                the minimal ontology tern id to get the info for (get the term list only for ids>min_term_id)
+                if not provided, get a list of all terms
+            ontologyid: int, optional
+                get only terms from this ontology
+                if not provided, get terms from all ontologies
+
+        }
     Success Response:
         Code : 200
         Content :
         {
-            "ontology" : list of
+            "ontology" : dict of {term(str): id(int))}
             {
-                "description" : str
-                    the ontology terms
+                "term" : str
+                    the ontology term
+                "id" : int
+                    the internal unique dbbact id for the term
             }
         }
     """
-    debug(2, 'get_all_descriptions', request)
-    jsonRetData = dbontology.GetListOfOntologies(g.con, g.cur)
+    debug(3, 'get_all_descriptions', request)
+    alldat = request.get_json()
+    if alldat is None:
+        min_term_id = None
+        ontologyid = None
+    else:
+        min_term_id = alldat.get('min_term_id')
+        ontologyid = alldat.get('ontologyid')
+    print(min_term_id)
+    print(type(min_term_id))
+    jsonRetData = dbontology.get_ontology_terms_list(g.con, g.cur, min_term_id=min_term_id, ontologyid=ontologyid)
     return json.dumps(jsonRetData, ensure_ascii=False)
 
 
