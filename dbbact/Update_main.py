@@ -17,7 +17,7 @@ from dbbact.utils import debug, SetDebugLevel
 sys.path.append(os.getcwd())
 
 #sleep_time = 10
-sleep_time = 10 # Debug
+sleep_time = 86400 # Debug
 
 def isFileExist(fileName):
     my_file = Path(fileName)
