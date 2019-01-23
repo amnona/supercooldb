@@ -16,8 +16,8 @@ from dbbact.utils import debug, SetDebugLevel
 
 sys.path.append(os.getcwd())
 
-sleep_time = 86400
-#sleep_time = 10 # Debug
+#sleep_time = 10
+sleep_time = 10 # Debug
 
 def isFileExist(fileName):
     my_file = Path(fileName)
@@ -37,8 +37,13 @@ def saveStringToFile(file_name,content_str):
         text_file.write(content_str)        
 
 if __name__ == '__main__':
-    sys.path.insert(0, '/Users/admin/supercooldb')
-    sys.path.insert(0, '/home/eitano/supercooldb')
+
+    if 'SCDB_WEBSITE_TYPE' in os.environ:
+        sys.path.insert(0, '/Users/admin/supercooldb')
+        os.chdir('/Users/admin/supercooldb')
+    else:
+        sys.path.insert(0, '/home/eitano/supercooldb')
+        os.chdir('/home/eitano/supercooldb')
 
     SetDebugLevel(0)
     date_time_str = datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S")
@@ -50,6 +55,8 @@ if __name__ == '__main__':
     removeFile("stop_silva")
     removeFile("stop_tax")
     removeFile("stop_seq_hash")
+
+    os.system("dbbact/dbutils/add_term_info.py --db openu --add-pairs --add-single")
 
     while isFileExist("stop") == False:
  		#Update GG
@@ -80,6 +87,7 @@ if __name__ == '__main__':
         saveStringToFile("maint_log_" + date_time_str,maint_log)
         
         #Sleep until the next time
+        debug(2, "go to sleep")
         time.sleep(sleep_time)
 
 
