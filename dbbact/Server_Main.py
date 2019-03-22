@@ -47,7 +47,7 @@ class User(UserMixin):
 # whenever a new request arrives, connect to the database and store in g.db
 @app.before_request
 def before_request():
-    debug(1, 'got request from source ip: %s' % request.remote_addr)
+    debug(6, 'got request from source ip: %s' % request.remote_addr, request=request)
     con, cur = db_access.connect_db()
     g.con = con
     g.cur = cur
