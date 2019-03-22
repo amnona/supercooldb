@@ -48,9 +48,9 @@ class User(UserMixin):
 @app.before_request
 def before_request():
     if request.remote_addr != '127.0.0.1':
-        debug(6, 'got request from source ip: %s' % request.remote_addr, request=request)
+        debug(6, 'got request for page %s' % request.url, request=request)
     else:
-        debug(1, 'got local request from source ip: %s' % request.remote_addr, request=request)
+        debug(1, 'got local request for page %s' % request.url, request=request)
     con, cur = db_access.connect_db()
     g.con = con
     g.cur = cur
