@@ -784,6 +784,8 @@ def get_taxonomy_sequences():
                         the sequence
                     'seqid': int
                         the dbbact sequence id
+                    'taxonomy': str
+                        the taxonomy for the given sequence. semicolon separate format: k_XXX;f_YYY;...
                 }
         }
     Validation:
@@ -797,12 +799,10 @@ def get_taxonomy_sequences():
     if taxonomy is None:
         return('taxonomy parameter missing', 400)
     seqids = dbsequences.get_taxonomy_seqids(g.con, g.cur, taxonomy, userid=None)
-    sequences = []
-    for cid in seqids:
-        err, cseq = dbsequences.GetSequenceStrByID(g.con, g.cur, cid)
-        if err:
-            cseq = 'NA'
-        sequences.append({'seq': cseq, 'seqid': cid})
+    err, sequences = dbsequences.SeqFromID(g.con, g.cur, seqids)
+    if err:
+        return err, err
+
     return json.dumps({'sequences': sequences})
 
 

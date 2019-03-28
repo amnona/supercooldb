@@ -114,7 +114,7 @@ def SeqFromID(con, cur, seqids):
                 taxStr += val + res[idx + 1]
                 firstTax = False
 
-        cseqinfo = {'seq': res[0], 'taxonomy': taxStr}
+        cseqinfo = {'seq': res[0], 'taxonomy': taxStr, 'seqid': cseqid}
         sequences.append(cseqinfo)
     return '', sequences
 
@@ -849,12 +849,13 @@ def WholeSeqIdExists(con, cur, dbidVal, dbbactidVal, wholeseqidVal=''):
 
 def GetSequenceStrByID(con, cur, seq_id):
     '''
-    Get sequence with no taxonomy (if any)
+    Get sequence from seqid
 
     Parameters
     ----------
     con,cur
-    seq_id
+    seq_id: int
+        the dbbact seqid
 
     Returns
     -------
@@ -864,7 +865,7 @@ def GetSequenceStrByID(con, cur, seq_id):
 
     cur.execute("select sequence from annotationschematest.sequencestable where id=%s" % seq_id)
     if cur.rowcount == 0:
-        errmsg = 'no missing taxonomy'
+        errmsg = 'no sequeence for seqid %s' % seq_id
         debug(1, errmsg)
         return errmsg, seq_id
     res = cur.fetchone()
