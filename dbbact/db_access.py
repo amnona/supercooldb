@@ -72,7 +72,7 @@ def connect_db(schema='AnnotationSchemaTest'):
         if 'OPENU_FLAG' in os.environ:
             con = psycopg2.connect(database=database, user=user, password=password, port=port)
         else:
-            con = psycopg2.connect(host=host,database=database, user=user, password=password, port=port)
+            con = psycopg2.connect(host=host, database=database, user=user, password=password, port=port)
         cur = con.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cur.execute('SET search_path to %s' % schema)
         debug(1, 'connected to database')

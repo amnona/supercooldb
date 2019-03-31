@@ -92,18 +92,21 @@ def SeqFromID(con, cur, seqids):
             the sequence
         'taxonomy' : str
             the taxonomy of the sequence or '' if unknown
+        'total_annotations': int
+            the number of annotations which this sequence is associated with
+        'total_experiments': int
+            the total number of experiments which this sequence is associated with
     '''
     if isinstance(seqids, int):
         seqids = [seqids]
     sequences = []
     for cseqid in seqids:
-        cur.execute("SELECT sequence,coalesce(taxdomain,''),coalesce(taxphylum,''),  coalesce(taxclass,''),coalesce(taxorder,''),coalesce(taxfamily,''), coalesce(taxgenus,'') as taxonomy_str FROM SequencesTable WHERE id=%s", [cseqid])
+        cur.execute("SELECT sequence,coalesce(taxdomain,''),coalesce(taxphylum,''),  coalesce(taxclass,''),coalesce(taxorder,''),coalesce(taxfamily,''), coalesce(taxgenus,'') as taxonomy_str, total_annotations, total_experiments FROM SequencesTable WHERE id=%s", [cseqid])
 
         if cur.rowcount == 0:
             sequences.append({'seq': ''})
             continue
         res = cur.fetchone()
-
         firstTax = True
         taxStr = ''
         list_of_pre_str = ["d__", "p__", "c__", "o__", "f__", "g__"]
@@ -114,7 +117,7 @@ def SeqFromID(con, cur, seqids):
                 taxStr += val + res[idx + 1]
                 firstTax = False
 
-        cseqinfo = {'seq': res[0], 'taxonomy': taxStr, 'seqid': cseqid}
+        cseqinfo = {'seq': res[0], 'taxonomy': taxStr, 'seqid': cseqid, 'total_annotations': res['total_annotations'], 'total_experiments': res['total_experiments']}
         sequences.append(cseqinfo)
     return '', sequences
 

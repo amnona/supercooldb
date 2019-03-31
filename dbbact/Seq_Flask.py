@@ -786,6 +786,10 @@ def get_taxonomy_sequences():
                         the dbbact sequence id
                     'taxonomy': str
                         the taxonomy for the given sequence. semicolon separate format: k_XXX;f_YYY;...
+                    'total_annotations': int
+                        the number of annotations which this sequence is associated with
+                    'total_experiments': int
+                        the total number of experiments which this sequence is associated with
                 }
         }
     Validation:
